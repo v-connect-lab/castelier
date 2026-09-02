@@ -1,0 +1,218 @@
+accounts:
+    title: "アカウント管理"
+    headerRow: 2
+    dataStartRow: 3
+    columns:
+        userId:
+            label: "ユーザーID"
+            type: string
+            required: true
+        password:
+            label: "編集パスコード"
+            type: string
+            required: true
+        createdAt:
+            label: "登録日時"
+            type: datetime
+            required: true
+        updatedAt:
+            label: "最終更新日時"
+            type: datetime
+            required: true
+        role:
+            label: "ユーザー区分"
+            options: [ "creator", "streamer" ]
+            optionLabels: [ "クリエイター", "配信者" ]
+            required: true
+        displayName:
+            label: "活動名（表示名）"
+            type: string
+            required: true
+        isPublic:
+            label: "公開設定"
+            options: [ true, false ]
+            optionLabels: [ "公開", "非公開" ]
+            required: true
+        isContactWelcome:
+            label: "お声がけ歓迎設定"
+            options: [ true, false ]
+            optionLabels: [ "声掛け歓迎", "閲覧のみ" ]
+            required: true
+        category:
+            label: "メインカテゴリ"
+            type: array
+            required: true
+            minItems: 1
+            multiple: true
+            options:
+                creator:
+                    - illust
+                    - Live2D
+                    - 3DModeling
+                    - MIX
+                    - BGM/SE
+                    - Movie
+                    - Web
+                streamer:
+                    - VTuber
+                    - VLiveStreamer
+                    - Streamer
+                    - UnderPreparation
+                    - Newcomer
+            optionLabels:
+                creator:
+                    - "イラスト"
+                    - "Live2D"
+                    - "3Dモデル"
+                    - "MIX"
+                    - "BGM/SE"
+                    - "動画制作（MV, short etc.）"
+                    - "Web制作（HP, LP etc.）"
+                streamer:
+                    - "VTuber"
+                    - "Vライバー"
+                    - "配信者"
+                    - "準備中"
+                    - "新人"
+        tags:
+            label: "属性・作風タグ"
+            type: array
+            required: true
+            minItems: 1
+            multiple: true
+            options:
+                - Woman
+                - Man
+                - Genderless
+                - Androgynous
+                - JapaneseStyle
+                - WesternStyle
+                - Cyberpunk
+                - MiddleAges
+                - Fantasy
+                - ScienceFiction
+                - Humanoid
+                - DemiHuman
+                - Beastman
+                - MythicalBeast
+                - Gothic
+                - Pop
+                - Horror
+                - Retro
+                - Chibi
+                - Cute
+                - Cool
+                - Bishojo
+                - Ikemen
+                - Macho
+                - Acoustic
+                - EDM
+                - Chill
+                - Rock
+                - Minimal
+                - Modern
+            optionLabels:
+                - "女性モデル"
+                - "男性モデル"
+                - "中性・無性モデル"
+                - "両性・中性的モデル"
+                - "和風"
+                - "洋風"
+                - "サイバーパンク"
+                - "中世"
+                - "幻想（ファンタジー）"
+                - "SF"
+                - "人間"
+                - "亜人"
+                - "獣人"
+                - "幻獣"
+                - "ゴシック・ダーク"
+                - "ポップ・カラフル"
+                - "ホラー・アンダーグラウンド"
+                - "レトロ・平成/昭和"
+                - "ミニキャラ・SD"
+                - "かわいい・萌え"
+                - "かっこいい・スタイリッシュ"
+                - "美少女"
+                - "イケメン・青年"
+                - "おじ・人外マッスル"
+                - "生音・アコースティック"
+                - "クラブ・EDM"
+                - "Lo-Fi・Chill"
+                - "ロック・バンドサウンド"
+                - "シンプル・ミニマル"
+                - "モダン・グラフィカル"
+        freeTags:
+            label: "フリータグ"
+            type: array
+            items:
+                type: string
+            required: false
+            ui:
+                widget: "tag-input" # または "comma-separated"
+                placeholder: "例: 青年声, SF好き, 短納期相談可"
+            description: "半角または全角カンマで区切って自由に入力してください"
+        avatarUrl:
+            label: "アイコン画像URL"
+            type: url
+            required: false
+            description: "https://..."
+        workUrls:
+            label: "代表作品URL"
+            type: array
+            required: false
+            items:
+                type: url
+                description: "https://..."
+        portfolioUrl:
+            label: "ポートフォリオ・個人HP"
+            type: url
+            required: false
+            description: "https://..."
+        xUrl:
+            label: "X (Twitter) URL"
+            type: url
+            required: false
+            description: "https://..."
+        platformUrls:
+            label: "活動プラットフォーム"
+            type: array
+            required: false
+            items:
+                type: url
+                description: "https://..."
+        contactInfo:
+            label: "連絡先窓口"
+            type: string
+            required: false
+        description:
+            label: "自己紹介・アピール文"
+            type: text
+            default: "よろしくお願いします。"
+            required: false
+        priceGuide:
+            label: "料金・予算目安"
+            type: string
+            applicableRoles: [ "creator" ]
+            options:
+                - "~1000"
+                - "~2000"
+                - "~3000"
+                - "~5000"
+                - "~10000"
+                - "~30000"
+                - "~50000"
+                - "50000~"
+                - consultation
+                - Free
+            optionLabels:
+                - "~1,000円"
+                - "~2,000円"
+                - "~3,000円"
+                - "~5,000円"
+                - "~10,000円"
+                - "~30,000円"
+                - "~50,000円"
+                - "50,000円~"
+                - "要相談"
+                - "無償（モニター）"
