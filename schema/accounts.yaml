@@ -8,7 +8,7 @@ accounts:
             type: string
             required: true
         password:
-            label: "編集パスコード"
+            label: "パスワード"
             type: string
             required: true
         createdAt:
