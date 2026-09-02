@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Castelier | 管理ダッシュボード</title>
+  <title>Castelier | プロフィール管理</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/js-yaml/4.1.0/js-yaml.min.js"></script>
   <style>
     :root {
@@ -23,34 +23,54 @@
       background-color: var(--bg);
       color: var(--text);
       line-height: 1.5;
-      padding: 20px;
+      padding: 24px 16px;
     }
 
     .container {
       max-width: 720px;
       margin: 0 auto;
       background: var(--card-bg);
-      padding: 28px;
+      padding: 32px 28px;
       border-radius: var(--radius);
       box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
       border: 1px solid var(--border);
     }
 
-    h1 { font-size: 1.4rem; margin-bottom: 8px; }
+    .header-nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .header-nav a {
+      color: var(--primary);
+      text-decoration: none;
+      font-size: 0.85rem;
+      font-weight: bold;
+    }
+    .header-nav a:hover { text-decoration: underline; }
+
+    .title-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+    h1 { font-size: 1.4rem; }
+    .user-badge {
+      background: #e0e7ff;
+      color: var(--primary);
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 0.8rem;
+      font-weight: bold;
+    }
+
     .lead { font-size: 0.85rem; color: var(--text-sub); margin-bottom: 24px; }
     
-    .tabs { display: flex; gap: 8px; margin-bottom: 20px; border-bottom: 1px solid var(--border); }
-    .tab-btn {
-      padding: 8px 16px;
-      border: none;
-      background: none;
-      font-size: 0.9rem;
-      cursor: pointer;
-      color: var(--text-sub);
-      border-bottom: 2px solid transparent;
-    }
-    .tab-btn.active { color: var(--primary); font-weight: bold; border-bottom-color: var(--primary); }
-
     .form-group { margin-bottom: 16px; }
     label { display: block; font-size: 0.85rem; font-weight: bold; margin-bottom: 6px; }
     .hint { font-size: 0.75rem; color: var(--text-sub); margin-top: 4px; }
@@ -66,7 +86,6 @@
 
     .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 
-    /* タグ選択用のボックステーブル */
     .checkbox-group {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
@@ -103,6 +122,18 @@
     button.btn-primary:hover { background-color: var(--primary-hover); }
     button:disabled { opacity: 0.6; cursor: not-allowed; }
 
+    .btn-logout {
+      width: 100%;
+      margin-top: 10px;
+      padding: 8px;
+      background: none;
+      border: none;
+      color: var(--text-sub);
+      font-size: 0.85rem;
+      cursor: pointer;
+    }
+    .btn-logout:hover { color: #dc2626; }
+
     .status-box {
       padding: 12px;
       margin-top: 16px;
@@ -113,144 +144,31 @@
     .status-box.success { background-color: #ecfdf5; color: #065f46; border: 1px solid #a7f3d0; }
     .status-box.error { background-color: #fef2f2; color: #991b1b; border: 1px solid #fecaca; }
 
+    .loading-overlay {
+      text-align: center;
+      padding: 60px 0;
+      color: var(--text-sub);
+      font-size: 0.9rem;
+    }
+
     .hidden { display: none !important; }
-    .user-badge { background: #e0e7ff; color: var(--primary); padding: 4px 8px; border-radius: 4px; font-size: 0.8rem; }
     .section-divider { border: 0; border-top: 1px dashed var(--border); margin: 20px 0; }
   </style>
 </head>
 <body>
 
 <div class="container">
-  <!-- 認証エリア（ログイン / 新規登録） -->
-  <div id="authSection">
-    <h1>Castelier 管理画面</h1>
-    <p class="lead">アカウント作成またはログインしてプロフィールを設定してください。</p>
-
-    <div class="tabs">
-      <button class="tab-btn active" onclick="switchAuthTab('login')">ログイン</button>
-      <button class="tab-btn" onclick="switchAuthTab('register')">新規登録</button>
-    </div>
-
-    <!-- ログインフォーム -->
-    <form id="loginForm" onsubmit="handleLogin(event)">
-      <div class="form-group">
-        <label>ユーザーID</label>
-        <input type="text" id="loginUserId" placeholder="usr_xxxxxxxx" required>
-      </div>
-      <div class="form-group">
-        <label>編集パスコード</label>
-        <input type="password" id="loginPassword" placeholder="登録時のパスコード" required>
-      </div>
-      <button type="submit" class="btn-primary" id="loginBtn">ログイン</button>
-    </form>
-
-    <!-- 新規登録フォーム（全項目入力対応） -->
-    <form id="registerForm" class="hidden" onsubmit="handleRegister(event)">
-      <div class="form-group">
-        <label>ユーザー区分 *</label>
-        <select id="regRole" required onchange="handleRoleChange('reg')">
-          <option value="creator">クリエイター</option>
-          <option value="streamer">配信者</option>
-        </select>
-      </div>
-
-      <div class="grid-2">
-        <div class="form-group">
-          <label>活動名（表示名） *</label>
-          <input type="text" id="regDisplayName" placeholder="ニックネーム" required>
-        </div>
-        <div class="form-group">
-          <label>編集パスコード（英数字） *</label>
-          <input type="password" id="regPassword" placeholder="次回以降の編集用パスコード" required>
-        </div>
-      </div>
-
-      <div class="grid-2">
-        <div class="form-group">
-          <label>公開設定</label>
-          <select id="regIsPublic">
-            <option value="true">公開</option>
-            <option value="false">非公開</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label>お声がけ歓迎設定</label>
-          <select id="regIsContactWelcome">
-            <option value="true">声掛け歓迎</option>
-            <option value="false">閲覧のみ</option>
-          </select>
-        </div>
-      </div>
-
-      <div class="form-group">
-        <label>メインカテゴリ（複数選択可・最低1つ） *</label>
-        <div id="regCategoryContainer" class="checkbox-group"></div>
-      </div>
-
-      <div class="form-group">
-        <label>属性・作風タグ（複数選択可・最低1つ） *</label>
-        <div id="regTagsContainer" class="checkbox-group"></div>
-      </div>
-
-      <div class="form-group">
-        <label>フリータグ（カンマ区切り）</label>
-        <input type="text" id="regFreeTags" placeholder="例: 青年声, SF好き, 短納期相談可">
-      </div>
-
-      <div class="form-group" id="regPriceGuideGroup">
-        <label>料金目安（クリエイター） *</label>
-        <select id="regPriceGuide"></select>
-      </div>
-
-      <hr class="section-divider">
-
-      <div class="form-group">
-        <label>アイコン画像URL</label>
-        <input type="text" id="regAvatarUrl" placeholder="https://...">
-      </div>
-
-      <div class="form-group">
-        <label>自己紹介・アピール文</label>
-        <textarea id="regDescription" placeholder="活動内容や依頼時の希望など">よろしくお願いします。</textarea>
-      </div>
-
-      <div class="form-group">
-        <label>連絡先窓口</label>
-        <input type="text" id="regContactInfo" placeholder="例: XのDM / contact@example.com">
-      </div>
-
-      <div class="form-group">
-        <label>X (Twitter) URL</label>
-        <input type="text" id="regXUrl" placeholder="https://x.com/ユーザー名">
-      </div>
-
-      <div class="form-group">
-        <label>ポートフォリオ・個人HP</label>
-        <input type="text" id="regPortfolioUrl" placeholder="https://...">
-      </div>
-
-      <div class="form-group">
-        <label>代表作品URL（最大4枠）</label>
-        <input type="text" id="regWork1" placeholder="作品URL 1" style="margin-bottom:6px;">
-        <input type="text" id="regWork2" placeholder="作品URL 2" style="margin-bottom:6px;">
-        <input type="text" id="regWork3" placeholder="作品URL 3" style="margin-bottom:6px;">
-        <input type="text" id="regWork4" placeholder="作品URL 4">
-      </div>
-
-      <div class="form-group">
-        <label>活動プラットフォーム（最大3枠）</label>
-        <input type="text" id="regPlatform1" placeholder="例: YouTubeチャンネルURL" style="margin-bottom:6px;">
-        <input type="text" id="regPlatform2" placeholder="例: Twitch / Skeb URL" style="margin-bottom:6px;">
-        <input type="text" id="regPlatform3" placeholder="例: BOOTH URL">
-      </div>
-
-      <button type="submit" class="btn-primary" id="regBtn">登録して完了</button>
-    </form>
+  <div class="header-nav">
+    <a href="./top.html">← TOPページに戻る</a>
+    <span style="font-size: 0.85rem; color: var(--text-sub);">アカウント管理</span>
   </div>
 
-  <!-- ダッシュボード（プロフィール編集エリア） -->
-  <div id="dashboardSection" class="hidden">
-    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+  <div id="loadingView" class="loading-overlay">
+    アカウントデータを読み込み中...
+  </div>
+
+  <div id="mainFormView" class="hidden">
+    <div class="title-row">
       <h1>プロフィール編集</h1>
       <span class="user-badge" id="displayUserId"></span>
     </div>
@@ -260,7 +178,7 @@
       <div class="grid-2">
         <div class="form-group">
           <label>ユーザー区分</label>
-          <select id="profRole" disabled style="background:#eef2f6; cursor:not-allowed;">
+          <select id="profRole" disabled style="background:#f1f5f9; cursor:not-allowed;">
             <option value="creator">クリエイター</option>
             <option value="streamer">配信者</option>
           </select>
@@ -351,7 +269,7 @@
       </div>
 
       <button type="submit" class="btn-primary" id="saveBtn">変更内容を保存する</button>
-      <button type="button" onclick="logout()" style="width:100%; margin-top:8px; padding:8px; background:none; border:none; color:var(--text-sub); cursor:pointer;">ログアウト</button>
+      <button type="button" class="btn-logout" onclick="logout()">ログアウト</button>
     </form>
   </div>
 
@@ -361,78 +279,113 @@
 <script>
   const GAS_API_URL = "https://script.google.com/macros/s/AKfycbyk1gWVq5JmKoz73D6zGB_k0WmpWgs4BGsH00J7WyewnW-iWAFzM6ORGOC4aR_ePRry4Q/exec";
 
-  let currentSession = { userId: "", password: "" };
+  let sessionUser = null;
   let schemaData = null;
 
-  // 起動時にYAMLスキーマをロード
   window.addEventListener('DOMContentLoaded', async () => {
+    // 1. セッション情報の検証（未ログインなら index.html へ戻す）
+    const stored = sessionStorage.getItem('castelier_session');
+    if (!stored) {
+      window.location.href = './index.html';
+      return;
+    }
+    sessionUser = JSON.parse(stored);
+
+    // 2. YAMLスキーマとユーザーデータを並行取得
     try {
-      const res = await fetch('./schema/accounts.yaml');
-      const yamlText = await res.text();
-      const loaded = jsyaml.load(yamlText);
+      const [schemaRes, userRes] = await Promise.all([
+        fetch('./schema/accounts.yaml').then(r => r.text()),
+        fetch(GAS_API_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain' },
+          body: JSON.stringify({
+            action: 'login',
+            data: { userId: sessionUser.userId, password: sessionUser.password }
+          }),
+          redirect: 'follow'
+        }).then(r => r.json())
+      ]);
+
+      const loaded = jsyaml.load(schemaRes);
       schemaData = loaded.accounts.columns;
-      initUiFromSchema();
-    } catch (e) {
-      console.error('YAMLスキーマ読み込み失敗:', e);
-      showStatus('スキーマファイルの読み込みに失敗しました。', false);
+
+      if (userRes.success) {
+        initForm(userRes.userData);
+      } else {
+        alert('セッションの有効期限が切れたか、認証に失敗しました。再ログインしてください。');
+        logout();
+      }
+    } catch (err) {
+      console.error(err);
+      showStatus('データの読み込みに失敗しました: ' + err.message, false);
     }
   });
 
-  // スキーマからUI要素を動的生成
-  function initUiFromSchema() {
-    if (!schemaData) return;
+  function initForm(userData) {
+    document.getElementById('loadingView').classList.add('hidden');
+    document.getElementById('mainFormView').classList.remove('hidden');
+    document.getElementById('displayUserId').textContent = `ID: ${userData.userId}`;
 
-    // 1. 属性・作風タグチェックボックス生成
-    renderCheckboxes('regTagsContainer', 'regTag', schemaData.tags.options, schemaData.tags.optionLabels);
-    renderCheckboxes('profTagsContainer', 'profTag', schemaData.tags.options, schemaData.tags.optionLabels);
-
-    // 2. 料金目安セレクトボックス生成
-    renderSelect('regPriceGuide', schemaData.priceGuide.options, schemaData.priceGuide.optionLabels);
-    renderSelect('profPriceGuide', schemaData.priceGuide.options, schemaData.priceGuide.optionLabels);
-
-    // 3. カテゴリ初期表示（初期値: creator）
-    handleRoleChange('reg');
-  }
-
-  function renderCheckboxes(containerId, namePrefix, values, labels) {
-    const el = document.getElementById(containerId);
-    el.innerHTML = values.map((val, i) => `
+    // タグチェックボックス生成
+    const tagsContainer = document.getElementById('profTagsContainer');
+    tagsContainer.innerHTML = schemaData.tags.options.map((val, i) => `
       <label class="checkbox-label">
-        <input type="checkbox" name="${namePrefix}" value="${val}">
-        <span>${labels[i] || val}</span>
+        <input type="checkbox" name="profTag" value="${val}">
+        <span>${schemaData.tags.optionLabels[i] || val}</span>
       </label>
     `).join('');
-  }
 
-  function renderSelect(selectId, values, labels) {
-    const el = document.getElementById(selectId);
-    el.innerHTML = values.map((val, i) => `
-      <option value="${val}">${labels[i] || val}</option>
+    // 料金目安セレクトボックス生成
+    const priceSelect = document.getElementById('profPriceGuide');
+    priceSelect.innerHTML = schemaData.priceGuide.options.map((val, i) => `
+      <option value="${val}">${schemaData.priceGuide.optionLabels[i] || val}</option>
     `).join('');
-  }
 
-  // ユーザー区分切り替え時のカテゴリ選択肢＆料金欄制御
-  function handleRoleChange(prefix) {
-    if (!schemaData) return;
-    const role = document.getElementById(`${prefix}Role`).value;
-    const container = document.getElementById(`${prefix}CategoryContainer`);
-    const priceGroup = document.getElementById(`${prefix}PriceGuideGroup`);
+    // ロール設定とカテゴリ生成
+    const role = userData.role || 'creator';
+    document.getElementById('profRole').value = role;
 
+    const catContainer = document.getElementById('profCategoryContainer');
     const categories = schemaData.category.options[role] || [];
-    const labels = schemaData.category.optionLabels[role] || [];
-    container.innerHTML = categories.map((val, i) => `
+    const catLabels = schemaData.category.optionLabels[role] || [];
+    catContainer.innerHTML = categories.map((val, i) => `
       <label class="checkbox-label">
-        <input type="checkbox" name="${prefix}Category" value="${val}">
-        <span>${labels[i] || val}</span>
+        <input type="checkbox" name="profCategory" value="${val}">
+        <span>${catLabels[i] || val}</span>
       </label>
     `).join('');
 
-    // クリエイターのみ料金欄を表示
     if (role === 'creator') {
-      priceGroup.classList.remove('hidden');
+      document.getElementById('profPriceGuideGroup').classList.remove('hidden');
     } else {
-      priceGroup.classList.add('hidden');
+      document.getElementById('profPriceGuideGroup').classList.add('hidden');
     }
+
+    // 既存データのフォーム反映
+    document.getElementById('profDisplayName').value = userData.displayName || '';
+    document.getElementById('profIsPublic').value = String(userData.isPublic) === 'false' ? 'false' : 'true';
+    document.getElementById('profIsContactWelcome').value = String(userData.isContactWelcome) === 'false' ? 'false' : 'true';
+
+    setCheckedValues('profCategory', userData.category);
+    setCheckedValues('profTag', userData.tags);
+    document.getElementById('profFreeTags').value = userData.freeTags || '';
+
+    if (role === 'creator') {
+      document.getElementById('profPriceGuide').value = userData.priceGuide || '';
+    }
+
+    document.getElementById('profAvatarUrl').value = userData.avatarUrl || '';
+    document.getElementById('profDescription').value = userData.description || '';
+    document.getElementById('profContactInfo').value = userData.contactInfo || '';
+    document.getElementById('profXUrl').value = userData.xUrl || '';
+    document.getElementById('profPortfolioUrl').value = userData.portfolioUrl || '';
+    document.getElementById('profWork1').value = userData['workUrls-1'] || '';
+    document.getElementById('profWork2').value = userData['workUrls-2'] || '';
+    document.getElementById('profWork3').value = userData['workUrls-3'] || '';
+    document.getElementById('profWork4').value = userData['workUrls-4'] || '';
+    document.getElementById('profPlatform1').value = userData['platformUrls-1'] || '';
+    document.getElementById('profPlatform2').value = userData['platformUrls-2'] || '';
+    document.getElementById('profPlatform3').value = userData['platformUrls-3'] || '';
   }
 
   function getCheckedValues(name) {
@@ -446,15 +399,6 @@
     });
   }
 
-  function switchAuthTab(type) {
-    const isLogin = type === 'login';
-    document.querySelectorAll('.tab-btn')[0].classList.toggle('active', isLogin);
-    document.querySelectorAll('.tab-btn')[1].classList.toggle('active', !isLogin);
-    document.getElementById('loginForm').classList.toggle('hidden', !isLogin);
-    document.getElementById('registerForm').classList.toggle('hidden', isLogin);
-    hideStatus();
-  }
-
   function showStatus(msg, isSuccess) {
     const el = document.getElementById('statusMsg');
     el.textContent = msg;
@@ -466,158 +410,11 @@
     document.getElementById('statusMsg').style.display = 'none';
   }
 
-  // 1. 新規登録処理（全項目まとめて送信）
-  async function handleRegister(e) {
-    e.preventDefault();
-    hideStatus();
-
-    const selectedCategories = getCheckedValues('regCategory');
-    const selectedTags = getCheckedValues('regTag');
-
-    if (selectedCategories.length === 0) {
-      showStatus('メインカテゴリを最低1つ選択してください。', false);
-      return;
-    }
-    if (selectedTags.length === 0) {
-      showStatus('属性・作風タグを最低1つ選択してください。', false);
-      return;
-    }
-
-    const btn = document.getElementById('regBtn');
-    btn.disabled = true;
-    btn.textContent = '登録中...';
-
-    const role = document.getElementById('regRole').value;
-    const payload = {
-      action: 'register',
-      data: {
-        role: role,
-        displayName: document.getElementById('regDisplayName').value.trim(),
-        password: document.getElementById('regPassword').value.trim(),
-        isPublic: document.getElementById('regIsPublic').value === 'true',
-        isContactWelcome: document.getElementById('regIsContactWelcome').value === 'true',
-        category: selectedCategories.join(','),
-        tags: selectedTags.join(','),
-        freeTags: document.getElementById('regFreeTags').value.trim(),
-        priceGuide: role === 'creator' ? document.getElementById('regPriceGuide').value : '',
-        avatarUrl: document.getElementById('regAvatarUrl').value.trim(),
-        description: document.getElementById('regDescription').value,
-        contactInfo: document.getElementById('regContactInfo').value.trim(),
-        xUrl: document.getElementById('regXUrl').value.trim(),
-        portfolioUrl: document.getElementById('regPortfolioUrl').value.trim(),
-        'workUrls-1': document.getElementById('regWork1').value.trim(),
-        'workUrls-2': document.getElementById('regWork2').value.trim(),
-        'workUrls-3': document.getElementById('regWork3').value.trim(),
-        'workUrls-4': document.getElementById('regWork4').value.trim(),
-        'platformUrls-1': document.getElementById('regPlatform1').value.trim(),
-        'platformUrls-2': document.getElementById('regPlatform2').value.trim(),
-        'platformUrls-3': document.getElementById('regPlatform3').value.trim()
-      }
-    };
-
-    try {
-      const res = await fetch(GAS_API_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'text/plain' },
-        body: JSON.stringify(payload),
-        redirect: 'follow'
-      });
-      const data = await res.json();
-
-      if (data.success) {
-        showStatus(`登録完了！あなたのIDは【 ${data.userId} 】です。控えてログインしてください。`, true);
-        document.getElementById('loginUserId').value = data.userId;
-        document.getElementById('loginPassword').value = payload.data.password;
-        switchAuthTab('login');
-      } else {
-        showStatus(data.message || '登録に失敗しました。', false);
-      }
-    } catch (err) {
-      console.error(err);
-      showStatus('通信エラーが発生しました: ' + err.message, false);
-    } finally {
-      btn.disabled = false;
-      btn.textContent = '登録して完了';
-    }
-  }
-
-  // 2. ログイン処理
-  async function handleLogin(e) {
-    e.preventDefault();
-    const btn = document.getElementById('loginBtn');
-    btn.disabled = true;
-    btn.textContent = '照合中...';
-    hideStatus();
-
-    const userId = document.getElementById('loginUserId').value.trim();
-    const password = document.getElementById('loginPassword').value.trim();
-
-    try {
-      const res = await fetch(GAS_API_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'text/plain' },
-        body: JSON.stringify({
-          action: 'login',
-          data: { userId, password }
-        }),
-        redirect: 'follow'
-      });
-      const data = await res.json();
-
-      if (data.success) {
-        currentSession.userId = userId;
-        currentSession.password = password;
-        populateDashboard(data.userData);
-      } else {
-        showStatus(data.message || 'ログインに失敗しました。', false);
-      }
-    } catch (err) {
-      console.error(err);
-      showStatus('通信エラーが発生しました: ' + err.message, false);
-    } finally {
-      btn.disabled = false;
-      btn.textContent = 'ログイン';
-    }
-  }
-
-  // ダッシュボードへのデータ流し込み
-  function populateDashboard(user) {
-    document.getElementById('authSection').classList.add('hidden');
-    document.getElementById('dashboardSection').classList.remove('hidden');
-    document.getElementById('displayUserId').textContent = `ID: ${user.userId}`;
-
-    document.getElementById('profRole').value = user.role || 'creator';
-    handleRoleChange('prof');
-
-    document.getElementById('profDisplayName').value = user.displayName || '';
-    document.getElementById('profIsPublic').value = String(user.isPublic) === 'false' ? 'false' : 'true';
-    document.getElementById('profIsContactWelcome').value = String(user.isContactWelcome) === 'false' ? 'false' : 'true';
-
-    setCheckedValues('profCategory', user.category);
-    setCheckedValues('profTag', user.tags);
-    document.getElementById('profFreeTags').value = user.freeTags || '';
-
-    if (user.role === 'creator') {
-      document.getElementById('profPriceGuide').value = user.priceGuide || '';
-    }
-
-    document.getElementById('profAvatarUrl').value = user.avatarUrl || '';
-    document.getElementById('profWork1').value = user['workUrls-1'] || '';
-    document.getElementById('profWork2').value = user['workUrls-2'] || '';
-    document.getElementById('profWork3').value = user['workUrls-3'] || '';
-    document.getElementById('profWork4').value = user['workUrls-4'] || '';
-    document.getElementById('profXUrl').value = user.xUrl || '';
-    document.getElementById('profPlatform1').value = user['platformUrls-1'] || '';
-    document.getElementById('profPlatform2').value = user['platformUrls-2'] || '';
-    document.getElementById('profPlatform3').value = user['platformUrls-3'] || '';
-    document.getElementById('profPortfolioUrl').value = user.portfolioUrl || '';
-    document.getElementById('profContactInfo').value = user.contactInfo || '';
-    document.getElementById('profDescription').value = user.description || '';
-  }
-
-  // 3. 更新保存処理
+  // プロフィール更新処理
   async function handleUpdate(e) {
     e.preventDefault();
+    hideStatus();
+
     const selectedCategories = getCheckedValues('profCategory');
     const selectedTags = getCheckedValues('profTag');
 
@@ -633,14 +430,13 @@
     const btn = document.getElementById('saveBtn');
     btn.disabled = true;
     btn.textContent = '保存中...';
-    hideStatus();
 
     const role = document.getElementById('profRole').value;
     const payload = {
       action: 'update',
       data: {
-        userId: currentSession.userId,
-        password: currentSession.password,
+        userId: sessionUser.userId,
+        password: sessionUser.password,
         displayName: document.getElementById('profDisplayName').value.trim(),
         isPublic: document.getElementById('profIsPublic').value === 'true',
         isContactWelcome: document.getElementById('profIsContactWelcome').value === 'true',
@@ -649,17 +445,17 @@
         freeTags: document.getElementById('profFreeTags').value.trim(),
         priceGuide: role === 'creator' ? document.getElementById('profPriceGuide').value : '',
         avatarUrl: document.getElementById('profAvatarUrl').value.trim(),
+        description: document.getElementById('profDescription').value,
+        contactInfo: document.getElementById('profContactInfo').value.trim(),
+        xUrl: document.getElementById('profXUrl').value.trim(),
+        portfolioUrl: document.getElementById('profPortfolioUrl').value.trim(),
         'workUrls-1': document.getElementById('profWork1').value.trim(),
         'workUrls-2': document.getElementById('profWork2').value.trim(),
         'workUrls-3': document.getElementById('profWork3').value.trim(),
         'workUrls-4': document.getElementById('profWork4').value.trim(),
-        xUrl: document.getElementById('profXUrl').value.trim(),
         'platformUrls-1': document.getElementById('profPlatform1').value.trim(),
         'platformUrls-2': document.getElementById('profPlatform2').value.trim(),
-        'platformUrls-3': document.getElementById('profPlatform3').value.trim(),
-        portfolioUrl: document.getElementById('profPortfolioUrl').value.trim(),
-        contactInfo: document.getElementById('profContactInfo').value.trim(),
-        description: document.getElementById('profDescription').value
+        'platformUrls-3': document.getElementById('profPlatform3').value.trim()
       }
     };
 
@@ -673,7 +469,7 @@
       const data = await res.json();
 
       if (data.success) {
-        showStatus('プロフィールを保存・更新しました！', true);
+        showStatus('プロフィール情報を保存・更新しました！', true);
       } else {
         showStatus(data.message || '更新に失敗しました。', false);
       }
@@ -687,10 +483,8 @@
   }
 
   function logout() {
-    currentSession = { userId: "", password: "" };
-    document.getElementById('dashboardSection').classList.add('hidden');
-    document.getElementById('authSection').classList.remove('hidden');
-    hideStatus();
+    sessionStorage.removeItem('castelier_session');
+    window.location.href = './index.html';
   }
 </script>
 </body>
