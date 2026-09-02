@@ -72,7 +72,49 @@
     .lead { font-size: 0.85rem; color: var(--text-sub); margin-bottom: 24px; }
     
     .form-group { margin-bottom: 16px; }
-    label { display: block; font-size: 0.85rem; font-weight: bold; margin-bottom: 6px; }
+    label {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.85rem;
+      font-weight: bold;
+      margin-bottom: 6px;
+    }
+
+    /* ツールチップ（インフォマーク） */
+    .info-icon {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: #e2e8f0;
+      color: var(--text-sub);
+      font-size: 0.7rem;
+      font-weight: bold;
+      cursor: help;
+      position: relative;
+    }
+    .info-icon:hover::after {
+      content: attr(data-tooltip);
+      position: absolute;
+      bottom: 125%;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #1e293b;
+      color: #fff;
+      padding: 6px 10px;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      font-weight: normal;
+      white-space: normal;
+      width: 240px;
+      z-index: 50;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.15);
+      line-height: 1.4;
+      pointer-events: none;
+    }
     
     input[type="text"], input[type="password"], textarea, select {
       width: 100%;
@@ -80,6 +122,11 @@
       border: 1px solid var(--border);
       border-radius: var(--radius);
       font-size: 0.9rem;
+    }
+    input:disabled, select:disabled {
+      background-color: #f1f5f9;
+      color: #94a3b8;
+      cursor: not-allowed;
     }
     textarea { resize: vertical; min-height: 80px; }
 
@@ -176,29 +223,29 @@
     <form id="profileForm" onsubmit="handleUpdate(event)">
       <div class="grid-2">
         <div class="form-group">
-          <label>ユーザー区分</label>
+          <label>ユーザー区分 <span class="info-icon" id="tip-prof-role">ℹ</span></label>
           <select id="profRole" disabled style="background:#f1f5f9; cursor:not-allowed;">
             <option value="creator">クリエイター</option>
             <option value="streamer">配信者</option>
           </select>
         </div>
         <div class="form-group">
-          <label>活動名（表示名） *</label>
+          <label>活動名（表示名） * <span class="info-icon" id="tip-prof-displayName">ℹ</span></label>
           <input type="text" id="profDisplayName" required>
         </div>
       </div>
 
-      <!-- 配信者のみ表示する公開設定＆お声がけ設定 -->
+      <!-- 配信者のみ表示する設定 -->
       <div class="grid-2 hidden" id="profStreamerSettingsGroup">
         <div class="form-group">
-          <label>公開設定</label>
-          <select id="profIsPublic">
+          <label>公開設定 <span class="info-icon" id="tip-prof-isPublic">ℹ</span></label>
+          <select id="profIsPublic" onchange="handlePublicChange('prof')">
             <option value="true">公開</option>
             <option value="false">非公開</option>
           </select>
         </div>
         <div class="form-group">
-          <label>お声がけ歓迎設定</label>
+          <label id="lbl-profIsContactWelcome">お声がけ歓迎設定 <span class="info-icon" id="tip-prof-isContactWelcome">ℹ</span></label>
           <select id="profIsContactWelcome">
             <option value="true">声掛け歓迎</option>
             <option value="false">閲覧のみ</option>
@@ -207,40 +254,39 @@
       </div>
 
       <div class="form-group">
-        <label>メインカテゴリ（複数選択可・最低1つ） *</label>
+        <label>メインカテゴリ（複数選択可・最低1つ） * <span class="info-icon" id="tip-prof-category">ℹ</span></label>
         <div id="profCategoryContainer" class="checkbox-group"></div>
       </div>
 
       <div class="form-group">
-        <label>属性・作風タグ（複数選択可・最低1つ） *</label>
+        <label>属性・作風タグ（複数選択可・最低1つ） * <span class="info-icon" id="tip-prof-tags">ℹ</span></label>
         <div id="profTagsContainer" class="checkbox-group"></div>
       </div>
 
       <div class="form-group">
-        <label>フリータグ（カンマ区切り）</label>
+        <label>フリータグ（カンマ区切り） <span class="info-icon" id="tip-prof-freeTags">ℹ</span></label>
         <input type="text" id="profFreeTags" placeholder="例: 青年声, SF好き, 短納期相談可">
       </div>
 
-      <!-- クリエイターのみ表示 -->
       <div class="form-group" id="profPriceGuideGroup">
-        <label>料金目安（クリエイター） *</label>
+        <label>料金目安（クリエイター） * <span class="info-icon" id="tip-prof-priceGuide">ℹ</span></label>
         <select id="profPriceGuide"></select>
       </div>
 
       <hr class="section-divider">
 
       <div class="form-group">
-        <label>アイコン画像URL</label>
+        <label>アイコン画像URL <span class="info-icon" id="tip-prof-avatarUrl">ℹ</span></label>
         <input type="text" id="profAvatarUrl" placeholder="https://...">
       </div>
 
       <div class="form-group">
-        <label>自己紹介・アピール文</label>
+        <label>自己紹介・アピール文 <span class="info-icon" id="tip-prof-description">ℹ</span></label>
         <textarea id="profDescription"></textarea>
       </div>
 
       <div class="form-group">
-        <label>連絡先窓口</label>
+        <label>連絡先窓口 <span class="info-icon" id="tip-prof-contactInfo">ℹ</span></label>
         <input type="text" id="profContactInfo" placeholder="例: XのDM / contact@example.com">
       </div>
 
@@ -250,12 +296,12 @@
       </div>
 
       <div class="form-group">
-        <label>ポートフォリオ・個人HP</label>
+        <label>ポートフォリオ・個人HP <span class="info-icon" id="tip-prof-portfolioUrl">ℹ</span></label>
         <input type="text" id="profPortfolioUrl" placeholder="https://...">
       </div>
 
       <div class="form-group">
-        <label>代表作品URL（最大4枠）</label>
+        <label>代表作品URL（最大4枠） <span class="info-icon" id="tip-prof-workUrls">ℹ</span></label>
         <input type="text" id="profWork1" placeholder="作品URL 1" style="margin-bottom:6px;">
         <input type="text" id="profWork2" placeholder="作品URL 2" style="margin-bottom:6px;">
         <input type="text" id="profWork3" placeholder="作品URL 3" style="margin-bottom:6px;">
@@ -263,7 +309,7 @@
       </div>
 
       <div class="form-group">
-        <label>活動プラットフォーム（最大3枠）</label>
+        <label>活動プラットフォーム（最大3枠） <span class="info-icon" id="tip-prof-platformUrls">ℹ</span></label>
         <input type="text" id="profPlatform1" placeholder="例: YouTubeチャンネルURL" style="margin-bottom:6px;">
         <input type="text" id="profPlatform2" placeholder="例: Twitch / Skeb URL" style="margin-bottom:6px;">
         <input type="text" id="profPlatform3" placeholder="例: BOOTH URL">
@@ -326,6 +372,8 @@
     document.getElementById('mainFormView').classList.remove('hidden');
     document.getElementById('displayUserId').textContent = `ID: ${userData.userId}`;
 
+    applyInfoTips('prof');
+
     currentUserRole = userData.role || 'creator';
     const isStreamer = currentUserRole === 'streamer';
     document.getElementById('profRole').value = currentUserRole;
@@ -362,6 +410,7 @@
       document.getElementById('profPriceGuideGroup').classList.add('hidden');
       document.getElementById('profIsPublic').value = String(userData.isPublic) === 'false' ? 'false' : 'true';
       document.getElementById('profIsContactWelcome').value = String(userData.isContactWelcome) === 'false' ? 'false' : 'true';
+      handlePublicChange('prof');
     } else {
       document.getElementById('profStreamerSettingsGroup').classList.add('hidden');
       document.getElementById('profPriceGuideGroup').classList.remove('hidden');
@@ -385,6 +434,26 @@
     document.getElementById('profPlatform1').value = userData['platformUrls-1'] || '';
     document.getElementById('profPlatform2').value = userData['platformUrls-2'] || '';
     document.getElementById('profPlatform3').value = userData['platformUrls-3'] || '';
+  }
+
+  function applyInfoTips(prefix) {
+    Object.keys(schemaData).forEach(key => {
+      const el = document.getElementById(`tip-${prefix}-${key}`);
+      if (el && schemaData[key].infoTip) {
+        el.setAttribute('data-tooltip', schemaData[key].infoTip);
+      }
+    });
+  }
+
+  function handlePublicChange(prefix) {
+    const isPublic = document.getElementById(`${prefix}IsPublic`).value === 'true';
+    const contactSelect = document.getElementById(`${prefix}IsContactWelcome`);
+    if (!isPublic) {
+      contactSelect.disabled = true;
+      contactSelect.value = 'false';
+    } else {
+      contactSelect.disabled = false;
+    }
   }
 
   function getCheckedValues(name) {
@@ -430,14 +499,17 @@
     btn.textContent = '保存中...';
 
     const isStreamer = currentUserRole === 'streamer';
+    const isPublic = isStreamer ? (document.getElementById('profIsPublic').value === 'true') : true;
+    const isContactWelcome = (isStreamer && isPublic) ? (document.getElementById('profIsContactWelcome').value === 'true') : (!isStreamer ? true : false);
+
     const payload = {
       action: 'update',
       data: {
         userId: sessionUser.userId,
         password: sessionUser.password,
         displayName: document.getElementById('profDisplayName').value.trim(),
-        isPublic: isStreamer ? (document.getElementById('profIsPublic').value === 'true') : true,
-        isContactWelcome: isStreamer ? (document.getElementById('profIsContactWelcome').value === 'true') : true,
+        isPublic: isPublic,
+        isContactWelcome: isContactWelcome,
         category: selectedCategories.join(','),
         tags: selectedTags.join(','),
         freeTags: document.getElementById('profFreeTags').value.trim(),
