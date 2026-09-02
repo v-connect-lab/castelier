@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Castelier | ログイン・新規登録</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/js-yaml/4.1.0/js-yaml.min.js"></script>
+  <style>
+    :root {
+      --primary: #4f46e5;
+      --primary-hover: #4338ca;
+      --bg: #f8fafc;
+      --card-bg: #ffffff;
+      --text: #1e293b;
+      --text-sub: #64748b;
+      --border: #e2e8f0;
+      --radius: 8px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      line-height: 1.5;
+      padding: 24px 16px;
+    }
+
+    .container {
+      max-width: 720px;
+      margin: 0 auto;
+      background: var(--card-bg);
+      padding: 32px 28px;
+      border-radius: var(--radius);
+      box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+      border: 1px solid var(--border);
+    }
+
+    h1 { font-size: 1.5rem; margin-bottom: 6px; text-align: center; }
+    .lead { font-size: 0.85rem; color: var(--text-sub); margin-bottom: 24px; text-align: center; }
+    
+    .tabs { display: flex; gap: 8px; margin-bottom: 24px; border-bottom: 1px solid var(--border); }
+    .tab-btn {
+      flex: 1;
+      padding: 10px;
+      border: none;
+      background: none;
+      font-size: 0.95rem;
+      cursor: pointer;
+      color: var(--text-sub);
+      border-bottom: 2px solid transparent;
+      text-align: center;
+    }
+    .tab-btn.active { color: var(--primary); font-weight: bold; border-bottom-color: var(--primary); }
+
+    .form-group { margin-bottom: 16px; }
+    label { display: block; font-size: 0.85rem; font-weight: bold; margin-bottom: 6px; }
+    .hint { font-size: 0.75rem; color: var(--text-sub); margin-top: 4px; }
+    
+    input[type="text"], input[type="password"], textarea, select {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      font-size: 0.9rem;
+    }
+    textarea { resize: vertical; min-height: 80px; }
+
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+    .checkbox-group {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+      gap: 8px;
+      max-height: 180px;
+      overflow-y: auto;
+      padding: 10px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: #fafafa;
+    }
+    .checkbox-label {
+      font-size: 0.8rem;
+      font-weight: normal;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      cursor: pointer;
+      margin-bottom: 0;
+    }
+
+    .toggle-password-wrap {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 6px;
+      font-size: 0.8rem;
+      color: var(--text-sub);
+      cursor: pointer;
+    }
+
+    button.btn-primary {
+      width: 100%;
+      padding: 12px;
+      background-color: var(--primary);
+      color: white;
+      border: none;
+      border-radius: var(--radius);
+      font-size: 0.95rem;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    button.btn-primary:hover { background-color: var(--primary-hover); }
+    button:disabled { opacity: 0.6; cursor: not-allowed; }
+
+    .status-box {
+      padding: 12px;
+      margin-top: 16px;
+      border-radius: var(--radius);
+      font-size: 0.85rem;
+      display: none;
+    }
+    .status-box.success { background-color: #ecfdf5; color: #065f46; border: 1px solid #a7f3d0; }
+    .status-box.error { background-color: #fef2f2; color: #991b1b; border: 1px solid #fecaca; }
+
+    .hidden { display: none !important; }
+    .section-divider { border: 0; border-top: 1px dashed var(--border); margin: 20px 0; }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <h1>Castelier（キャストリエ）</h1>
+  <p class="lead">アカウント作成またはログインしてプラットフォームをご利用ください。</p>
+
+  <div class="tabs">
+    <button type="button" class="tab-btn active" onclick="switchAuthTab('login')">ログイン</button>
+    <button type="button" class="tab-btn" onclick="switchAuthTab('register')">新規登録</button>
+  </div>
+
+  <!-- ログインフォーム -->
+  <form id="loginForm" onsubmit="handleLogin(event)">
+    <div class="form-group">
+      <label>ユーザーID</label>
+      <input type="text" id="loginUserId" placeholder="usr_xxxxxxxx" required>
+    </div>
+    <div class="form-group">
+      <label>パスワード</label>
+      <input type="password" id="loginPassword" placeholder="パスワードを入力" required>
+      <label class="toggle-password-wrap">
+        <input type="checkbox" onchange="togglePasswordVisibility(['loginPassword'], this.checked)">
+        パスワードを表示
+      </label>
+    </div>
+    <button type="submit" class="btn-primary" id="loginBtn">ログイン</button>
+  </form>
+
+  <!-- 新規登録フォーム -->
+  <form id="registerForm" class="hidden" onsubmit="handleRegister(event)">
+    <div class="form-group">
+      <label>ユーザー区分 *</label>
+      <select id="regRole" required onchange="handleRoleChange()">
+        <option value="creator">クリエイター</option>
+        <option value="streamer">配信者</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label>活動名（表示名） *</label>
+      <input type="text" id="regDisplayName" placeholder="ニックネーム" required>
+    </div>
+
+    <div class="grid-2">
+      <div class="form-group">
+        <label>パスワード *</label>
+        <input type="password" id="regPassword" placeholder="英数字パスワード" required>
+      </div>
+      <div class="form-group">
+        <label>パスワード（確認用） *</label>
+        <input type="password" id="regPasswordConfirm" placeholder="もう一度入力" required>
+      </div>
+    </div>
+    <label class="toggle-password-wrap" style="margin-top:-8px; margin-bottom:16px;">
+      <input type="checkbox" onchange="togglePasswordVisibility(['regPassword', 'regPasswordConfirm'], this.checked)">
+      パスワードを表示
+    </label>
+
+    <div class="grid-2">
+      <div class="form-group">
+        <label>公開設定</label>
+        <select id="regIsPublic">
+          <option value="true">公開</option>
+          <option value="false">非公開</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>お声がけ歓迎設定</label>
+        <select id="regIsContactWelcome">
+          <option value="true">声掛け歓迎</option>
+          <option value="false">閲覧のみ</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>メインカテゴリ（複数選択可・最低1つ） *</label>
+      <div id="regCategoryContainer" class="checkbox-group"></div>
+    </div>
+
+    <div class="form-group">
+      <label>属性・作風タグ（複数選択可・最低1つ） *</label>
+      <div id="regTagsContainer" class="checkbox-group"></div>
+    </div>
+
+    <div class="form-group">
+      <label>フリータグ（カンマ区切り）</label>
+      <input type="text" id="regFreeTags" placeholder="例: 青年声, SF好き, 短納期相談可">
+    </div>
+
+    <div class="form-group" id="regPriceGuideGroup">
+      <label>料金目安（クリエイター） *</label>
+      <select id="regPriceGuide"></select>
+    </div>
+
+    <hr class="section-divider">
+
+    <div class="form-group">
+      <label>アイコン画像URL</label>
+      <input type="text" id="regAvatarUrl" placeholder="https://...">
+    </div>
+
+    <div class="form-group">
+      <label>自己紹介・アピール文</label>
+      <textarea id="regDescription" placeholder="活動内容や依頼時の希望など">よろしくお願いします。</textarea>
+    </div>
+
+    <div class="form-group">
+      <label>連絡先窓口</label>
+      <input type="text" id="regContactInfo" placeholder="例: XのDM / contact@example.com">
+    </div>
+
+    <div class="form-group">
+      <label>X (Twitter) URL</label>
+      <input type="text" id="regXUrl" placeholder="https://x.com/ユーザー名">
+    </div>
+
+    <div class="form-group">
+      <label>ポートフォリオ・個人HP</label>
+      <input type="text" id="regPortfolioUrl" placeholder="https://...">
+    </div>
+
+    <div class="form-group">
+      <label>代表作品URL（最大4枠）</label>
+      <input type="text" id="regWork1" placeholder="作品URL 1" style="margin-bottom:6px;">
+      <input type="text" id="regWork2" placeholder="作品URL 2" style="margin-bottom:6px;">
+      <input type="text" id="regWork3" placeholder="作品URL 3" style="margin-bottom:6px;">
+      <input type="text" id="regWork4" placeholder="作品URL 4">
+    </div>
+
+    <div class="form-group">
+      <label>活動プラットフォーム（最大3枠）</label>
+      <input type="text" id="regPlatform1" placeholder="例: YouTubeチャンネルURL" style="margin-bottom:6px;">
+      <input type="text" id="regPlatform2" placeholder="例: Twitch / Skeb URL" style="margin-bottom:6px;">
+      <input type="text" id="regPlatform3" placeholder="例: BOOTH URL">
+    </div>
+
+    <button type="submit" class="btn-primary" id="regBtn">登録してTOPへ進む</button>
+  </form>
+
+  <div id="statusMsg" class="status-box"></div>
+</div>
+
+<script>
+  const GAS_API_URL = "https://script.google.com/macros/s/AKfycbyk1gWVq5JmKoz73D6zGB_k0WmpWgs4BGsH00J7WyewnW-iWAFzM6ORGOC4aR_ePRry4Q/exec";
+
+  let schemaData = null;
+
+  window.addEventListener('DOMContentLoaded', async () => {
+    try {
+      const res = await fetch('./schema/accounts.yaml');
+      const yamlText = await res.text();
+      const loaded = jsyaml.load(yamlText);
+      schemaData = loaded.accounts.columns;
+      initUiFromSchema();
+    } catch (e) {
+      console.error('YAMLスキーマ読み込み失敗:', e);
+      showStatus('スキーマファイルの読み込みに失敗しました。', false);
+    }
+  });
+
+  function initUiFromSchema() {
+    if (!schemaData) return;
+    renderCheckboxes('regTagsContainer', 'regTag', schemaData.tags.options, schemaData.tags.optionLabels);
+    renderSelect('regPriceGuide', schemaData.priceGuide.options, schemaData.priceGuide.optionLabels);
+    handleRoleChange();
+  }
+
+  function renderCheckboxes(containerId, namePrefix, values, labels) {
+    const el = document.getElementById(containerId);
+    el.innerHTML = values.map((val, i) => `
+      <label class="checkbox-label">
+        <input type="checkbox" name="${namePrefix}" value="${val}">
+        <span>${labels[i] || val}</span>
+      </label>
+    `).join('');
+  }
+
+  function renderSelect(selectId, values, labels) {
+    const el = document.getElementById(selectId);
+    el.innerHTML = values.map((val, i) => `
+      <option value="${val}">${labels[i] || val}</option>
+    `).join('');
+  }
+
+  function handleRoleChange() {
+    if (!schemaData) return;
+    const role = document.getElementById('regRole').value;
+    const container = document.getElementById('regCategoryContainer');
+    const priceGroup = document.getElementById('regPriceGuideGroup');
+
+    const categories = schemaData.category.options[role] || [];
+    const labels = schemaData.category.optionLabels[role] || [];
+    container.innerHTML = categories.map((val, i) => `
+      <label class="checkbox-label">
+        <input type="checkbox" name="regCategory" value="${val}">
+        <span>${labels[i] || val}</span>
+      </label>
+    `).join('');
+
+    if (role === 'creator') {
+      priceGroup.classList.remove('hidden');
+    } else {
+      priceGroup.classList.add('hidden');
+    }
+  }
+
+  function togglePasswordVisibility(fieldIds, isVisible) {
+    fieldIds.forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.type = isVisible ? 'text' : 'password';
+    });
+  }
+
+  function getCheckedValues(name) {
+    return Array.from(document.querySelectorAll(`input[name="${name}"]:checked`)).map(cb => cb.value);
+  }
+
+  function switchAuthTab(type) {
+    const isLogin = type === 'login';
+    document.querySelectorAll('.tab-btn')[0].classList.toggle('active', isLogin);
+    document.querySelectorAll('.tab-btn')[1].classList.toggle('active', !isLogin);
+    document.getElementById('loginForm').classList.toggle('hidden', !isLogin);
+    document.getElementById('registerForm').classList.toggle('hidden', isLogin);
+    hideStatus();
+  }
+
+  function showStatus(msg, isSuccess) {
+    const el = document.getElementById('statusMsg');
+    el.textContent = msg;
+    el.className = `status-box ${isSuccess ? 'success' : 'error'}`;
+    el.style.display = 'block';
+  }
+
+  function hideStatus() {
+    document.getElementById('statusMsg').style.display = 'none';
+  }
+
+  // 1. 新規登録処理
+  async function handleRegister(e) {
+    e.preventDefault();
+    hideStatus();
+
+    const pwd = document.getElementById('regPassword').value;
+    const pwdConfirm = document.getElementById('regPasswordConfirm').value;
+    if (pwd !== pwdConfirm) {
+      showStatus('確認用パスワードが一致しません。もう一度ご確認ください。', false);
+      return;
+    }
+
+    const selectedCategories = getCheckedValues('regCategory');
+    const selectedTags = getCheckedValues('regTag');
+
+    if (selectedCategories.length === 0) {
+      showStatus('メインカテゴリを最低1つ選択してください。', false);
+      return;
+    }
+    if (selectedTags.length === 0) {
+      showStatus('属性・作風タグを最低1つ選択してください。', false);
+      return;
+    }
+
+    const btn = document.getElementById('regBtn');
+    btn.disabled = true;
+    btn.textContent = '登録中...';
+
+    const role = document.getElementById('regRole').value;
+    const payload = {
+      action: 'register',
+      data: {
+        role: role,
+        displayName: document.getElementById('regDisplayName').value.trim(),
+        password: pwd.trim(),
+        isPublic: document.getElementById('regIsPublic').value === 'true',
+        isContactWelcome: document.getElementById('regIsContactWelcome').value === 'true',
+        category: selectedCategories.join(','),
+        tags: selectedTags.join(','),
+        freeTags: document.getElementById('regFreeTags').value.trim(),
+        priceGuide: role === 'creator' ? document.getElementById('regPriceGuide').value : '',
+        avatarUrl: document.getElementById('regAvatarUrl').value.trim(),
+        description: document.getElementById('regDescription').value,
+        contactInfo: document.getElementById('regContactInfo').value.trim(),
+        xUrl: document.getElementById('regXUrl').value.trim(),
+        portfolioUrl: document.getElementById('regPortfolioUrl').value.trim(),
+        'workUrls-1': document.getElementById('regWork1').value.trim(),
+        'workUrls-2': document.getElementById('regWork2').value.trim(),
+        'workUrls-3': document.getElementById('regWork3').value.trim(),
+        'workUrls-4': document.getElementById('regWork4').value.trim(),
+        'platformUrls-1': document.getElementById('regPlatform1').value.trim(),
+        'platformUrls-2': document.getElementById('regPlatform2').value.trim(),
+        'platformUrls-3': document.getElementById('regPlatform3').value.trim()
+      }
+    };
+
+    try {
+      const res = await fetch(GAS_API_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain' },
+        body: JSON.stringify(payload),
+        redirect: 'follow'
+      });
+      const data = await res.json();
+
+      if (data.success) {
+        alert(`登録が完了しました！\nあなたのアカウントIDは【 ${data.userId} 】です。\nログイン時に必要となるため必ず控えてください。`);
+        sessionStorage.setItem('castelier_session', JSON.stringify({
+          userId: data.userId,
+          password: pwd.trim()
+        }));
+        window.location.href = './top.html';
+      } else {
+        showStatus(data.message || '登録に失敗しました。', false);
+      }
+    } catch (err) {
+      console.error(err);
+      showStatus('通信エラーが発生しました: ' + err.message, false);
+    } finally {
+      btn.disabled = false;
+      btn.textContent = '登録してTOPへ進む';
+    }
+  }
+
+  // 2. ログイン処理
+  async function handleLogin(e) {
+    e.preventDefault();
+    const btn = document.getElementById('loginBtn');
+    btn.disabled = true;
+    btn.textContent = '照合中...';
+    hideStatus();
+
+    const userId = document.getElementById('loginUserId').value.trim();
+    const password = document.getElementById('loginPassword').value.trim();
+
+    try {
+      const res = await fetch(GAS_API_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain' },
+        body: JSON.stringify({
+          action: 'login',
+          data: { userId, password }
+        }),
+        redirect: 'follow'
+      });
+      const data = await res.json();
+
+      if (data.success) {
+        sessionStorage.setItem('castelier_session', JSON.stringify({
+          userId: userId,
+          password: password
+        }));
+        window.location.href = './top.html';
+      } else {
+        showStatus(data.message || 'ログインに失敗しました。', false);
+      }
+    } catch (err) {
+      console.error(err);
+      showStatus('通信エラーが発生しました: ' + err.message, false);
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'ログイン';
+    }
+  }
+</script>
+</body>
+</html>
