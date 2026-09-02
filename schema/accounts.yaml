@@ -7,44 +7,64 @@ accounts:
             label: "ユーザーID"
             type: string
             required: true
+            exportJson: false
+            infoTip: "ログイン時に使用するあなた固有のアカウントIDです。外部には公開されません。"
         password:
             label: "パスワード"
             type: string
             required: true
+            exportJson: false
+            infoTip: "プロフィールの編集・ログイン時にのみ使用します。外部には絶対に公開されません。"
         createdAt:
             label: "登録日時"
             type: datetime
             required: true
+            exportJson: false
         updatedAt:
             label: "最終更新日時"
             type: datetime
             required: true
+            exportJson: true
+            infoTip: "カタログで「新着・更新順」にソートする際に使用されます。"
         role:
             label: "ユーザー区分"
             options: [ "creator", "streamer" ]
             optionLabels: [ "クリエイター", "配信者" ]
             required: true
+            exportJson: true
+            infoTip: "制作を受ける側（クリエイター）か、活動・依頼する側（配信者）かを選択します。"
         displayName:
             label: "活動名（表示名）"
             type: string
             required: true
+            exportJson: true
+            infoTip: "カタログ一覧や検索で一番大きく表示される活動名・ニックネームです。"
         isPublic:
             label: "公開設定"
             applicableRoles: [ "streamer" ]
             options: [ true, false ]
             optionLabels: [ "公開", "非公開" ]
             required: true
+            exportJson: false
+            infoTip: "「非公開」に設定すると、TOPカタログに掲載されずステルスモードになります。"
         isContactWelcome:
             label: "お声がけ歓迎設定"
             options: [ true, false ]
             optionLabels: [ "声掛け歓迎", "閲覧のみ" ]
             applicableRoles: [ "streamer" ]
+            dependsOn:
+                field: "isPublic"
+                value: true
+            exportJson: true
+            infoTip: "クリエイターからの企画提案や逆オファー・素材提供を受け付けるかどうかを設定します（公開時のみ有効）。"
         category:
             label: "メインカテゴリ"
             type: array
             required: true
             minItems: 1
             multiple: true
+            exportJson: true
+            infoTip: "検索の主力フィルターになります。活動・制作の軸を最低1つ選んでください。"
             options:
                 creator:
                     - illust
@@ -81,6 +101,8 @@ accounts:
             required: true
             minItems: 1
             multiple: true
+            exportJson: true
+            infoTip: "世界観やテイストで絞り込むための公式タグです（最低1つ選択）。"
             options:
                 - Woman
                 - Man
@@ -149,19 +171,25 @@ accounts:
             items:
                 type: string
             required: false
+            exportJson: true
+            infoTip: "公式タグにない特徴や条件（短納期、厚塗り、ケモ耳など）を自由に入力できます。"
             ui:
-                widget: "tag-input" # または "comma-separated"
+                widget: "tag-input"
                 placeholder: "例: 青年声, SF好き, 短納期相談可"
             description: "半角または全角カンマで区切って自由に入力してください"
         avatarUrl:
             label: "アイコン画像URL"
             type: url
             required: false
+            exportJson: true
+            infoTip: "カタログのサムネイルになる画像の直リンク（https://...）を入力してください。"
             description: "https://..."
         workUrls:
             label: "代表作品URL"
             type: array
             required: false
+            exportJson: true
+            infoTip: "最大4枠まで登録できます。ポートフォリオや動画リンクなどに活用できます。"
             items:
                 type: url
                 description: "https://..."
@@ -169,16 +197,21 @@ accounts:
             label: "ポートフォリオ・個人HP"
             type: url
             required: false
+            exportJson: true
+            infoTip: "foriio、lit.link、独自WebサイトなどのURLです。"
             description: "https://..."
         xUrl:
             label: "X (Twitter) URL"
             type: url
             required: false
+            exportJson: true
             description: "https://..."
         platformUrls:
             label: "活動プラットフォーム"
             type: array
             required: false
+            exportJson: true
+            infoTip: "YouTube、Twitch、BOOTHなどのURLを最大3枠まで登録できます。"
             items:
                 type: url
                 description: "https://..."
@@ -186,15 +219,21 @@ accounts:
             label: "連絡先窓口"
             type: string
             required: false
+            exportJson: true
+            infoTip: "連絡を受け付けたい窓口（XのDM、連絡用メールアドレスなど）を入力します。"
         description:
             label: "自己紹介・アピール文"
             type: text
             default: "よろしくお願いします。"
             required: false
+            exportJson: true
+            infoTip: "詳細モーダルに表示されるメインの紹介文です。"
         priceGuide:
             label: "料金・予算目安"
             type: string
             applicableRoles: [ "creator" ]
+            exportJson: true
+            infoTip: "依頼検討者向けの目安金額です。"
             options:
                 - "~1000"
                 - "~2000"
