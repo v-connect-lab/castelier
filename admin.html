@@ -339,7 +339,8 @@
       if (data.success) {
         currentSession.userId = userId;
         currentSession.password = password;
-        populateDashboard(data.userData);
+        // 修正前: populatedDashboard(data.userData);
+        populateDashboard(data.userData); // ← 末尾の「d」を削る
       } else {
         showStatus(data.message || 'ログインに失敗しました。', false);
       }
