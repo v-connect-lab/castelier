@@ -277,7 +277,7 @@
 
       <div class="form-group">
         <label>アイコン画像URL <span class="info-icon" id="tip-prof-avatarUrl">ℹ</span></label>
-        <input type="text" id="profAvatarUrl" placeholder="https://...">
+        <input type="text" id="profAvatarUrl" placeholder="https://...（Googleドライブリンク可）">
       </div>
 
       <div class="form-group">
@@ -302,10 +302,10 @@
 
       <div class="form-group">
         <label>代表作品URL（最大4枠） <span class="info-icon" id="tip-prof-workUrls">ℹ</span></label>
-        <input type="text" id="profWork1" placeholder="作品URL 1" style="margin-bottom:6px;">
-        <input type="text" id="profWork2" placeholder="作品URL 2" style="margin-bottom:6px;">
-        <input type="text" id="profWork3" placeholder="作品URL 3" style="margin-bottom:6px;">
-        <input type="text" id="profWork4" placeholder="作品URL 4">
+        <input type="text" id="profWork1" placeholder="作品URL 1（Googleドライブリンク可）" style="margin-bottom:6px;">
+        <input type="text" id="profWork2" placeholder="作品URL 2（Googleドライブリンク可）" style="margin-bottom:6px;">
+        <input type="text" id="profWork3" placeholder="作品URL 3（Googleドライブリンク可）" style="margin-bottom:6px;">
+        <input type="text" id="profWork4" placeholder="作品URL 4（Googleドライブリンク可）">
       </div>
 
       <div class="form-group">
@@ -378,7 +378,7 @@
     const isStreamer = currentUserRole === 'streamer';
     document.getElementById('profRole').value = currentUserRole;
 
-    // タグ
+    // タグ一覧
     const tagsContainer = document.getElementById('profTagsContainer');
     tagsContainer.innerHTML = schemaData.tags.options.map((val, i) => `
       <label class="checkbox-label">
@@ -387,13 +387,13 @@
       </label>
     `).join('');
 
-    // 料金目安
+    // 料金目安一覧
     const priceSelect = document.getElementById('profPriceGuide');
     priceSelect.innerHTML = schemaData.priceGuide.options.map((val, i) => `
       <option value="${val}">${schemaData.priceGuide.optionLabels[i] || val}</option>
     `).join('');
 
-    // カテゴリ
+    // カテゴリ一覧
     const catContainer = document.getElementById('profCategoryContainer');
     const categories = schemaData.category.options[currentUserRole] || [];
     const catLabels = schemaData.category.optionLabels[currentUserRole] || [];
@@ -478,6 +478,7 @@
     document.getElementById('statusMsg').style.display = 'none';
   }
 
+  // プロフィール更新処理
   async function handleUpdate(e) {
     e.preventDefault();
     hideStatus();
@@ -493,6 +494,18 @@
       showStatus('属性・作風タグを最低1つ選択してください。', false);
       return;
     }
+
+    // GoogleドライブURLの検証と自動変換
+    const rawAvatar = document.getElementById('profAvatarUrl').value;
+    if (rawAvatar && !isValidImageUrl(rawAvatar)) {
+      showStatus('アイコンURLには画像直リンク（.jpg/.png等）またはGoogleドライブの共有リンクを入力してください。', false);
+      return;
+    }
+    const cleanedAvatarUrl = normalizeDriveUrl(rawAvatar, 'image');
+    const cleanedWork1 = normalizeDriveUrl(document.getElementById('profWork1').value, 'preview');
+    const cleanedWork2 = normalizeDriveUrl(document.getElementById('profWork2').value, 'preview');
+    const cleanedWork3 = normalizeDriveUrl(document.getElementById('profWork3').value, 'preview');
+    const cleanedWork4 = normalizeDriveUrl(document.getElementById('profWork4').value, 'preview');
 
     const btn = document.getElementById('saveBtn');
     btn.disabled = true;
@@ -514,15 +527,15 @@
         tags: selectedTags.join(','),
         freeTags: document.getElementById('profFreeTags').value.trim(),
         priceGuide: !isStreamer ? document.getElementById('profPriceGuide').value : '',
-        avatarUrl: document.getElementById('profAvatarUrl').value.trim(),
+        avatarUrl: cleanedAvatarUrl,
         description: document.getElementById('profDescription').value,
         contactInfo: document.getElementById('profContactInfo').value.trim(),
         xUrl: document.getElementById('profXUrl').value.trim(),
         portfolioUrl: document.getElementById('profPortfolioUrl').value.trim(),
-        'workUrls-1': document.getElementById('profWork1').value.trim(),
-        'workUrls-2': document.getElementById('profWork2').value.trim(),
-        'workUrls-3': document.getElementById('profWork3').value.trim(),
-        'workUrls-4': document.getElementById('profWork4').value.trim(),
+        'workUrls-1': cleanedWork1,
+        'workUrls-2': cleanedWork2,
+        'workUrls-3': cleanedWork3,
+        'workUrls-4': cleanedWork4,
         'platformUrls-1': document.getElementById('profPlatform1').value.trim(),
         'platformUrls-2': document.getElementById('profPlatform2').value.trim(),
         'platformUrls-3': document.getElementById('profPlatform3').value.trim()
@@ -555,6 +568,30 @@
   function logout() {
     sessionStorage.removeItem('castelier_session');
     window.location.href = './index.html';
+  }
+
+  // ユーティリティ関数
+  function normalizeDriveUrl(url, type = 'image') {
+    if (!url || typeof url !== 'string') return '';
+    const trimmed = url.trim();
+    const driveRegex = /(?:drive\.google\.com\/(?:file\/d\/|open\?id=)|docs\.google\.com\/file\/d\/)([a-zA-Z0-9_-]{25,})/;
+    const match = trimmed.match(driveRegex);
+    if (match && match[1]) {
+      const fileId = match[1];
+      return type === 'image'
+        ? `https://lh3.googleusercontent.com/d/${fileId}`
+        : `https://drive.google.com/file/d/${fileId}/preview`;
+    }
+    return trimmed;
+  }
+
+  function isValidImageUrl(url) {
+    if (!url) return true;
+    const trimmed = url.trim();
+    if (/drive\.google\.com/.test(trimmed)) return true;
+    const isDirectImage = /\.(jpeg|jpg|gif|png|webp|svg)(\?.*)?$/i.test(trimmed);
+    const isHttps = /^https?:\/\//i.test(trimmed);
+    return isHttps && (isDirectImage || trimmed.includes('googleusercontent.com'));
   }
 </script>
 </body>
