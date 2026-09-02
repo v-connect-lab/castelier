@@ -55,7 +55,6 @@
 
     .form-group { margin-bottom: 16px; }
     label { display: block; font-size: 0.85rem; font-weight: bold; margin-bottom: 6px; }
-    .hint { font-size: 0.75rem; color: var(--text-sub); margin-top: 4px; }
     
     input[type="text"], input[type="password"], textarea, select {
       width: 100%;
@@ -186,7 +185,8 @@
       パスワードを表示
     </label>
 
-    <div class="grid-2">
+    <!-- 配信者のみ表示する公開設定＆お声がけ設定 -->
+    <div class="grid-2 hidden" id="regStreamerSettingsGroup">
       <div class="form-group">
         <label>公開設定</label>
         <select id="regIsPublic">
@@ -218,6 +218,7 @@
       <input type="text" id="regFreeTags" placeholder="例: 青年声, SF好き, 短納期相談可">
     </div>
 
+    <!-- クリエイターのみ表示 -->
     <div class="form-group" id="regPriceGuideGroup">
       <label>料金目安（クリエイター） *</label>
       <select id="regPriceGuide"></select>
@@ -318,6 +319,7 @@
     const role = document.getElementById('regRole').value;
     const container = document.getElementById('regCategoryContainer');
     const priceGroup = document.getElementById('regPriceGuideGroup');
+    const streamerGroup = document.getElementById('regStreamerSettingsGroup');
 
     const categories = schemaData.category.options[role] || [];
     const labels = schemaData.category.optionLabels[role] || [];
@@ -328,10 +330,13 @@
       </label>
     `).join('');
 
+    // ロールに応じた出し分け
     if (role === 'creator') {
       priceGroup.classList.remove('hidden');
+      streamerGroup.classList.add('hidden');
     } else {
       priceGroup.classList.add('hidden');
+      streamerGroup.classList.remove('hidden');
     }
   }
 
@@ -366,7 +371,6 @@
     document.getElementById('statusMsg').style.display = 'none';
   }
 
-  // 1. 新規登録処理
   async function handleRegister(e) {
     e.preventDefault();
     hideStatus();
@@ -395,14 +399,17 @@
     btn.textContent = '登録中...';
 
     const role = document.getElementById('regRole').value;
+    const isStreamer = role === 'streamer';
+
     const payload = {
       action: 'register',
       data: {
         role: role,
         displayName: document.getElementById('regDisplayName').value.trim(),
         password: pwd.trim(),
-        isPublic: document.getElementById('regIsPublic').value === 'true',
-        isContactWelcome: document.getElementById('regIsContactWelcome').value === 'true',
+        // 配信者のみフォームの選択値を反映、クリエイターはデフォルト true
+        isPublic: isStreamer ? (document.getElementById('regIsPublic').value === 'true') : true,
+        isContactWelcome: isStreamer ? (document.getElementById('regIsContactWelcome').value === 'true') : true,
         category: selectedCategories.join(','),
         tags: selectedTags.join(','),
         freeTags: document.getElementById('regFreeTags').value.trim(),
@@ -450,7 +457,6 @@
     }
   }
 
-  // 2. ログイン処理
   async function handleLogin(e) {
     e.preventDefault();
     const btn = document.getElementById('loginBtn');
