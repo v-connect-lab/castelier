@@ -408,51 +408,6 @@
       btn.textContent = '変更内容を保存する';
     }
   }
-  // ダッシュボードへのデータ反映
-  function populateDashboard(user) {
-    document.getElementById('authSection').classList.add('hidden');
-    document.getElementById('dashboardSection').classList.remove('hidden');
-    document.getElementById('displayUserId').textContent = `ID: ${user.userId}`;
-
-    document.getElementById('profDisplayName').value = user.displayName || '';
-    document.getElementById('profCategory').value = user.category || '';
-    document.getElementById('profIsPublic').value = String(user.isPublic) === 'false' ? 'false' : 'true';
-    document.getElementById('profIsContactWelcome').value = String(user.isContactWelcome) === 'false' ? 'false' : 'true';
-    document.getElementById('profTags').value = user.tags || '';
-    document.getElementById('profAvatarUrl').value = user.avatarUrl || '';
-    document.getElementById('profWork1').value = user['workUrls-1'] || '';
-    document.getElementById('profWork2').value = user['workUrls-2'] || '';
-    document.getElementById('profWork3').value = user['workUrls-3'] || '';
-    document.getElementById('profWork4').value = user['workUrls-4'] || '';
-    document.getElementById('profXUrl').value = user.xUrl || '';
-    document.getElementById('profPlatform1').value = user['platformUrls-1'] || '';
-    document.getElementById('profPlatform2').value = user['platformUrls-2'] || '';
-    document.getElementById('profPlatform3').value = user['platformUrls-3'] || '';
-    document.getElementById('profPortfolioUrl').value = user.portfolioUrl || '';
-    document.getElementById('profContactInfo').value = user.contactInfo || '';
-    document.getElementById('profDescription').value = user.description || '';
-    document.getElementById('profPriceGuide').value = user.priceGuide || '';
-  }
-
-    try {
-      const res = await fetch(GAS_API_URL, {
-        method: 'POST',
-        body: JSON.stringify(payload)
-      });
-      const data = await res.json();
-
-      if (data.success) {
-        showStatus('プロフィールを保存・更新しました！', true);
-      } else {
-        showStatus(data.message || '更新に失敗しました。', false);
-      }
-    } catch (err) {
-      showStatus('通信エラーが発生しました。', false);
-    } finally {
-      btn.disabled = false;
-      btn.textContent = '変更内容を保存する';
-    }
-  }
 
   function logout() {
     currentSession = { userId: "", password: "" };
