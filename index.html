@@ -232,7 +232,7 @@
       パスワードを表示
     </label>
 
-    <!-- 配信者のみの表示設定 -->
+    <!-- 配信者のみ表示する設定 -->
     <div class="grid-2 hidden" id="regStreamerSettingsGroup">
       <div class="form-group">
         <label>公開設定 <span class="info-icon" id="tip-reg-isPublic">ℹ</span></label>
@@ -274,7 +274,7 @@
 
     <div class="form-group">
       <label>アイコン画像URL <span class="info-icon" id="tip-reg-avatarUrl">ℹ</span></label>
-      <input type="text" id="regAvatarUrl" placeholder="https://...">
+      <input type="text" id="regAvatarUrl" placeholder="https://...（Googleドライブリンク可）">
     </div>
 
     <div class="form-group">
@@ -299,7 +299,7 @@
 
     <div class="form-group">
       <label>代表作品URL（最大4枠） <span class="info-icon" id="tip-reg-workUrls">ℹ</span></label>
-      <input type="text" id="regWork1" placeholder="作品URL 1" style="margin-bottom:6px;">
+      <input type="text" id="regWork1" placeholder="作品URL 1（Googleドライブリンク可）" style="margin-bottom:6px;">
       <input type="text" id="regWork2" placeholder="作品URL 2" style="margin-bottom:6px;">
       <input type="text" id="regWork3" placeholder="作品URL 3" style="margin-bottom:6px;">
       <input type="text" id="regWork4" placeholder="作品URL 4">
@@ -338,10 +338,7 @@
 
   function initUiFromSchema() {
     if (!schemaData) return;
-
-    // ツールチップ設定
     applyInfoTips('reg');
-
     renderCheckboxes('regTagsContainer', 'regTag', schemaData.tags.options, schemaData.tags.optionLabels);
     renderSelect('regPriceGuide', schemaData.priceGuide.options, schemaData.priceGuide.optionLabels);
     handleRoleChange();
@@ -399,7 +396,6 @@
     }
   }
 
-  // 非公開時にお声がけ設定をグレーアウト連動
   function handlePublicChange(prefix) {
     const isPublic = document.getElementById(`${prefix}IsPublic`).value === 'true';
     const contactSelect = document.getElementById(`${prefix}IsContactWelcome`);
@@ -442,6 +438,7 @@
     document.getElementById('statusMsg').style.display = 'none';
   }
 
+  // 新規登録処理
   async function handleRegister(e) {
     e.preventDefault();
     hideStatus();
@@ -465,6 +462,18 @@
       return;
     }
 
+    // GoogleドライブURLの検証と自動変換
+    const rawAvatar = document.getElementById('regAvatarUrl').value;
+    if (rawAvatar && !isValidImageUrl(rawAvatar)) {
+      showStatus('アイコンURLには画像直リンク（.jpg/.png等）またはGoogleドライブの共有リンクを入力してください。', false);
+      return;
+    }
+    const cleanedAvatarUrl = normalizeDriveUrl(rawAvatar, 'image');
+    const cleanedWork1 = normalizeDriveUrl(document.getElementById('regWork1').value, 'preview');
+    const cleanedWork2 = normalizeDriveUrl(document.getElementById('regWork2').value, 'preview');
+    const cleanedWork3 = normalizeDriveUrl(document.getElementById('regWork3').value, 'preview');
+    const cleanedWork4 = normalizeDriveUrl(document.getElementById('regWork4').value, 'preview');
+
     const btn = document.getElementById('regBtn');
     btn.disabled = true;
     btn.textContent = '登録中...';
@@ -486,15 +495,15 @@
         tags: selectedTags.join(','),
         freeTags: document.getElementById('regFreeTags').value.trim(),
         priceGuide: role === 'creator' ? document.getElementById('regPriceGuide').value : '',
-        avatarUrl: document.getElementById('regAvatarUrl').value.trim(),
+        avatarUrl: cleanedAvatarUrl,
         description: document.getElementById('regDescription').value,
         contactInfo: document.getElementById('regContactInfo').value.trim(),
         xUrl: document.getElementById('regXUrl').value.trim(),
         portfolioUrl: document.getElementById('regPortfolioUrl').value.trim(),
-        'workUrls-1': document.getElementById('regWork1').value.trim(),
-        'workUrls-2': document.getElementById('regWork2').value.trim(),
-        'workUrls-3': document.getElementById('regWork3').value.trim(),
-        'workUrls-4': document.getElementById('regWork4').value.trim(),
+        'workUrls-1': cleanedWork1,
+        'workUrls-2': cleanedWork2,
+        'workUrls-3': cleanedWork3,
+        'workUrls-4': cleanedWork4,
         'platformUrls-1': document.getElementById('regPlatform1').value.trim(),
         'platformUrls-2': document.getElementById('regPlatform2').value.trim(),
         'platformUrls-3': document.getElementById('regPlatform3').value.trim()
@@ -529,6 +538,7 @@
     }
   }
 
+  // ログイン処理
   async function handleLogin(e) {
     e.preventDefault();
     const btn = document.getElementById('loginBtn');
@@ -567,6 +577,30 @@
       btn.disabled = false;
       btn.textContent = 'ログイン';
     }
+  }
+
+  // ユーティリティ関数
+  function normalizeDriveUrl(url, type = 'image') {
+    if (!url || typeof url !== 'string') return '';
+    const trimmed = url.trim();
+    const driveRegex = /(?:drive\.google\.com\/(?:file\/d\/|open\?id=)|docs\.google\.com\/file\/d\/)([a-zA-Z0-9_-]{25,})/;
+    const match = trimmed.match(driveRegex);
+    if (match && match[1]) {
+      const fileId = match[1];
+      return type === 'image'
+        ? `https://lh3.googleusercontent.com/d/${fileId}`
+        : `https://drive.google.com/file/d/${fileId}/preview`;
+    }
+    return trimmed;
+  }
+
+  function isValidImageUrl(url) {
+    if (!url) return true;
+    const trimmed = url.trim();
+    if (/drive\.google\.com/.test(trimmed)) return true;
+    const isDirectImage = /\.(jpeg|jpg|gif|png|webp|svg)(\?.*)?$/i.test(trimmed);
+    const isHttps = /^https?:\/\//i.test(trimmed);
+    return isHttps && (isDirectImage || trimmed.includes('googleusercontent.com'));
   }
 </script>
 </body>
