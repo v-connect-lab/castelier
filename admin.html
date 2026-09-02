@@ -73,7 +73,6 @@
     
     .form-group { margin-bottom: 16px; }
     label { display: block; font-size: 0.85rem; font-weight: bold; margin-bottom: 6px; }
-    .hint { font-size: 0.75rem; color: var(--text-sub); margin-top: 4px; }
     
     input[type="text"], input[type="password"], textarea, select {
       width: 100%;
@@ -189,7 +188,8 @@
         </div>
       </div>
 
-      <div class="grid-2">
+      <!-- 配信者のみ表示する公開設定＆お声がけ設定 -->
+      <div class="grid-2 hidden" id="profStreamerSettingsGroup">
         <div class="form-group">
           <label>公開設定</label>
           <select id="profIsPublic">
@@ -221,6 +221,7 @@
         <input type="text" id="profFreeTags" placeholder="例: 青年声, SF好き, 短納期相談可">
       </div>
 
+      <!-- クリエイターのみ表示 -->
       <div class="form-group" id="profPriceGuideGroup">
         <label>料金目安（クリエイター） *</label>
         <select id="profPriceGuide"></select>
@@ -281,9 +282,9 @@
 
   let sessionUser = null;
   let schemaData = null;
+  let currentUserRole = "creator";
 
   window.addEventListener('DOMContentLoaded', async () => {
-    // 1. セッション情報の検証（未ログインなら index.html へ戻す）
     const stored = sessionStorage.getItem('castelier_session');
     if (!stored) {
       window.location.href = './index.html';
@@ -291,7 +292,6 @@
     }
     sessionUser = JSON.parse(stored);
 
-    // 2. YAMLスキーマとユーザーデータを並行取得
     try {
       const [schemaRes, userRes] = await Promise.all([
         fetch('./schema/accounts.yaml').then(r => r.text()),
@@ -326,7 +326,11 @@
     document.getElementById('mainFormView').classList.remove('hidden');
     document.getElementById('displayUserId').textContent = `ID: ${userData.userId}`;
 
-    // タグチェックボックス生成
+    currentUserRole = userData.role || 'creator';
+    const isStreamer = currentUserRole === 'streamer';
+    document.getElementById('profRole').value = currentUserRole;
+
+    // タグ
     const tagsContainer = document.getElementById('profTagsContainer');
     tagsContainer.innerHTML = schemaData.tags.options.map((val, i) => `
       <label class="checkbox-label">
@@ -335,19 +339,16 @@
       </label>
     `).join('');
 
-    // 料金目安セレクトボックス生成
+    // 料金目安
     const priceSelect = document.getElementById('profPriceGuide');
     priceSelect.innerHTML = schemaData.priceGuide.options.map((val, i) => `
       <option value="${val}">${schemaData.priceGuide.optionLabels[i] || val}</option>
     `).join('');
 
-    // ロール設定とカテゴリ生成
-    const role = userData.role || 'creator';
-    document.getElementById('profRole').value = role;
-
+    // カテゴリ
     const catContainer = document.getElementById('profCategoryContainer');
-    const categories = schemaData.category.options[role] || [];
-    const catLabels = schemaData.category.optionLabels[role] || [];
+    const categories = schemaData.category.options[currentUserRole] || [];
+    const catLabels = schemaData.category.optionLabels[currentUserRole] || [];
     catContainer.innerHTML = categories.map((val, i) => `
       <label class="checkbox-label">
         <input type="checkbox" name="profCategory" value="${val}">
@@ -355,24 +356,22 @@
       </label>
     `).join('');
 
-    if (role === 'creator') {
-      document.getElementById('profPriceGuideGroup').classList.remove('hidden');
-    } else {
+    // 出し分け制御
+    if (isStreamer) {
+      document.getElementById('profStreamerSettingsGroup').classList.remove('hidden');
       document.getElementById('profPriceGuideGroup').classList.add('hidden');
+      document.getElementById('profIsPublic').value = String(userData.isPublic) === 'false' ? 'false' : 'true';
+      document.getElementById('profIsContactWelcome').value = String(userData.isContactWelcome) === 'false' ? 'false' : 'true';
+    } else {
+      document.getElementById('profStreamerSettingsGroup').classList.add('hidden');
+      document.getElementById('profPriceGuideGroup').classList.remove('hidden');
+      document.getElementById('profPriceGuide').value = userData.priceGuide || '';
     }
 
-    // 既存データのフォーム反映
     document.getElementById('profDisplayName').value = userData.displayName || '';
-    document.getElementById('profIsPublic').value = String(userData.isPublic) === 'false' ? 'false' : 'true';
-    document.getElementById('profIsContactWelcome').value = String(userData.isContactWelcome) === 'false' ? 'false' : 'true';
-
     setCheckedValues('profCategory', userData.category);
     setCheckedValues('profTag', userData.tags);
     document.getElementById('profFreeTags').value = userData.freeTags || '';
-
-    if (role === 'creator') {
-      document.getElementById('profPriceGuide').value = userData.priceGuide || '';
-    }
 
     document.getElementById('profAvatarUrl').value = userData.avatarUrl || '';
     document.getElementById('profDescription').value = userData.description || '';
@@ -410,7 +409,6 @@
     document.getElementById('statusMsg').style.display = 'none';
   }
 
-  // プロフィール更新処理
   async function handleUpdate(e) {
     e.preventDefault();
     hideStatus();
@@ -431,19 +429,19 @@
     btn.disabled = true;
     btn.textContent = '保存中...';
 
-    const role = document.getElementById('profRole').value;
+    const isStreamer = currentUserRole === 'streamer';
     const payload = {
       action: 'update',
       data: {
         userId: sessionUser.userId,
         password: sessionUser.password,
         displayName: document.getElementById('profDisplayName').value.trim(),
-        isPublic: document.getElementById('profIsPublic').value === 'true',
-        isContactWelcome: document.getElementById('profIsContactWelcome').value === 'true',
+        isPublic: isStreamer ? (document.getElementById('profIsPublic').value === 'true') : true,
+        isContactWelcome: isStreamer ? (document.getElementById('profIsContactWelcome').value === 'true') : true,
         category: selectedCategories.join(','),
         tags: selectedTags.join(','),
         freeTags: document.getElementById('profFreeTags').value.trim(),
-        priceGuide: role === 'creator' ? document.getElementById('profPriceGuide').value : '',
+        priceGuide: !isStreamer ? document.getElementById('profPriceGuide').value : '',
         avatarUrl: document.getElementById('profAvatarUrl').value.trim(),
         description: document.getElementById('profDescription').value,
         contactInfo: document.getElementById('profContactInfo').value.trim(),
