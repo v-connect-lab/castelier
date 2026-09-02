@@ -30,6 +30,7 @@ accounts:
             required: true
         isPublic:
             label: "公開設定"
+            applicableRoles: [ "streamer" ]
             options: [ true, false ]
             optionLabels: [ "公開", "非公開" ]
             required: true
@@ -37,7 +38,7 @@ accounts:
             label: "お声がけ歓迎設定"
             options: [ true, false ]
             optionLabels: [ "声掛け歓迎", "閲覧のみ" ]
-            required: true
+            applicableRoles: [ "streamer" ]
         category:
             label: "メインカテゴリ"
             type: array
