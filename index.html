@@ -408,6 +408,8 @@
       const loaded = jsyaml.load(yamlText);
       schemaData = loaded.accounts.columns;
       initUiFromSchema();
+      setupTooltipToggle();
+  } catch (e) { ... }
     } catch (e) {
       console.error('YAMLスキーマ読み込み失敗:', e);
       showStatus('スキーマファイルの読み込みに失敗しました。', false);
@@ -728,6 +730,25 @@
     } else {
       box.style.display = 'none';
     }
+  }
+
+  // ツールチップのタップ開閉制御（スマホ・PC共通）
+  function setupTooltipToggle() {
+    document.addEventListener('click', (e) => {
+      const targetIcon = e.target.closest('.info-icon');
+
+      // 他の開いているツールチップをすべて閉じる
+      document.querySelectorAll('.info-icon.active').forEach(icon => {
+        if (icon !== targetIcon) {
+          icon.classList.remove('active');
+        }
+      });
+
+      // タップしたアイコンの表示/非表示を切り替え
+      if (targetIcon) {
+        targetIcon.classList.toggle('active');
+      }
+    });
   }
 </script>
 </body>
