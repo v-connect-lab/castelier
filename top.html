@@ -397,21 +397,40 @@
       return url;
     }
 
-    // 初期データ読み込み (users.json 参照)
+    // 初期データ読み込み（登録後15分以内はGAS直読、それ以降はusers.json）
     window.addEventListener('DOMContentLoaded', async () => {
+      const registeredAt = localStorage.getItem('castelier_registered_at');
+      const now = Date.now();
+      const FIFTEEN_MINUTES = 15 * 60 * 1000;
+
+      // 登録から15分以内かどうかの判定
+      const isRecentlyRegistered = registeredAt && (now - parseInt(registeredAt, 10) < FIFTEEN_MINUTES);
+
       try {
-        // キャッシュ対策としてタイムスタンプを付与
-        const res = await fetch(`./data/users.json?t=${Date.now()}`);
-        if (!res.ok) {
-          throw new Error('users.json の読み込みに失敗しました');
+        if (isRecentlyRegistered) {
+          console.log('登録直後のため、最新データをGASから直接取得します。');
+          const res = await fetch(`${GAS_API_URL}?action=getPublicUsers`);
+          const data = await res.json();
+          allUsers = data.users || [];
+        } else {
+          // 15分経過している、または一般訪問者はGitHubの静的JSONを参照
+          const res = await fetch(`./data/users.json?t=${now}`);
+          if (!res.ok) throw new Error('users.json fetch error');
+          const data = await res.json();
+          allUsers = Array.isArray(data) ? data : [];
         }
 
-        const data = await res.json();
-        allUsers = Array.isArray(data) ? data : [];
         renderFilteredUsers();
       } catch (err) {
-        document.getElementById('userGrid').innerHTML = '<div class="loading-state">ユーザー一覧の取得に失敗しました。</div>';
-        console.error(err);
+        // 万が一 users.json が失敗した場合はフォールバックとしてGASを叩く
+        try {
+          const fallbackRes = await fetch(`${GAS_API_URL}?action=getPublicUsers`);
+          const fallbackData = await fallbackRes.json();
+          allUsers = fallbackData.users || [];
+          renderFilteredUsers();
+        } catch (fallbackErr) {
+          document.getElementById('userGrid').innerHTML = '<div class="loading-state">ユーザー一覧の取得に失敗しました。</div>';
+        }
       }
     });
 
