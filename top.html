@@ -328,17 +328,17 @@
       display: block;
     }
     .media-audio-box {
-      padding: 16px;
+      padding: 14px;
     }
     .media-link-box {
-      padding: 16px;
+      padding: 14px;
     }
     .external-work-link {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-top: 8px;
-      padding: 10px 14px;
+      margin-top: 6px;
+      padding: 8px 12px;
       background: #ffffff;
       color: var(--primary);
       text-decoration: none;
@@ -346,7 +346,6 @@
       font-size: 0.85rem;
       border-radius: 6px;
       border: 1px solid var(--border);
-      transition: background 0.15s;
     }
     .external-work-link:hover {
       background: #e0e7ff;
@@ -374,25 +373,6 @@
       padding: 48px 0;
       color: var(--text-sub);
       font-size: 0.95rem;
-    }
-
-    /* Googleドライブ埋め込み枠のズレ・余白補正 */
-    .drive-embed-container {
-      position: relative;
-      width: 100%;
-      height: 180px;
-      overflow: hidden; /* はみ出た上部ヘッダーやスクロールバーを完全にカット */
-      border-radius: 6px;
-      background: #1e293b;
-    }
-
-    .drive-embed-iframe {
-      position: absolute;
-      top: -52px; /* ★上部の黒いヘッダーバー（ファイル名・外部リンクボタン）を枠外に隠す */
-      left: 0;
-      width: 100%;
-      height: calc(100% + 56px); /* 削った分だけ高さを足してコントローラーを収める */
-      border: 0;
     }
   </style>
 </head>
@@ -431,7 +411,7 @@
   </div>
 
   <script>
-    const GAS_API_URL = 'https://script.google.com/macros/s/AKfycbyKigWvQ5JmKO275b0ZGb_koWmpwgS4bdSh0057Wyewnm-iWArzM0okdOC4anR4O9U_cg/exec';
+    const GAS_API_URL = 'https://script.google.com/macros/s/AKfycbyk1gWVq5JmKoz73D6zGB_k0WmpWgs4BGsH00J7WyewnW-iWAFzM6ORGOC4aR_ePRry4Q/exec';
 
     let allUsers = [];
     let currentRole = 'all';
@@ -443,17 +423,17 @@
       priceGuide: {}
     };
 
-    // GoogleドライブURLの変換
-    function normalizeDriveUrl(url) {
-      if (!url) return '';
+    function normalizeDriveUrl(url, type = 'image') {
+      if (!url || typeof url !== 'string') return '';
       const match = url.match(/\/file\/d\/([a-zA-Z0-9_-]+)/) || url.match(/id=([a-zA-Z0-9_-]+)/);
       if (match && match[1]) {
-        return `https://drive.google.com/thumbnail?id=${match[1]}&sz=w800`;
+        return type === 'image' 
+          ? `https://drive.google.com/thumbnail?id=${match[1]}&sz=w800`
+          : `https://drive.google.com/file/d/${match[1]}/preview`;
       }
       return url;
     }
 
-    // accounts.yaml からオプションとラベルの対応辞書を生成
     function buildLabelMaps(cols) {
       if (cols.tags && cols.tags.options && cols.tags.optionLabels) {
         cols.tags.options.forEach((val, i) => {
@@ -491,121 +471,108 @@
         .map(v => getLabel(group, v));
     }
 
-    // メディアURLの種別判別
-    function analyzeMediaUrl(rawUrl) {
-      if (!rawUrl || typeof rawUrl !== 'string') return null;
-      const url = rawUrl.trim();
+    // 種別・画像有無に応じたモーダル用メディア生成
+    function renderMediaItem(item) {
+      if (!item || !item.url) return '';
+      const type = item.type || 'image';
+      const url = item.url.trim();
+      const customImg = item.image ? normalizeDriveUrl(item.image, 'image') : null;
 
-      // 1. YouTube
-      const ytMatch = url.match(/(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
-      if (ytMatch && ytMatch[1]) {
-        const videoId = ytMatch[1];
-        return {
-          type: 'youtube',
-          url: url,
-          embedUrl: `https://www.youtube.com/embed/${videoId}`,
-          thumbUrl: `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`
-        };
+      // 1. 画像
+      if (type === 'image') {
+        const imgUrl = normalizeDriveUrl(url, 'image');
+        return `
+          <div class="media-box">
+            <img src="${imgUrl}" class="modal-work-img" alt="作品画像">
+          </div>
+        `;
       }
 
-      // 2. Googleドライブのリンク（動画・音楽・画像をすべてGoogle公式プレイヤー/ビューアで再生・表示）
-      const driveMatch = url.match(/(?:drive\.google\.com\/(?:file\/d\/|open\?id=)|docs\.google\.com\/file\/d\/)([a-zA-Z0-9_-]{25,})/);
-      if (driveMatch && driveMatch[1]) {
-        const fileId = driveMatch[1];
-        return {
-          type: 'drive_embed',
-          fileId: fileId,
-          embedUrl: `https://drive.google.com/file/d/${fileId}/preview`,
-          thumbUrl: `https://drive.google.com/thumbnail?id=${fileId}&sz=w800`,
-          url: url
-        };
-      }
+      // 2. 音楽・音声
+      if (type === 'music') {
+        const isDrive = url.includes('drive.google.com');
+        const audioSrc = isDrive ? normalizeDriveUrl(url, 'preview') : url;
+        const playerHtml = isDrive
+          ? `<iframe src="${audioSrc}" style="width:100%; height:48px; border:0;" allow="autoplay"></iframe>`
+          : `<audio controls src="${audioSrc}" style="width:100%; height:36px;"></audio>`;
 
-      // 3. 音声ファイル直リンク (.mp3, .wav等)
-      if (/\.(mp3|wav|ogg|m4a)(\?.*)?$/i.test(url)) {
-        return { type: 'audio', url: url };
-      }
-
-      // 4. 動画ファイル直リンク (.mp4, .webm等)
-      if (/\.(mp4|webm)(\?.*)?$/i.test(url)) {
-        return { type: 'video', url: url };
-      }
-
-      // 5. 画像直リンク (.jpg, .png等)
-      if (/\.(jpeg|jpg|gif|png|webp|svg)(\?.*)?$/i.test(url) || url.includes('googleusercontent.com')) {
-        return { type: 'image', url: url, rawUrl: url };
-      }
-
-      // 6. 外部Webサイト
-      return { type: 'link', url: url };
-    }
-
-    // モーダル用メディアコンポーネント生成
-    function renderMediaComponent(item) {
-      if (!item) return '';
-
-      switch (item.type) {
-        // Googleドライブ（動画・音声・プレビューを自動対応）
-        case 'drive_embed':
+        if (customImg) {
           return `
-            <div class="media-box">
-              <div class="drive-embed-container">
-                <iframe src="${item.embedUrl}" 
-                        class="drive-embed-iframe"
-                        allow="autoplay"></iframe>
+            <div class="media-box" style="display:flex; flex-direction:column; overflow:hidden;">
+              <div style="width:100%; height:160px; background:#1e293b; overflow:hidden;">
+                <img src="${customImg}" style="width:100%; height:100%; object-fit:cover;" alt="ジャケット画像">
+              </div>
+              <div class="media-audio-box" style="padding:10px 14px; background:#fff;">
+                <div style="font-size:0.75rem; font-weight:bold; margin-bottom:6px; color:var(--primary);">🎵 楽曲・音声サンプル</div>
+                ${playerHtml}
               </div>
             </div>
           `;
+        }
 
-        case 'image':
+        return `
+          <div class="media-box media-audio-box" style="padding:14px;">
+            <div style="font-size:0.8rem; font-weight:bold; margin-bottom:8px; color:var(--primary);">🎵 音声サンプル</div>
+            ${playerHtml}
+          </div>
+        `;
+      }
+
+      // 3. 動画
+      if (type === 'video') {
+        const ytMatch = url.match(/(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
+        if (ytMatch) {
           return `
-            <div class="media-box">
-              <img src="${item.url}" class="modal-work-img" alt="作品画像">
+            <div class="media-box" style="position:relative; padding-top:56.25%; background:#000;">
+              <iframe src="https://www.youtube.com/embed/${ytMatch[1]}" style="position:absolute; inset:0; width:100%; height:100%; border:0;" allowfullscreen></iframe>
             </div>
           `;
+        }
+        const isDrive = url.includes('drive.google.com');
+        const videoSrc = isDrive ? normalizeDriveUrl(url, 'preview') : url;
+        return `
+          <div class="media-box" style="position:relative; padding-top:56.25%; background:#000;">
+            ${isDrive 
+              ? `<iframe src="${videoSrc}" style="position:absolute; inset:0; width:100%; height:100%; border:0;" allow="autoplay" allowfullscreen></iframe>`
+              : `<video controls src="${videoSrc}" style="position:absolute; inset:0; width:100%; height:100%;"></video>`}
+          </div>
+        `;
+      }
 
-        case 'youtube':
-          return `
-            <div class="media-box" style="position:relative; padding-top:56.25%;">
-              <iframe src="${item.embedUrl}" 
-                      style="position:absolute; top:0; left:0; width:100%; height:100%; border:0;" 
-                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
-                      allowfullscreen></iframe>
-            </div>
-          `;
+      // 4. Webサイト・リンク
+      if (type === 'web') {
+        let domain = url;
+        try { domain = new URL(url).hostname; } catch(e){}
 
-        case 'audio':
+        if (customImg) {
           return `
-            <div class="media-box media-audio-box">
-              <div style="font-size:0.8rem; font-weight:bold; margin-bottom:8px; color:var(--primary);">🎵 音声・楽曲サンプル</div>
-              <audio controls src="${item.url}" style="width:100%; height:40px;"></audio>
-            </div>
+            <a href="${url}" target="_blank" rel="noopener" class="media-box" style="text-decoration:none; display:flex; flex-direction:column; overflow:hidden;">
+              <div style="width:100%; height:140px; background:#e2e8f0; overflow:hidden;">
+                <img src="${customImg}" style="width:100%; height:100%; object-fit:cover;" alt="Webサイトキャプチャ">
+              </div>
+              <div style="padding:10px 14px; background:#fff; display:flex; justify-content:space-between; align-items:center; border-top:1px solid var(--border);">
+                <div>
+                  <div style="font-size:0.75rem; color:#64748b;">🔗 Webサイト・制作物</div>
+                  <div style="font-size:0.85rem; font-weight:bold; color:var(--primary);">${escapeHtml(domain)}</div>
+                </div>
+                <span style="font-size:1rem; color:var(--primary);">↗</span>
+              </div>
+            </a>
           `;
+        }
 
-        case 'video':
-          return `
-            <div class="media-box">
-              <video controls src="${item.url}" style="width:100%; max-height:220px; background:#000; display:block;"></video>
-            </div>
-          `;
-
-        case 'link':
-        default:
-          let domain = item.url;
-          try { domain = new URL(item.url).hostname; } catch(e){}
-          return `
-            <div class="media-box media-link-box">
-              <div style="font-size:0.75rem; color:#64748b;">🔗 制作実績・サイトリンク</div>
-              <a href="${item.url}" target="_blank" rel="noopener" class="external-work-link">
-                <span>${escapeHtml(domain)} で開く</span>
-                <span>↗</span>
-              </a>
-            </div>
-          `;
+        return `
+          <div class="media-box media-link-box" style="padding:16px;">
+            <div style="font-size:0.75rem; color:#64748b;">🔗 Webサイト・リンク</div>
+            <a href="${url}" target="_blank" rel="noopener" class="external-work-link">
+              <span>${escapeHtml(domain)} で開く</span>
+              <span>↗</span>
+            </a>
+          </div>
+        `;
       }
     }
 
-    // ヘッダーナビの切り替え
     function renderHeaderNav() {
       const nav = document.getElementById('headerAuthNav');
       const session = sessionStorage.getItem('castelier_session');
@@ -631,7 +598,6 @@
       }
     }
 
-    // 初期化とデータ読み込み
     window.addEventListener('DOMContentLoaded', async () => {
       renderHeaderNav();
 
@@ -726,35 +692,43 @@
       }
 
       grid.innerHTML = filtered.map((u, idx) => {
-        const avatarUrl = normalizeDriveUrl(u.avatarUrl);
+        const avatarUrl = normalizeDriveUrl(u.avatarUrl, 'image');
         const roleLabel = getLabel('role', u.role);
 
-        // 代表作1からサムネイル生成
-        const media1 = analyzeMediaUrl(u['workUrls-1']);
-        let thumbHtml = '<div class="card-thumb-empty">No Preview</div>';
+        // works配列の解析
+        let userWorks = u.works || [];
+        if (typeof userWorks === 'string' && userWorks.startsWith('[')) {
+          try { userWorks = JSON.parse(userWorks); } catch(e) { userWorks = []; }
+        }
 
-        if (media1) {
-          if (media1.type === 'image' || media1.type === 'drive_embed') {
-            thumbHtml = `<img src="${media1.thumbUrl || media1.url}" alt="作品" onerror="this.parentElement.innerHTML='<div class=\\'card-thumb-empty\\'>Media File</div>'">`;
-          } else if (media1.type === 'youtube') {
-            thumbHtml = `
-              <img src="${media1.thumbUrl}" alt="動画サムネイル">
-              <span style="position:absolute; inset:0; display:flex; align-items:center; justify-content:center; background:rgba(0,0,0,0.35); font-size:2rem; color:#fff;">▶</span>
-            `;
-          } else if (media1.type === 'audio') {
-            thumbHtml = `<div class="card-thumb-empty" style="background:#e0e7ff; color:var(--primary); font-weight:bold; font-size:1.1rem;">🎵 音声作品</div>`;
-          } else if (media1.type === 'video') {
-            thumbHtml = `<div class="card-thumb-empty" style="background:#f1f5f9; color:var(--text-main); font-weight:bold; font-size:1.1rem;">🎬 動画作品</div>`;
-          } else if (media1.type === 'link') {
-            thumbHtml = `<div class="card-thumb-empty" style="background:#f1f5f9; color:#64748b; font-weight:bold; font-size:1.1rem;">🔗 Webサイト</div>`;
+        const firstWork = userWorks.length > 0 ? userWorks[0] : null;
+        let thumbHtml = '<div class="card-thumb-empty">No Work Preview</div>';
+
+        if (firstWork && firstWork.url) {
+          const customThumb = firstWork.image ? normalizeDriveUrl(firstWork.image, 'image') : null;
+
+          if (firstWork.type === 'image') {
+            thumbHtml = `<img src="${normalizeDriveUrl(firstWork.url, 'image')}" alt="作品">`;
+          } else if (firstWork.type === 'music') {
+            thumbHtml = customThumb 
+              ? `<img src="${customThumb}" alt="楽曲ジャケット"><span style="position:absolute; bottom:8px; right:8px; background:rgba(0,0,0,0.6); color:#fff; padding:2px 8px; border-radius:12px; font-size:0.7rem;">🎵 楽曲</span>`
+              : `<div class="card-thumb-empty" style="background:#e0e7ff; color:var(--primary); font-weight:bold;">🎵 音声作品</div>`;
+          } else if (firstWork.type === 'web') {
+            thumbHtml = customThumb 
+              ? `<img src="${customThumb}" alt="サイトキャプチャ"><span style="position:absolute; bottom:8px; right:8px; background:rgba(0,0,0,0.6); color:#fff; padding:2px 8px; border-radius:12px; font-size:0.7rem;">🔗 Web</span>`
+              : `<div class="card-thumb-empty" style="background:#f1f5f9; color:#64748b; font-weight:bold;">🔗 Webサイト</div>`;
+          } else if (firstWork.type === 'video') {
+            const ytMatch = firstWork.url.match(/(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
+            const thumbUrl = ytMatch ? `https://img.youtube.com/vi/${ytMatch[1]}/hqdefault.jpg` : normalizeDriveUrl(firstWork.url, 'image');
+            thumbHtml = thumbUrl 
+              ? `<img src="${thumbUrl}" alt="動画サムネイル"><span style="position:absolute; inset:0; display:flex; align-items:center; justify-content:center; background:rgba(0,0,0,0.35); font-size:2rem; color:#fff;">▶</span>`
+              : '<div class="card-thumb-empty">🎬 動画作品</div>';
           }
         }
 
-        // カテゴリ（日本語変換）
         const catLabels = parseCommaLabels('category', u.category);
         const categoryDisplay = catLabels.join(' / ') || '未設定';
 
-        // 属性タグ（日本語変換） + フリータグ（そのまま）
         const standardTags = parseCommaLabels('tags', u.tags);
         const freeTags = (u.freeTags ? String(u.freeTags).split(',') : []).map(t => t.trim()).filter(Boolean);
         const allCardTags = standardTags.concat(freeTags);
@@ -787,22 +761,29 @@
       const u = allUsers[index];
       if (!u) return;
 
-      const avatarUrl = normalizeDriveUrl(u.avatarUrl);
+      const avatarUrl = normalizeDriveUrl(u.avatarUrl, 'image');
       const roleLabel = getLabel('role', u.role);
       const categoryDisplay = parseCommaLabels('category', u.category).join(' / ') || '未設定';
       const priceLabel = getLabel('priceGuide', u.priceGuide);
       
-      // 登録されている作品URL（1〜4）をメディア解析
-      const works = [1, 2, 3, 4]
-        .map(i => analyzeMediaUrl(u[`workUrls-${i}`]))
-        .filter(Boolean);
+      let userWorks = u.works || [];
+      if (typeof userWorks === 'string' && userWorks.startsWith('[')) {
+        try { userWorks = JSON.parse(userWorks); } catch(e) { userWorks = []; }
+      }
+
+      let userPlatforms = u.platforms || [];
+      if (typeof userPlatforms === 'string' && userPlatforms.startsWith('[')) {
+        try { userPlatforms = JSON.parse(userPlatforms); } catch(e) { userPlatforms = []; }
+      }
 
       const links = [];
       if (u.xUrl) links.push(`<a href="${u.xUrl}" target="_blank" rel="noopener">X (Twitter)</a>`);
       if (u.portfolioUrl) links.push(`<a href="${u.portfolioUrl}" target="_blank" rel="noopener">ポートフォリオHP</a>`);
-      if (u['platformUrls-1']) links.push(`<a href="${u['platformUrls-1']}" target="_blank" rel="noopener">活動リンク 1</a>`);
-      if (u['platformUrls-2']) links.push(`<a href="${u['platformUrls-2']}" target="_blank" rel="noopener">活動リンク 2</a>`);
-      if (u['platformUrls-3']) links.push(`<a href="${u['platformUrls-3']}" target="_blank" rel="noopener">活動リンク 3</a>`);
+      userPlatforms.forEach(p => {
+        if (p.url) {
+          links.push(`<a href="${escapeHtml(p.url)}" target="_blank" rel="noopener">${escapeHtml(p.label || 'リンク')}</a>`);
+        }
+      });
 
       document.getElementById('modalBody').innerHTML = `
         <div style="display:flex; align-items:center; gap:16px; margin-bottom:16px;">
@@ -816,10 +797,10 @@
 
         <div style="margin-bottom:16px; white-space:pre-wrap; font-size:0.9rem; line-height:1.6; color:#334155;">${escapeHtml(u.description || '自己紹介文はありません。')}</div>
 
-        ${works.length > 0 ? `
+        ${userWorks.length > 0 ? `
           <div style="font-weight:bold; font-size:0.85rem; margin-bottom:8px;">代表作品・メディア</div>
           <div class="modal-works-grid">
-            ${works.map(w => renderMediaComponent(w)).join('')}
+            ${userWorks.map(w => renderMediaItem(w)).join('')}
           </div>
         ` : ''}
 
