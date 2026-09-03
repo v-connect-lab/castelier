@@ -200,13 +200,15 @@ accounts:
                         optionLabels: ["画像", "音楽・音声", "動画", "Webサイト・リンク"]
                         default: "image"
                     image:
-                        label: "サムネイル"
+                        label: "サムネイル・ジャケット画像"
                         type: url
-                        applicableRoles: [ "music", "web" ]
+                        applicableTypes: ["music", "web"]
+                        infoTip: "楽曲ジャケットやWebサイトのキャプチャ画像URL（Googleドライブ可）"
                         description: "https://..."
                     url:
-                        label: "URL"
+                        label: "作品URL"
                         type: url
+                        required: true
                         description: "https://..."
         portfolioUrl:
             label: "ポートフォリオ・個人HP"
