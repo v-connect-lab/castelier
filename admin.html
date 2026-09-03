@@ -406,6 +406,7 @@
 
       if (userRes.success) {
         initForm(userRes.userData);
+        setupTooltipToggle();
       } else {
         alert('セッションの有効期限が切れたか、認証に失敗しました。再ログインしてください。');
         logout();
@@ -682,6 +683,25 @@
     } else {
       box.style.display = 'none';
     }
+  }
+
+  // ツールチップのタップ開閉制御（スマホ・PC共通）
+  function setupTooltipToggle() {
+    document.addEventListener('click', (e) => {
+      const targetIcon = e.target.closest('.info-icon');
+
+      // 他の開いているツールチップをすべて閉じる
+      document.querySelectorAll('.info-icon.active').forEach(icon => {
+        if (icon !== targetIcon) {
+          icon.classList.remove('active');
+        }
+      });
+
+      // タップしたアイコンの表示/非表示を切り替え
+      if (targetIcon) {
+        targetIcon.classList.toggle('active');
+      }
+    });
   }
 </script>
 </body>
