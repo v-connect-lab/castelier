@@ -203,6 +203,35 @@
 
     .hidden { display: none !important; }
     .section-divider { border: 0; border-top: 1px dashed var(--border); margin: 20px 0; }
+
+    /* プレビュー表示用スタイル */
+    .img-preview-box {
+      margin-top: 8px;
+      display: none;
+      align-items: center;
+      gap: 12px;
+      background: #f1f5f9;
+      padding: 8px 12px;
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+    }
+    .img-preview-box img {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      object-fit: cover;
+      background: #fff;
+      border: 1px solid var(--border);
+    }
+    .img-preview-box.square img {
+      border-radius: 4px;
+      width: 60px;
+      height: 60px;
+    }
+    .img-preview-box span {
+      font-size: 0.8rem;
+      color: var(--text-sub);
+    }
   </style>
 </head>
 <body>
@@ -281,7 +310,11 @@
 
       <div class="form-group">
         <label>アイコン画像URL <span class="info-icon" id="tip-prof-avatarUrl">ℹ</span></label>
-        <input type="text" id="profAvatarUrl" placeholder="https://...（Googleドライブリンク可）">
+        <input type="text" id="profAvatarUrl" placeholder="https://...（Googleドライブリンク可）" oninput="updateImagePreview('profAvatarUrl', 'profAvatarPreview', false)">
+        <div id="profAvatarPreview" class="img-preview-box">
+          <img src="" alt="アイコンプレビュー">
+          <span>アイコン表示プレビュー</span>
+        </div>
       </div>
 
       <div class="form-group">
@@ -306,10 +339,17 @@
 
       <div class="form-group">
         <label>代表作品URL（最大4枠） <span class="info-icon" id="tip-prof-workUrls">ℹ</span></label>
-        <input type="text" id="profWork1" placeholder="作品URL 1（Googleドライブリンク可）" style="margin-bottom:6px;">
-        <input type="text" id="profWork2" placeholder="作品URL 2（Googleドライブリンク可）" style="margin-bottom:6px;">
-        <input type="text" id="profWork3" placeholder="作品URL 3（Googleドライブリンク可）" style="margin-bottom:6px;">
-        <input type="text" id="profWork4" placeholder="作品URL 4（Googleドライブリンク可）">
+        <input type="text" id="profWork1" placeholder="作品URL 1（Googleドライブリンク可）" style="margin-bottom:6px;" oninput="updateImagePreview('profWork1', 'profWork1Preview', true)">
+        <div id="profWork1Preview" class="img-preview-box square" style="margin-bottom:8px;"><img src="" alt="プレビュー"><span>作品1 プレビュー</span></div>
+
+        <input type="text" id="profWork2" placeholder="作品URL 2（Googleドライブリンク可）" style="margin-bottom:6px;" oninput="updateImagePreview('profWork2', 'profWork2Preview', true)">
+        <div id="profWork2Preview" class="img-preview-box square" style="margin-bottom:8px;"><img src="" alt="プレビュー"><span>作品2 プレビュー</span></div>
+
+        <input type="text" id="profWork3" placeholder="作品URL 3（Googleドライブリンク可）" style="margin-bottom:6px;" oninput="updateImagePreview('profWork3', 'profWork3Preview', true)">
+        <div id="profWork3Preview" class="img-preview-box square" style="margin-bottom:8px;"><img src="" alt="プレビュー"><span>作品3 プレビュー</span></div>
+
+        <input type="text" id="profWork4" placeholder="作品URL 4（Googleドライブリンク可）" oninput="updateImagePreview('profWork4', 'profWork4Preview', true)">
+        <div id="profWork4Preview" class="img-preview-box square"><img src="" alt="プレビュー"><span>作品4 プレビュー</span></div>
       </div>
 
       <div class="form-group">
@@ -438,6 +478,12 @@
     document.getElementById('profPlatform1').value = userData['platformUrls-1'] || '';
     document.getElementById('profPlatform2').value = userData['platformUrls-2'] || '';
     document.getElementById('profPlatform3').value = userData['platformUrls-3'] || '';
+    // 既存画像のプレビュー初期表示
+    updateImagePreview('profAvatarUrl', 'profAvatarPreview', false);
+    updateImagePreview('profWork1', 'profWork1Preview', true);
+    updateImagePreview('profWork2', 'profWork2Preview', true);
+    updateImagePreview('profWork3', 'profWork3Preview', true);
+    updateImagePreview('profWork4', 'profWork4Preview', true);
   }
 
   function applyInfoTips(prefix) {
@@ -486,6 +532,18 @@
   async function handleUpdate(e) {
     e.preventDefault();
     hideStatus();
+
+    const displayName = document.getElementById('profDisplayName').value.trim();
+    if (displayName.length > 30) {
+      showStatus('活動名は30文字以内で入力してください。', false);
+      return;
+    }
+
+    const xUrl = document.getElementById('profXUrl').value.trim();
+    if (xUrl && !/^https:\/\/(twitter\.com|x\.com)\/[a-zA-Z0-9_]+$/i.test(xUrl)) {
+      showStatus('X (Twitter) URLは「https://x.com/ユーザー名」の形式で入力してください。', false);
+      return;
+    }
 
     const selectedCategories = getCheckedValues('profCategory');
     const selectedTags = getCheckedValues('profTag');
@@ -596,6 +654,29 @@
     const isDirectImage = /\.(jpeg|jpg|gif|png|webp|svg)(\?.*)?$/i.test(trimmed);
     const isHttps = /^https?:\/\//i.test(trimmed);
     return isHttps && (isDirectImage || trimmed.includes('googleusercontent.com'));
+  }
+
+  // リアルタイム画像プレビュー更新
+  function updateImagePreview(inputId, previewBoxId, isSquare = false) {
+    const input = document.getElementById(inputId);
+    const box = document.getElementById(previewBoxId);
+    const img = box.querySelector('img');
+    const rawVal = input.value.trim();
+
+    if (!rawVal) {
+      box.style.display = 'none';
+      img.src = '';
+      return;
+    }
+
+    const converted = normalizeDriveUrl(rawVal, 'image');
+    if (isValidImageUrl(rawVal)) {
+      img.src = converted;
+      img.onload = () => { box.style.display = 'flex'; };
+      img.onerror = () => { box.style.display = 'none'; };
+    } else {
+      box.style.display = 'none';
+    }
   }
 </script>
 </body>
