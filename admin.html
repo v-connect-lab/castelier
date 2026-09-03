@@ -539,46 +539,26 @@
     document.getElementById('profXUrl').value = userData.xUrl || '';
     document.getElementById('profPortfolioUrl').value = userData.portfolioUrl || '';
 
-    // 代表作品 (works配列) の反映
-    let worksList = userData.works || [];
-    if (typeof worksList === 'string' && worksList.startsWith('[')) {
-      try { worksList = JSON.parse(worksList); } catch(e) { worksList = []; }
-    }
+    // ★ 代表作品 1〜4 を各列から直接セット
     const workBlocks = document.querySelectorAll('.prof-work-block');
-    workBlocks.forEach((block, i) => {
+    workBlocks.forEach((block, idx) => {
+      const i = idx + 1;
       const typeSelect = block.querySelector('.prof-work-type');
       const urlInput = block.querySelector('.prof-work-url');
-      const imageInput = block.querySelector('.prof-work-image');
+      const imgInput = block.querySelector('.prof-work-image');
 
-      if (worksList[i]) {
-        typeSelect.value = worksList[i].type || 'image';
-        urlInput.value = worksList[i].url || '';
-        imageInput.value = worksList[i].image || '';
-      } else {
-        typeSelect.value = 'image';
-        urlInput.value = '';
-        imageInput.value = '';
-      }
+      typeSelect.value = userData[`works_type-${i}`] || 'image';
+      urlInput.value = userData[`works_url-${i}`] || '';
+      imgInput.value = userData[`works_image-${i}`] || '';
       toggleWorkImageInput(typeSelect);
     });
 
-    // 活動プラットフォーム (platforms配列) の反映
-    let platformList = userData.platforms || [];
-    if (typeof platformList === 'string' && platformList.startsWith('[')) {
-      try { platformList = JSON.parse(platformList); } catch(e) { platformList = []; }
-    }
+    // ★ プラットフォーム 1〜3 を各列から直接セット
     const platformRows = document.querySelectorAll('.prof-platform-row');
-    platformRows.forEach((row, i) => {
-      const labelInput = row.querySelector('.prof-platform-label');
-      const urlInput = row.querySelector('.prof-platform-url');
-
-      if (platformList[i]) {
-        labelInput.value = platformList[i].label || '';
-        urlInput.value = platformList[i].url || '';
-      } else {
-        labelInput.value = '';
-        urlInput.value = '';
-      }
+    platformRows.forEach((row, idx) => {
+      const i = idx + 1;
+      row.querySelector('.prof-platform-label').value = userData[`platforms_name-${i}`] || '';
+      row.querySelector('.prof-platform-url').value = userData[`platforms_url-${i}`] || '';
     });
 
     updateImagePreview('profAvatarUrl', 'profAvatarPreview');
@@ -670,39 +650,10 @@
 
     const rawAvatar = document.getElementById('profAvatarUrl').value;
     if (rawAvatar && !isValidImageUrl(rawAvatar)) {
-      showStatus('アイコンURLには画像直リンク（.jpg/.png等）またはGoogleドライブの共有リンクを入力してください。', false);
+      showStatus('アイコンURLには画像直リンクまたはGoogleドライブの共有リンクを入力してください。', false);
       return;
     }
     const cleanedAvatarUrl = normalizeDriveUrl(rawAvatar, 'image');
-
-    // 作品配列の収集
-    const works = [];
-    document.querySelectorAll('.prof-work-block').forEach(block => {
-      const type = block.querySelector('.prof-work-type').value;
-      const rawUrl = block.querySelector('.prof-work-url').value.trim();
-      const rawImage = block.querySelector('.prof-work-image').value.trim();
-
-      if (rawUrl) {
-        const item = {
-          type: type,
-          url: normalizeDriveUrl(rawUrl, type === 'image' ? 'image' : 'preview')
-        };
-        if ((type === 'music' || type === 'web') && rawImage) {
-          item.image = normalizeDriveUrl(rawImage, 'image');
-        }
-        works.push(item);
-      }
-    });
-
-    // プラットフォーム配列の収集
-    const platforms = [];
-    document.querySelectorAll('.prof-platform-row').forEach(row => {
-      const label = row.querySelector('.prof-platform-label').value.trim();
-      const url = row.querySelector('.prof-platform-url').value.trim();
-      if (url) {
-        platforms.push({ label: label || '活動先', url: url });
-      }
-    });
 
     const btn = document.getElementById('saveBtn');
     btn.disabled = true;
@@ -712,33 +663,53 @@
     const isPublic = isStreamer ? (document.getElementById('profIsPublic').value === 'true') : true;
     const isContactWelcome = (isStreamer && isPublic) ? (document.getElementById('profIsContactWelcome').value === 'true') : (!isStreamer ? true : false);
 
-    const payload = {
-      action: 'update',
-      data: {
-        userId: sessionUser.userId,
-        password: sessionUser.password,
-        displayName: displayName,
-        isPublic: isPublic,
-        isContactWelcome: isContactWelcome,
-        category: selectedCategories.join(','),
-        tags: selectedTags.join(','),
-        freeTags: document.getElementById('profFreeTags').value.trim(),
-        priceGuide: !isStreamer ? document.getElementById('profPriceGuide').value : '',
-        avatarUrl: cleanedAvatarUrl,
-        description: document.getElementById('profDescription').value,
-        contactInfo: document.getElementById('profContactInfo').value.trim(),
-        xUrl: xUrl,
-        portfolioUrl: document.getElementById('profPortfolioUrl').value.trim(),
-        works: works,
-        platforms: platforms
-      }
+    // ★ スプレッドシートの列名に合わせてフラットに送信
+    const payloadData = {
+      userId: sessionUser.userId,
+      password: sessionUser.password,
+      displayName: displayName,
+      isPublic: isPublic,
+      isContactWelcome: isContactWelcome,
+      category: selectedCategories.join(','),
+      tags: selectedTags.join(','),
+      freeTags: document.getElementById('profFreeTags').value.trim(),
+      priceGuide: !isStreamer ? document.getElementById('profPriceGuide').value : '',
+      avatarUrl: cleanedAvatarUrl,
+      description: document.getElementById('profDescription').value,
+      contactInfo: document.getElementById('profContactInfo').value.trim(),
+      xUrl: xUrl,
+      portfolioUrl: document.getElementById('profPortfolioUrl').value.trim()
     };
+
+    // 代表作品 1〜4 を列名でセット
+    const workBlocks = document.querySelectorAll('.prof-work-block');
+    workBlocks.forEach((block, idx) => {
+      const i = idx + 1;
+      const type = block.querySelector('.prof-work-type').value;
+      const rawUrl = block.querySelector('.prof-work-url').value.trim();
+      const rawImg = block.querySelector('.prof-work-image').value.trim();
+
+      payloadData[`works_type-${i}`] = type;
+      payloadData[`works_url-${i}`] = rawUrl ? normalizeDriveUrl(rawUrl, type === 'image' ? 'image' : 'preview') : '';
+      payloadData[`works_image-${i}`] = rawImg ? normalizeDriveUrl(rawImg, 'image') : '';
+    });
+
+    // プラットフォーム 1〜3 を列名でセット
+    const platformRows = document.querySelectorAll('.prof-platform-row');
+    platformRows.forEach((row, idx) => {
+      const i = idx + 1;
+      payloadData[`platforms_name-${i}`] = row.querySelector('.prof-platform-label').value.trim();
+      payloadData[`platforms_url-${i}`] = row.querySelector('.prof-platform-url').value.trim();
+    });
 
     try {
       const res = await fetch(GAS_API_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'text/plain' },
-        body: JSON.stringify(payload),
+        body: JSON.stringify({
+          action: 'update',
+          data: payloadData
+        }),
         redirect: 'follow'
       });
       const data = await res.json();
