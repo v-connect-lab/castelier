@@ -4,7 +4,9 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="robots" content="noai, noimageai">
-  <title>Castelier (キャストリエ)</title>
+  <title>Castelier (キャストリエ) | クリエイター＆配信者マッチング</title>
+  <!-- YAMLパーサー -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/js-yaml/4.1.0/js-yaml.min.js"></script>
   <style>
     :root {
       --bg: #f8fafc;
@@ -30,7 +32,6 @@
       line-height: 1.5;
     }
 
-    /* ヘッダー */
     header {
       background: #ffffff;
       border-bottom: 1px solid var(--border);
@@ -48,32 +49,37 @@
       color: var(--primary);
       text-decoration: none;
     }
-    .header-links a {
+    .header-links a, .header-links button {
       font-size: 0.85rem;
       padding: 8px 16px;
       border-radius: 6px;
       text-decoration: none;
       font-weight: 600;
       margin-left: 8px;
+      cursor: pointer;
     }
     .btn-manage {
       background: #f1f5f9;
       color: var(--text-main);
       border: 1px solid var(--border);
     }
+    .btn-logout {
+      background: #fee2e2;
+      color: #b91c1c;
+      border: 1px solid #fca5a5;
+    }
     .btn-login {
       background: var(--primary);
       color: #fff;
+      border: none;
     }
 
-    /* メインコンテナ */
     .container {
       max-width: 1200px;
       margin: 0 auto;
       padding: 24px 16px 60px;
     }
 
-    /* 検索・絞り込みエリア */
     .filter-panel {
       background: var(--card-bg);
       padding: 20px;
@@ -83,7 +89,6 @@
       margin-bottom: 24px;
     }
 
-    /* ロール切り替えタブ */
     .role-tabs {
       display: flex;
       gap: 8px;
@@ -132,21 +137,18 @@
       font-size: 0.9rem;
     }
 
-    /* 件数表示 */
     .results-count {
       font-size: 0.85rem;
       color: var(--text-sub);
       margin-bottom: 16px;
     }
 
-    /* 一覧グリッド */
     .user-grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
       gap: 20px;
     }
 
-    /* カード */
     .user-card {
       background: var(--card-bg);
       border-radius: var(--radius);
@@ -163,7 +165,6 @@
       box-shadow: var(--shadow-hover);
     }
 
-    /* サムネイル（作品1） */
     .card-thumb {
       width: 100%;
       height: 160px;
@@ -175,7 +176,7 @@
       width: 100%;
       height: 100%;
       object-fit: cover;
-      pointer-events: none; /* ドラッグ・保存抑止 */
+      pointer-events: none;
       user-select: none;
     }
     .card-thumb-empty {
@@ -187,7 +188,6 @@
       font-size: 0.85rem;
     }
 
-    /* ロールバッジ */
     .role-badge {
       position: absolute;
       top: 10px;
@@ -260,7 +260,6 @@
       border-radius: 4px;
     }
 
-    /* モーダル */
     .modal-overlay {
       position: fixed;
       inset: 0;
@@ -330,7 +329,6 @@
       color: #fff;
     }
 
-    /* ローディング表示 */
     .loading-state {
       text-align: center;
       padding: 48px 0;
@@ -343,14 +341,10 @@
 
   <header>
     <a href="./top.html" class="header-logo">Castelier</a>
-    <div class="header-links">
-      <a href="./admin.html" class="btn-manage">管理画面</a>
-      <a href="./index.html" class="btn-login">ログイン / 登録</a>
-    </div>
+    <div class="header-links" id="headerAuthNav"></div>
   </header>
 
   <div class="container">
-    <!-- 絞り込みパネル -->
     <div class="filter-panel">
       <div class="role-tabs">
         <button class="role-btn active" data-role="all" onclick="setRoleFilter('all')">すべて</button>
@@ -358,21 +352,18 @@
         <button class="role-btn" data-role="streamer" onclick="setRoleFilter('streamer')">配信者</button>
       </div>
       <div class="search-inputs">
-        <input type="text" id="keywordSearch" class="search-input" placeholder="名前・自己紹介・タグで検索..." oninput="renderFilteredUsers()">
+        <input type="text" id="keywordSearch" class="search-input" placeholder="名前・自己紹介・タグ・カテゴリで検索..." oninput="renderFilteredUsers()">
         <input type="text" id="categorySearch" class="search-input" placeholder="カテゴリ絞り込み..." oninput="renderFilteredUsers()">
       </div>
     </div>
 
-    <!-- 件数 -->
     <div class="results-count" id="resultsCount">読み込み中...</div>
 
-    <!-- ユーザーカード一覧 -->
     <div class="user-grid" id="userGrid">
       <div class="loading-state">ユーザー一覧を読み込んでいます...</div>
     </div>
   </div>
 
-  <!-- 詳細モーダル -->
   <div class="modal-overlay" id="userModal" onclick="closeModal(event)">
     <div class="modal-content" onclick="event.stopPropagation()">
       <button class="modal-close" onclick="closeModal()">×</button>
@@ -381,11 +372,17 @@
   </div>
 
   <script>
-    // ※お使いのGAS Web App URLに書き換えてください
-    const GAS_API_URL = 'https://script.google.com/macros/s/AKfycbyk1gWVq5JmKoz73D6zGB_k0WmpWgs4BGsH00J7WyewnW-iWAFzM6ORGOC4aR_ePRry4Q/exec';
+    const GAS_API_URL = 'https://script.google.com/macros/s/AKfycbyKigWvQ5JmKO275b0ZGb_koWmpwgS4bdSh0057Wyewnm-iWArzM0okdOC4anR4O9U_cg/exec';
 
     let allUsers = [];
     let currentRole = 'all';
+    let schemaData = null;
+    let labelMaps = {
+      role: { creator: 'クリエイター', streamer: '配信者' },
+      category: {},
+      tags: {},
+      priceGuide: {}
+    };
 
     // GoogleドライブURLの変換
     function normalizeDriveUrl(url) {
@@ -397,44 +394,126 @@
       return url;
     }
 
-    // 初期データ読み込み（登録後15分以内はGAS直読、それ以降はusers.json）
+    // accounts.yaml からオプションとラベルの対応辞書を生成
+    function buildLabelMaps(cols) {
+      // tags
+      if (cols.tags && cols.tags.options && cols.tags.optionLabels) {
+        cols.tags.options.forEach((val, i) => {
+          labelMaps.tags[val] = cols.tags.optionLabels[i] || val;
+        });
+      }
+      // priceGuide
+      if (cols.priceGuide && cols.priceGuide.options && cols.priceGuide.optionLabels) {
+        cols.priceGuide.options.forEach((val, i) => {
+          labelMaps.priceGuide[val] = cols.priceGuide.optionLabels[i] || val;
+        });
+      }
+      // category (role別構造に対応)
+      if (cols.category && cols.category.options && cols.category.optionLabels) {
+        ['creator', 'streamer'].forEach(r => {
+          const opts = cols.category.options[r] || [];
+          const lbls = cols.category.optionLabels[r] || [];
+          opts.forEach((val, i) => {
+            labelMaps.category[val] = lbls[i] || val;
+          });
+        });
+      }
+    }
+
+    function getLabel(group, val) {
+      if (!val) return '';
+      const trimmed = String(val).trim();
+      return (labelMaps[group] && labelMaps[group][trimmed]) ? labelMaps[group][trimmed] : trimmed;
+    }
+
+    function parseCommaLabels(group, commaStr) {
+      if (!commaStr) return [];
+      return String(commaStr)
+        .split(',')
+        .map(v => v.trim())
+        .filter(Boolean)
+        .map(v => getLabel(group, v));
+    }
+
+    // ヘッダーナビの切り替え（ログイン中なら管理画面＋ログアウト、未ログインならログイン）
+    function renderHeaderNav() {
+      const nav = document.getElementById('headerAuthNav');
+      const session = sessionStorage.getItem('castelier_session');
+
+      if (session) {
+        nav.innerHTML = `
+          <a href="./admin.html" class="btn-manage">管理画面</a>
+          <button onclick="handleLogout()" class="btn-logout">ログアウト</button>
+        `;
+      } else {
+        nav.innerHTML = `
+          <a href="./index.html" class="btn-login">ログイン / 登録</a>
+        `;
+      }
+    }
+
+    function handleLogout() {
+      if (confirm('ログアウトしますか？')) {
+        sessionStorage.removeItem('castelier_session');
+        localStorage.removeItem('castelier_registered_at');
+        alert('ログアウトしました。');
+        window.location.href = './index.html';
+      }
+    }
+
+    // 初期化とデータ読み込み
     window.addEventListener('DOMContentLoaded', async () => {
+      renderHeaderNav();
+
       const registeredAt = localStorage.getItem('castelier_registered_at');
       const now = Date.now();
       const FIFTEEN_MINUTES = 15 * 60 * 1000;
-
-      // 登録から15分以内かどうかの判定
       const isRecentlyRegistered = registeredAt && (now - parseInt(registeredAt, 10) < FIFTEEN_MINUTES);
 
       try {
-        if (isRecentlyRegistered) {
-          console.log('登録直後のため、最新データをGASから直接取得します。');
-          const res = await fetch(`${GAS_API_URL}?action=getPublicUsers`);
-          const data = await res.json();
-          allUsers = data.users || [];
+        // 1. YAMLスキーマとユーザーデータを並列取得
+        const fetchSchema = fetch('./schema/accounts.yaml').then(r => r.text());
+        const fetchUserData = (async () => {
+          if (isRecentlyRegistered) {
+            console.log('登録直後のため、最新データをGASから取得します。');
+            const res = await fetch(`${GAS_API_URL}?action=getPublicUsers`);
+            return await res.json();
+          } else {
+            const res = await fetch(`./data/users.json?t=${now}`);
+            if (!res.ok) throw new Error('users.json fetch error');
+            const json = await res.json();
+            return { success: true, users: json };
+          }
+        })();
+
+        const [schemaYaml, userResult] = await Promise.all([fetchSchema, fetchUserData]);
+
+        // スキーマ辞書化
+        const loadedYaml = jsyaml.load(schemaYaml);
+        schemaData = loadedYaml.accounts.columns;
+        buildLabelMaps(schemaData);
+
+        if (userResult.success) {
+          allUsers = userResult.users || [];
+          renderFilteredUsers();
         } else {
-          // 15分経過している、または一般訪問者はGitHubの静的JSONを参照
-          const res = await fetch(`./data/users.json?t=${now}`);
-          if (!res.ok) throw new Error('users.json fetch error');
-          const data = await res.json();
-          allUsers = Array.isArray(data) ? data : [];
+          throw new Error(userResult.message || 'データ取得失敗');
         }
 
-        renderFilteredUsers();
       } catch (err) {
-        // 万が一 users.json が失敗した場合はフォールバックとしてGASを叩く
+        console.warn('初期読み込みフォールバック:', err);
+        // フォールバック（GAS直取得）
         try {
-          const fallbackRes = await fetch(`${GAS_API_URL}?action=getPublicUsers`);
-          const fallbackData = await fallbackRes.json();
-          allUsers = fallbackData.users || [];
+          const fbRes = await fetch(`${GAS_API_URL}?action=getPublicUsers`);
+          const fbData = await fbRes.json();
+          allUsers = fbData.users || [];
           renderFilteredUsers();
-        } catch (fallbackErr) {
+        } catch (fbErr) {
           document.getElementById('userGrid').innerHTML = '<div class="loading-state">ユーザー一覧の取得に失敗しました。</div>';
         }
       }
     });
 
-    // ロールフィルター切り替え
     function setRoleFilter(role) {
       currentRole = role;
       document.querySelectorAll('.role-btn').forEach(btn => {
@@ -443,24 +522,25 @@
       renderFilteredUsers();
     }
 
-    // 一覧レンダリング
     function renderFilteredUsers() {
       const keyword = document.getElementById('keywordSearch').value.toLowerCase().trim();
       const catSearch = document.getElementById('categorySearch').value.toLowerCase().trim();
 
       const filtered = allUsers.filter(u => {
-        // ロール判定
         if (currentRole !== 'all' && u.role !== currentRole) return false;
 
-        // カテゴリ判定
-        if (catSearch && (!u.category || !u.category.toLowerCase().includes(catSearch))) return false;
+        const catLabels = parseCommaLabels('category', u.category).join(' ').toLowerCase();
+        if (catSearch && !catLabels.includes(catSearch) && !(u.category || '').toLowerCase().includes(catSearch)) {
+          return false;
+        }
 
-        // キーワード判定 (活動名・自己紹介・タグ・フリータグ)
         if (keyword) {
+          const tagLabels = parseCommaLabels('tags', u.tags).join(' ');
           const matchTarget = [
             u.displayName || '',
             u.description || '',
-            u.tags || '',
+            catLabels,
+            tagLabels,
             u.freeTags || ''
           ].join(' ').toLowerCase();
 
@@ -481,28 +561,34 @@
       grid.innerHTML = filtered.map((u, idx) => {
         const thumbUrl = normalizeDriveUrl(u['workUrls-1']);
         const avatarUrl = normalizeDriveUrl(u.avatarUrl);
-        const roleName = u.role === 'creator' ? 'クリエイター' : '配信者';
+        const roleLabel = getLabel('role', u.role);
 
-        // タグ整形
-        const tags = (u.tags ? u.tags.split(',') : []).concat(u.freeTags ? u.freeTags.split(',') : []);
+        // カテゴリ（日本語変換）
+        const catLabels = parseCommaLabels('category', u.category);
+        const categoryDisplay = catLabels.join(' / ') || '未設定';
+
+        // 属性タグ（日本語変換） + フリータグ（そのまま）
+        const standardTags = parseCommaLabels('tags', u.tags);
+        const freeTags = (u.freeTags ? String(u.freeTags).split(',') : []).map(t => t.trim()).filter(Boolean);
+        const allCardTags = standardTags.concat(freeTags);
 
         return `
           <div class="user-card" onclick="openModal(${idx})">
             <div class="card-thumb">
               ${thumbUrl ? `<img src="${thumbUrl}" alt="作品">` : '<div class="card-thumb-empty">No Work Image</div>'}
-              <span class="role-badge ${u.role}">${roleName}</span>
+              <span class="role-badge ${u.role}">${roleLabel}</span>
             </div>
             <div class="card-body">
               <div class="card-header">
                 ${avatarUrl ? `<img src="${avatarUrl}" class="card-avatar" alt="">` : '<div class="card-avatar"></div>'}
                 <div style="overflow: hidden;">
                   <div class="card-name">${escapeHtml(u.displayName || '名無し')}</div>
-                  <div class="card-category">${escapeHtml(u.category || '')}</div>
+                  <div class="card-category">${escapeHtml(categoryDisplay)}</div>
                 </div>
               </div>
               <div class="card-desc">${escapeHtml(u.description || '自己紹介文はありません。')}</div>
               <div class="card-tags">
-                ${tags.slice(0, 4).map(t => `<span class="tag-badge">#${escapeHtml(t.trim())}</span>`).join('')}
+                ${allCardTags.slice(0, 4).map(t => `<span class="tag-badge">#${escapeHtml(t)}</span>`).join('')}
               </div>
             </div>
           </div>
@@ -510,20 +596,19 @@
       }).join('');
     }
 
-    // モーダル表示
     function openModal(index) {
       const u = allUsers[index];
       if (!u) return;
 
       const avatarUrl = normalizeDriveUrl(u.avatarUrl);
-      const roleName = u.role === 'creator' ? 'クリエイター' : '配信者';
+      const roleLabel = getLabel('role', u.role);
+      const categoryDisplay = parseCommaLabels('category', u.category).join(' / ') || '未設定';
+      const priceLabel = getLabel('priceGuide', u.priceGuide);
       
-      // 作品画像リスト
       const works = [1, 2, 3, 4]
         .map(i => normalizeDriveUrl(u[`workUrls-${i}`]))
-        .filter(url => Boolean(url));
+        .filter(Boolean);
 
-      // 外部リンク
       const links = [];
       if (u.xUrl) links.push(`<a href="${u.xUrl}" target="_blank" rel="noopener">X (Twitter)</a>`);
       if (u.portfolioUrl) links.push(`<a href="${u.portfolioUrl}" target="_blank" rel="noopener">ポートフォリオHP</a>`);
@@ -535,9 +620,9 @@
         <div style="display:flex; align-items:center; gap:16px; margin-bottom:16px;">
           ${avatarUrl ? `<img src="${avatarUrl}" style="width:64px; height:64px; border-radius:50%; object-fit:cover; border:1px solid #e2e8f0;" alt="">` : ''}
           <div>
-            <span class="role-badge ${u.role}" style="position:static; margin-bottom:4px; display:inline-block;">${roleName}</span>
+            <span class="role-badge ${u.role}" style="position:static; margin-bottom:4px; display:inline-block;">${roleLabel}</span>
             <h2 style="margin:4px 0 0 0; font-size:1.3rem;">${escapeHtml(u.displayName || '')}</h2>
-            <div style="font-size:0.85rem; color:#64748b;">${escapeHtml(u.category || '')}</div>
+            <div style="font-size:0.85rem; color:#64748b;">${escapeHtml(categoryDisplay)}</div>
           </div>
         </div>
 
@@ -550,9 +635,9 @@
           </div>
         ` : ''}
 
-        ${u.priceGuide ? `
+        ${priceLabel ? `
           <div style="margin:12px 0; font-size:0.85rem;">
-            <strong>料金・予算目安:</strong> ${escapeHtml(u.priceGuide)}
+            <strong>料金・予算目安:</strong> ${escapeHtml(priceLabel)}
           </div>
         ` : ''}
 
@@ -571,11 +656,10 @@
       document.getElementById('userModal').classList.add('open');
     }
 
-    function closeModal(e) {
+    function closeModal() {
       document.getElementById('userModal').classList.remove('open');
     }
 
-    // XSS対策用サニタイズ
     function escapeHtml(str) {
       if (!str) return '';
       return String(str)
