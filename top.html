@@ -489,38 +489,54 @@
         };
       }
 
-      // 2. 音声ファイル直リンク
+      // 2. Googleドライブのリンク（動画・音楽・画像をすべてGoogle公式プレイヤー/ビューアで再生・表示）
+      const driveMatch = url.match(/(?:drive\.google\.com\/(?:file\/d\/|open\?id=)|docs\.google\.com\/file\/d\/)([a-zA-Z0-9_-]{25,})/);
+      if (driveMatch && driveMatch[1]) {
+        const fileId = driveMatch[1];
+        return {
+          type: 'drive_embed',
+          fileId: fileId,
+          embedUrl: `https://drive.google.com/file/d/${fileId}/preview`,
+          thumbUrl: `https://drive.google.com/thumbnail?id=${fileId}&sz=w800`,
+          url: url
+        };
+      }
+
+      // 3. 音声ファイル直リンク (.mp3, .wav等)
       if (/\.(mp3|wav|ogg|m4a)(\?.*)?$/i.test(url)) {
         return { type: 'audio', url: url };
       }
 
-      // 3. 動画ファイル直リンク
+      // 4. 動画ファイル直リンク (.mp4, .webm等)
       if (/\.(mp4|webm)(\?.*)?$/i.test(url)) {
         return { type: 'video', url: url };
       }
 
-      // 4. 画像判定（Googleドライブ または 画像拡張子）
-      const driveMatch = url.match(/(?:drive\.google\.com\/(?:file\/d\/|open\?id=)|docs\.google\.com\/file\/d\/)([a-zA-Z0-9_-]{25,})/);
-      if (driveMatch && driveMatch[1]) {
-        return {
-          type: 'image',
-          url: `https://drive.google.com/thumbnail?id=${driveMatch[1]}&sz=w800`,
-          rawUrl: url
-        };
-      }
+      // 5. 画像直リンク (.jpg, .png等)
       if (/\.(jpeg|jpg|gif|png|webp|svg)(\?.*)?$/i.test(url) || url.includes('googleusercontent.com')) {
         return { type: 'image', url: url, rawUrl: url };
       }
 
-      // 5. 外部Webサイト
+      // 6. 外部Webサイト
       return { type: 'link', url: url };
     }
 
+    // モーダル用メディアコンポーネント生成
     // モーダル用メディアコンポーネント生成
     function renderMediaComponent(item) {
       if (!item) return '';
 
       switch (item.type) {
+        // Googleドライブ（動画・音声・プレビューを自動対応）
+        case 'drive_embed':
+          return `
+            <div class="media-box" style="position:relative; padding-top:56.25%; min-height:180px;">
+              <iframe src="${item.embedUrl}" 
+                      style="position:absolute; top:0; left:0; width:100%; height:100%; border:0;" 
+                      allow="autoplay"></iframe>
+            </div>
+          `;
+
         case 'image':
           return `
             <div class="media-box">
