@@ -714,8 +714,8 @@
         let thumbHtml = '<div class="card-thumb-empty">No Preview</div>';
 
         if (media1) {
-          if (media1.type === 'image') {
-            thumbHtml = `<img src="${media1.url}" alt="作品">`;
+          if (media1.type === 'image' || media1.type === 'drive_embed') {
+            thumbHtml = `<img src="${media1.thumbUrl || media1.url}" alt="作品" onerror="this.parentElement.innerHTML='<div class=\\'card-thumb-empty\\'>Media File</div>'">`;
           } else if (media1.type === 'youtube') {
             thumbHtml = `
               <img src="${media1.thumbUrl}" alt="動画サムネイル">
