@@ -72,17 +72,22 @@
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      width: 16px;
-      height: 16px;
+      width: 18px;
+      height: 18px;
       border-radius: 50%;
       background: #e2e8f0;
       color: var(--text-sub);
       font-size: 0.7rem;
       font-weight: bold;
-      cursor: help;
+      cursor: pointer; /* スマホでも押しやすいよう pointer に変更 */
       position: relative;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
     }
-    .info-icon:hover::after {
+
+    /* PCホバー時、またはスマホでタップされて .active がついた時に表示 */
+    .info-icon:hover::after,
+    .info-icon.active::after {
       content: attr(data-tooltip);
       position: absolute;
       bottom: 125%;
