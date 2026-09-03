@@ -184,15 +184,30 @@ accounts:
             exportJson: true
             infoTip: "カタログのサムネイルになる画像の直リンク（https://...）を入力してください。"
             description: "https://..."
-        workUrls:
+        works:
             label: "代表作品URL"
             type: array
             required: false
             exportJson: true
             infoTip: "最大4枠まで登録できます。ポートフォリオや動画リンクなどに活用できます。"
             items:
-                type: url
-                description: "https://..."
+                type: object
+                properties:
+                    type:
+                        label: "ファイル種類"
+                        type: select
+                        options: ["image", "music", "video", "web"]
+                        optionLabels: ["画像", "音楽・音声", "動画", "Webサイト・リンク"]
+                        default: "image"
+                    image:
+                        label: "サムネイル"
+                        type: url
+                        applicableRoles: [ "streamer" ]
+                        description: "https://..."
+                    url:
+                        label: "URL"
+                        type: url
+                        description: "https://..."
         portfolioUrl:
             label: "ポートフォリオ・個人HP"
             type: url
@@ -206,15 +221,22 @@ accounts:
             required: false
             exportJson: true
             description: "https://..."
-        platformUrls:
+        platforms:
             label: "活動プラットフォーム"
             type: array
             required: false
             exportJson: true
             infoTip: "YouTube、Twitch、BOOTHなどのURLを最大3枠まで登録できます。"
             items:
-                type: url
-                description: "https://..."
+                type: object
+                properties:
+                    label: "プラットフォーム名"
+                    type: string
+                    description: "YouTube、Twitch、BOOTHなど"
+                url:
+                    label: "プラットフォーム名"
+                    type: url
+                    description: "https://..."
         contactInfo:
             label: "連絡先窓口"
             type: string
