@@ -411,7 +411,7 @@
   </div>
 
   <script>
-    const GAS_API_URL = 'https://script.google.com/macros/s/AKfycbyk1gWVq5JmKoz73D6zGB_k0WmpWgs4BGsH00J7WyewnW-iWAFzM6ORGOC4aR_ePRry4Q/exec';
+    const GAS_API_URL = 'https://script.google.com/macros/s/AKfycbyKigWvQ5JmKO275b0ZGb_koWmpwgS4bdSh0057Wyewnm-iWArzM0okdOC4anR4O9U_cg/exec';
 
     let allUsers = [];
     let currentRole = 'all';
@@ -432,6 +432,59 @@
           : `https://drive.google.com/file/d/${match[1]}/preview`;
       }
       return url;
+    }
+
+    // ★ works データを配列オブジェクトに正規化（フラット列・JSON両対応）
+    function normalizeUserWorks(u) {
+      if (Array.isArray(u.works)) {
+        return u.works.filter(w => w && w.url);
+      }
+      if (typeof u.works === 'string' && u.works.trim().startsWith('[')) {
+        try {
+          const parsed = JSON.parse(u.works);
+          if (Array.isArray(parsed)) return parsed.filter(w => w && w.url);
+        } catch(e) {}
+      }
+
+      // フラット形式（works_url-1 ...）からの抽出
+      const list = [];
+      for (let i = 1; i <= 4; i++) {
+        const url = u[`works_url-${i}`] || u[`workUrls-${i}`];
+        if (url) {
+          list.push({
+            type: u[`works_type-${i}`] || 'image',
+            image: u[`works_image-${i}`] || '',
+            url: url
+          });
+        }
+      }
+      return list;
+    }
+
+    // ★ platforms データを配列オブジェクトに正規化（フラット列・JSON両対応）
+    function normalizeUserPlatforms(u) {
+      if (Array.isArray(u.platforms)) {
+        return u.platforms.filter(p => p && p.url);
+      }
+      if (typeof u.platforms === 'string' && u.platforms.trim().startsWith('[')) {
+        try {
+          const parsed = JSON.parse(u.platforms);
+          if (Array.isArray(parsed)) return parsed.filter(p => p && p.url);
+        } catch(e) {}
+      }
+
+      // フラット形式（platforms_url-1 ...）からの抽出
+      const list = [];
+      for (let i = 1; i <= 3; i++) {
+        const url = u[`platforms_url-${i}`] || u[`platformUrls-${i}`];
+        if (url) {
+          list.push({
+            label: u[`platforms_name-${i}`] || `活動先 ${i}`,
+            url: url
+          });
+        }
+      }
+      return list;
     }
 
     function buildLabelMaps(cols) {
@@ -695,12 +748,8 @@
         const avatarUrl = normalizeDriveUrl(u.avatarUrl, 'image');
         const roleLabel = getLabel('role', u.role);
 
-        // works配列の解析
-        let userWorks = u.works || [];
-        if (typeof userWorks === 'string' && userWorks.startsWith('[')) {
-          try { userWorks = JSON.parse(userWorks); } catch(e) { userWorks = []; }
-        }
-
+        // ★ 正規化ヘルパーを通して代表作品を取得
+        const userWorks = normalizeUserWorks(u);
         const firstWork = userWorks.length > 0 ? userWorks[0] : null;
         let thumbHtml = '<div class="card-thumb-empty">No Work Preview</div>';
 
@@ -766,15 +815,9 @@
       const categoryDisplay = parseCommaLabels('category', u.category).join(' / ') || '未設定';
       const priceLabel = getLabel('priceGuide', u.priceGuide);
       
-      let userWorks = u.works || [];
-      if (typeof userWorks === 'string' && userWorks.startsWith('[')) {
-        try { userWorks = JSON.parse(userWorks); } catch(e) { userWorks = []; }
-      }
-
-      let userPlatforms = u.platforms || [];
-      if (typeof userPlatforms === 'string' && userPlatforms.startsWith('[')) {
-        try { userPlatforms = JSON.parse(userPlatforms); } catch(e) { userPlatforms = []; }
-      }
+      // ★ 正規化ヘルパーを通して取得
+      const userWorks = normalizeUserWorks(u);
+      const userPlatforms = normalizeUserPlatforms(u);
 
       const links = [];
       if (u.xUrl) links.push(`<a href="${u.xUrl}" target="_blank" rel="noopener">X (Twitter)</a>`);
