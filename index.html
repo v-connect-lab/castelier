@@ -384,10 +384,16 @@
     </div>
 
     <div class="terms-box">
-      <label>
-        <input type="checkbox" id="regAgreeTerms" required>
-        <span>無断転載・自作発言の禁止、健全な交流ガイドラインに同意する *</span>
+      <label style="cursor: pointer;">
+        <input type="checkbox" id="regAgreeTerms" disabled required>
+        <span>
+          <a href="./terms.html" target="_blank" id="termsLink" style="color: var(--primary); text-decoration: underline; font-weight: 600;">無断転載・自作発言の禁止、健全な交流ガイドライン</a>
+          を確認し、同意する *
+        </span>
       </label>
+      <div id="termsNotice" style="font-size: 0.75rem; color: #ef4444; margin-top: 6px; padding-left: 24px;">
+        ※リンク先を開いて規約内容を確認するとチェック可能になります。
+      </div>
     </div>
 
     <button type="submit" class="btn-primary" id="regBtn">登録してTOPへ進む</button>
@@ -409,6 +415,7 @@
       schemaData = loaded.accounts.columns;
       initUiFromSchema();
       setupTooltipToggle();
+      setupTermsUnlock();
     } catch (e) {
       console.error('YAMLスキーマ読み込み失敗:', e);
       showStatus('スキーマファイルの読み込みに失敗しました。', false);
@@ -746,6 +753,25 @@
       // タップしたアイコンの表示/非表示を切り替え
       if (targetIcon) {
         targetIcon.classList.toggle('active');
+      }
+    });
+  }
+
+  // ガイドライン確認によるチェックボックス有効化
+  function setupTermsUnlock() {
+    const termsLink = document.getElementById('termsLink');
+    const agreeCheckbox = document.getElementById('regAgreeTerms');
+    const notice = document.getElementById('termsNotice');
+
+    if (!termsLink || !agreeCheckbox) return;
+
+    termsLink.addEventListener('click', () => {
+      // 規約リンクをクリックしたらロック解除
+      agreeCheckbox.disabled = false;
+      agreeCheckbox.checked = true; // 開いた時点で自動チェック（好みに応じて false でも可）
+      if (notice) {
+        notice.style.color = '#10b981';
+        notice.textContent = '✓ ガイドラインを確認しました。';
       }
     });
   }
