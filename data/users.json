@@ -1,6 +1,7 @@
 [
   {
     "userId": "usr_beebb209",
+    "updatedAt": "2026-09-02T16:59:49.000Z",
     "role": "creator",
     "displayName": "潤華ねろ",
     "isContactWelcome": true,
@@ -8,17 +9,12 @@
     "tags": "JapaneseStyle,WesternStyle,Retro,Cute,Cool,Minimal",
     "freeTags": "",
     "avatarUrl": "https://lh3.googleusercontent.com/d/1ZcK-qteXRtnGYkZoP-1wqklgzvTkiUQd",
-    "workUrls-1": "",
-    "workUrls-2": "",
-    "workUrls-3": "https://drive.google.com/file/d/1eqFX8I9hQA38DGl8YioSHGeUTwJMzhW3/preview",
-    "workUrls-4": "",
+    "works": "",
     "portfolioUrl": "",
-    "xUrl": "https://drive.google.com/file/d/1ChdICRCISo8HyT-HoseoW45bKuqdeVw4/preview",
-    "platformUrls-1": "",
-    "platformUrls-2": "",
-    "platformUrls-3": "https://www.youtube.com/watch?v=HWDVVysH_oI",
+    "xUrl": "https://drive.google.com/file/d/1eqFX8I9hQA38DGl8YioSHGeUTwJMzhW3/preview",
+    "platforms": "",
     "contactInfo": "",
-    "description": "",
-    "priceGuide": "https://raw.githubusercontent.com/nr-works-dev/portfolio/main/assets/web1_image-1.jpg"
+    "description": "https://drive.google.com/file/d/1ChdICRCISo8HyT-HoseoW45bKuqdeVw4/preview",
+    "priceGuide": ""
   }
 ]
