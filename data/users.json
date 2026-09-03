@@ -1,7 +1,6 @@
 [
   {
     "userId": "usr_beebb209",
-    "updatedAt": "2026-09-02T16:59:49.000Z",
     "role": "creator",
     "displayName": "潤華ねろ",
     "isContactWelcome": true,
@@ -9,10 +8,39 @@
     "tags": "JapaneseStyle,WesternStyle,Retro,Cute,Cool,Minimal",
     "freeTags": "",
     "avatarUrl": "https://lh3.googleusercontent.com/d/1ZcK-qteXRtnGYkZoP-1wqklgzvTkiUQd",
+    "works": [
+      {
+        "type": "video",
+        "image": "",
+        "url": "https://drive.google.com/file/d/1eqFX8I9hQA38DGl8YioSHGeUTwJMzhW3/preview"
+      },
+      {
+        "type": "music",
+        "image": "",
+        "url": "https://drive.google.com/file/d/1ChdICRCISo8HyT-HoseoW45bKuqdeVw4/preview"
+      },
+      {
+        "type": "video",
+        "image": "",
+        "url": "https://www.youtube.com/watch?v=HWDVVysH_oI"
+      },
+      {
+        "type": "image",
+        "image": "",
+        "url": "https://raw.githubusercontent.com/nr-works-dev/portfolio/main/assets/web1_image-1.jpg"
+      }
+    ],
     "portfolioUrl": "https://nr-works-dev.github.io/portfolio/",
     "xUrl": "https://x.com/urukanero_works",
+    "platforms": [
+      {
+        "label": "YouTube",
+        "url": "https://www.youtube.com/@uruka_nero"
+      }
+    ],
     "contactInfo": "urukanero.works@gmail.com",
     "description": "よろしくお願いします。",
-    "priceGuide": "Free"
+    "priceGuide": "Free",
+    "updatedAt": "2026-09-02T16:59:49.000Z"
   }
 ]
