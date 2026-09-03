@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="robots" content="noai, noimageai">
-  <title>Castelier (キャストリエ) </title>
+  <title>Castelier (キャストリエ)</title>
   <!-- YAMLパーサー -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/js-yaml/4.1.0/js-yaml.min.js"></script>
   <style>
@@ -32,6 +32,7 @@
       line-height: 1.5;
     }
 
+    /* ヘッダー */
     header {
       background: #ffffff;
       border-bottom: 1px solid var(--border);
@@ -74,12 +75,14 @@
       border: none;
     }
 
+    /* メインコンテナ */
     .container {
       max-width: 1200px;
       margin: 0 auto;
       padding: 24px 16px 60px;
     }
 
+    /* 検索パネル */
     .filter-panel {
       background: var(--card-bg);
       padding: 20px;
@@ -88,7 +91,6 @@
       box-shadow: var(--shadow);
       margin-bottom: 24px;
     }
-
     .role-tabs {
       display: flex;
       gap: 8px;
@@ -137,18 +139,21 @@
       font-size: 0.9rem;
     }
 
+    /* 件数 */
     .results-count {
       font-size: 0.85rem;
       color: var(--text-sub);
       margin-bottom: 16px;
     }
 
+    /* グリッドレイアウト */
     .user-grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
       gap: 20px;
     }
 
+    /* カード */
     .user-card {
       background: var(--card-bg);
       border-radius: var(--radius);
@@ -197,6 +202,7 @@
       font-weight: bold;
       border-radius: 12px;
       color: #fff;
+      z-index: 2;
     }
     .role-badge.creator { background: var(--creator-color); }
     .role-badge.streamer { background: var(--streamer-color); }
@@ -260,6 +266,7 @@
       border-radius: 4px;
     }
 
+    /* モーダル */
     .modal-overlay {
       position: fixed;
       inset: 0;
@@ -275,7 +282,7 @@
     .modal-content {
       background: #ffffff;
       width: 100%;
-      max-width: 640px;
+      max-width: 680px;
       max-height: 90vh;
       border-radius: var(--radius);
       overflow-y: auto;
@@ -296,20 +303,53 @@
       cursor: pointer;
     }
 
+    /* メディア埋め込みスタイル */
     .modal-works-grid {
       display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 10px;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 12px;
       margin: 16px 0;
     }
-    .modal-work-img {
-      width: 100%;
-      height: 140px;
-      object-fit: cover;
-      border-radius: 6px;
+    .media-box {
+      border-radius: 8px;
+      overflow: hidden;
+      background: #f8fafc;
       border: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+    .media-box img.modal-work-img {
+      width: 100%;
+      height: 180px;
+      object-fit: cover;
       pointer-events: none;
       user-select: none;
+      display: block;
+    }
+    .media-audio-box {
+      padding: 16px;
+    }
+    .media-link-box {
+      padding: 16px;
+    }
+    .external-work-link {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 8px;
+      padding: 10px 14px;
+      background: #ffffff;
+      color: var(--primary);
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 0.85rem;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      transition: background 0.15s;
+    }
+    .external-work-link:hover {
+      background: #e0e7ff;
     }
 
     .modal-links a {
@@ -396,19 +436,16 @@
 
     // accounts.yaml からオプションとラベルの対応辞書を生成
     function buildLabelMaps(cols) {
-      // tags
       if (cols.tags && cols.tags.options && cols.tags.optionLabels) {
         cols.tags.options.forEach((val, i) => {
           labelMaps.tags[val] = cols.tags.optionLabels[i] || val;
         });
       }
-      // priceGuide
       if (cols.priceGuide && cols.priceGuide.options && cols.priceGuide.optionLabels) {
         cols.priceGuide.options.forEach((val, i) => {
           labelMaps.priceGuide[val] = cols.priceGuide.optionLabels[i] || val;
         });
       }
-      // category (role別構造に対応)
       if (cols.category && cols.category.options && cols.category.optionLabels) {
         ['creator', 'streamer'].forEach(r => {
           const opts = cols.category.options[r] || [];
@@ -435,7 +472,104 @@
         .map(v => getLabel(group, v));
     }
 
-    // ヘッダーナビの切り替え（ログイン中なら管理画面＋ログアウト、未ログインならログイン）
+    // メディアURLの種別判別
+    function analyzeMediaUrl(rawUrl) {
+      if (!rawUrl || typeof rawUrl !== 'string') return null;
+      const url = rawUrl.trim();
+
+      // 1. YouTube
+      const ytMatch = url.match(/(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
+      if (ytMatch && ytMatch[1]) {
+        const videoId = ytMatch[1];
+        return {
+          type: 'youtube',
+          url: url,
+          embedUrl: `https://www.youtube.com/embed/${videoId}`,
+          thumbUrl: `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`
+        };
+      }
+
+      // 2. 音声ファイル直リンク
+      if (/\.(mp3|wav|ogg|m4a)(\?.*)?$/i.test(url)) {
+        return { type: 'audio', url: url };
+      }
+
+      // 3. 動画ファイル直リンク
+      if (/\.(mp4|webm)(\?.*)?$/i.test(url)) {
+        return { type: 'video', url: url };
+      }
+
+      // 4. 画像判定（Googleドライブ または 画像拡張子）
+      const driveMatch = url.match(/(?:drive\.google\.com\/(?:file\/d\/|open\?id=)|docs\.google\.com\/file\/d\/)([a-zA-Z0-9_-]{25,})/);
+      if (driveMatch && driveMatch[1]) {
+        return {
+          type: 'image',
+          url: `https://drive.google.com/thumbnail?id=${driveMatch[1]}&sz=w800`,
+          rawUrl: url
+        };
+      }
+      if (/\.(jpeg|jpg|gif|png|webp|svg)(\?.*)?$/i.test(url) || url.includes('googleusercontent.com')) {
+        return { type: 'image', url: url, rawUrl: url };
+      }
+
+      // 5. 外部Webサイト
+      return { type: 'link', url: url };
+    }
+
+    // モーダル用メディアコンポーネント生成
+    function renderMediaComponent(item) {
+      if (!item) return '';
+
+      switch (item.type) {
+        case 'image':
+          return `
+            <div class="media-box">
+              <img src="${item.url}" class="modal-work-img" alt="作品画像">
+            </div>
+          `;
+
+        case 'youtube':
+          return `
+            <div class="media-box" style="position:relative; padding-top:56.25%;">
+              <iframe src="${item.embedUrl}" 
+                      style="position:absolute; top:0; left:0; width:100%; height:100%; border:0;" 
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                      allowfullscreen></iframe>
+            </div>
+          `;
+
+        case 'audio':
+          return `
+            <div class="media-box media-audio-box">
+              <div style="font-size:0.8rem; font-weight:bold; margin-bottom:8px; color:var(--primary);">🎵 音声・楽曲サンプル</div>
+              <audio controls src="${item.url}" style="width:100%; height:40px;"></audio>
+            </div>
+          `;
+
+        case 'video':
+          return `
+            <div class="media-box">
+              <video controls src="${item.url}" style="width:100%; max-height:220px; background:#000; display:block;"></video>
+            </div>
+          `;
+
+        case 'link':
+        default:
+          let domain = item.url;
+          try { domain = new URL(item.url).hostname; } catch(e){}
+          return `
+            <div class="media-box media-link-box">
+              <div style="font-size:0.75rem; color:#64748b;">🔗 制作実績・サイトリンク</div>
+              <a href="${item.url}" target="_blank" rel="noopener" class="external-work-link">
+                <span>${escapeHtml(domain)} で開く</span>
+                <span>↗</span>
+              </a>
+            </div>
+          `;
+      }
+    }
+
+    // ヘッダーナビの切り替え
     function renderHeaderNav() {
       const nav = document.getElementById('headerAuthNav');
       const session = sessionStorage.getItem('castelier_session');
@@ -471,7 +605,6 @@
       const isRecentlyRegistered = registeredAt && (now - parseInt(registeredAt, 10) < FIFTEEN_MINUTES);
 
       try {
-        // 1. YAMLスキーマとユーザーデータを並列取得
         const fetchSchema = fetch('./schema/accounts.yaml').then(r => r.text());
         const fetchUserData = (async () => {
           if (isRecentlyRegistered) {
@@ -488,7 +621,6 @@
 
         const [schemaYaml, userResult] = await Promise.all([fetchSchema, fetchUserData]);
 
-        // スキーマ辞書化
         const loadedYaml = jsyaml.load(schemaYaml);
         schemaData = loadedYaml.accounts.columns;
         buildLabelMaps(schemaData);
@@ -502,7 +634,6 @@
 
       } catch (err) {
         console.warn('初期読み込みフォールバック:', err);
-        // フォールバック（GAS直取得）
         try {
           const fbRes = await fetch(`${GAS_API_URL}?action=getPublicUsers`);
           const fbData = await fbRes.json();
@@ -559,9 +690,29 @@
       }
 
       grid.innerHTML = filtered.map((u, idx) => {
-        const thumbUrl = normalizeDriveUrl(u['workUrls-1']);
         const avatarUrl = normalizeDriveUrl(u.avatarUrl);
         const roleLabel = getLabel('role', u.role);
+
+        // 代表作1からサムネイル生成
+        const media1 = analyzeMediaUrl(u['workUrls-1']);
+        let thumbHtml = '<div class="card-thumb-empty">No Preview</div>';
+
+        if (media1) {
+          if (media1.type === 'image') {
+            thumbHtml = `<img src="${media1.url}" alt="作品">`;
+          } else if (media1.type === 'youtube') {
+            thumbHtml = `
+              <img src="${media1.thumbUrl}" alt="動画サムネイル">
+              <span style="position:absolute; inset:0; display:flex; align-items:center; justify-content:center; background:rgba(0,0,0,0.35); font-size:2rem; color:#fff;">▶</span>
+            `;
+          } else if (media1.type === 'audio') {
+            thumbHtml = `<div class="card-thumb-empty" style="background:#e0e7ff; color:var(--primary); font-weight:bold; font-size:1.1rem;">🎵 音声作品</div>`;
+          } else if (media1.type === 'video') {
+            thumbHtml = `<div class="card-thumb-empty" style="background:#f1f5f9; color:var(--text-main); font-weight:bold; font-size:1.1rem;">🎬 動画作品</div>`;
+          } else if (media1.type === 'link') {
+            thumbHtml = `<div class="card-thumb-empty" style="background:#f1f5f9; color:#64748b; font-weight:bold; font-size:1.1rem;">🔗 Webサイト</div>`;
+          }
+        }
 
         // カテゴリ（日本語変換）
         const catLabels = parseCommaLabels('category', u.category);
@@ -575,7 +726,7 @@
         return `
           <div class="user-card" onclick="openModal(${idx})">
             <div class="card-thumb">
-              ${thumbUrl ? `<img src="${thumbUrl}" alt="作品">` : '<div class="card-thumb-empty">No Work Image</div>'}
+              ${thumbHtml}
               <span class="role-badge ${u.role}">${roleLabel}</span>
             </div>
             <div class="card-body">
@@ -605,8 +756,9 @@
       const categoryDisplay = parseCommaLabels('category', u.category).join(' / ') || '未設定';
       const priceLabel = getLabel('priceGuide', u.priceGuide);
       
+      // 登録されている作品URL（1〜4）をメディア解析
       const works = [1, 2, 3, 4]
-        .map(i => normalizeDriveUrl(u[`workUrls-${i}`]))
+        .map(i => analyzeMediaUrl(u[`workUrls-${i}`]))
         .filter(Boolean);
 
       const links = [];
@@ -629,9 +781,9 @@
         <div style="margin-bottom:16px; white-space:pre-wrap; font-size:0.9rem; line-height:1.6; color:#334155;">${escapeHtml(u.description || '自己紹介文はありません。')}</div>
 
         ${works.length > 0 ? `
-          <div style="font-weight:bold; font-size:0.85rem; margin-bottom:8px;">代表作品</div>
+          <div style="font-weight:bold; font-size:0.85rem; margin-bottom:8px;">代表作品・メディア</div>
           <div class="modal-works-grid">
-            ${works.map(w => `<img src="${w}" class="modal-work-img" alt="作品">`).join('')}
+            ${works.map(w => renderMediaComponent(w)).join('')}
           </div>
         ` : ''}
 
