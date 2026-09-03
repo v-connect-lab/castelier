@@ -231,6 +231,10 @@
         <input type="password" id="regPasswordConfirm" placeholder="もう一度入力" required>
       </div>
     </div>
+    <div style="position: absolute; left: -9999px; top: -9999px; opacity: 0; pointer-events: none;" aria-hidden="true" tabindex="-1">
+      <label for="regWebsiteUrl">Website Confirm</label>
+      <input type="text" id="regWebsiteUrl" name="regWebsiteUrl" autocomplete="off">
+    </div>
     <label class="toggle-password-wrap" style="margin-top:-8px; margin-bottom:16px;">
       <input type="checkbox" onchange="togglePasswordVisibility(['regPassword', 'regPasswordConfirm'], this.checked)">
       パスワードを表示
@@ -447,6 +451,13 @@
     e.preventDefault();
     hideStatus();
 
+    const honeypot = document.getElementById('regWebsiteUrl').value;
+    if (honeypot) {
+      console.warn('Bot detected by honeypot.');
+      alert('登録が完了しました！');
+      return;
+    }
+
     const pwd = document.getElementById('regPassword').value;
     const pwdConfirm = document.getElementById('regPasswordConfirm').value;
     if (pwd !== pwdConfirm) {
@@ -490,6 +501,7 @@
     const payload = {
       action: 'register',
       data: {
+        honeypot: document.getElementById('regWebsiteUrl').value,
         role: role,
         displayName: document.getElementById('regDisplayName').value.trim(),
         password: pwd.trim(),
