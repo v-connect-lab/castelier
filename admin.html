@@ -85,7 +85,7 @@
       margin-bottom: 6px;
     }
 
-    /* ツールチップ（インフォマーク） */
+    /* ツールチップ */
     .info-icon {
       display: inline-flex;
       align-items: center;
@@ -97,13 +97,12 @@
       color: var(--text-sub);
       font-size: 0.7rem;
       font-weight: bold;
-      cursor: pointer; /* スマホでも押しやすいよう pointer に変更 */
+      cursor: pointer;
       position: relative;
       user-select: none;
       -webkit-tap-highlight-color: transparent;
     }
 
-    /* PCホバー時、またはスマホでタップされて .active がついた時に表示 */
     .info-icon:hover::after,
     .info-icon.active::after {
       content: attr(data-tooltip);
@@ -209,7 +208,7 @@
     .hidden { display: none !important; }
     .section-divider { border: 0; border-top: 1px dashed var(--border); margin: 20px 0; }
 
-    /* プレビュー表示用スタイル */
+    /* アイコンプレビュー */
     .img-preview-box {
       margin-top: 8px;
       display: none;
@@ -227,11 +226,6 @@
       object-fit: cover;
       background: #fff;
       border: 1px solid var(--border);
-    }
-    .img-preview-box.square img {
-      border-radius: 4px;
-      width: 60px;
-      height: 60px;
     }
     .img-preview-box span {
       font-size: 0.8rem;
@@ -315,7 +309,7 @@
 
       <div class="form-group">
         <label>アイコン画像URL <span class="info-icon" id="tip-prof-avatarUrl">ℹ</span></label>
-        <input type="text" id="profAvatarUrl" placeholder="https://...（Googleドライブリンク可）" oninput="updateImagePreview('profAvatarUrl', 'profAvatarPreview', false)">
+        <input type="text" id="profAvatarUrl" placeholder="https://...（Googleドライブリンク可）" oninput="updateImagePreview('profAvatarUrl', 'profAvatarPreview')">
         <div id="profAvatarPreview" class="img-preview-box">
           <img src="" alt="アイコンプレビュー">
           <span>アイコン表示プレビュー</span>
@@ -342,26 +336,93 @@
         <input type="text" id="profPortfolioUrl" placeholder="https://...">
       </div>
 
+      <!-- 代表作品URL（最大4枠） -->
       <div class="form-group">
-        <label>代表作品URL（最大4枠） <span class="info-icon" id="tip-prof-workUrls">ℹ</span></label>
-        <input type="text" id="profWork1" placeholder="作品URL 1（Googleドライブリンク可）" style="margin-bottom:6px;" oninput="updateImagePreview('profWork1', 'profWork1Preview', true)">
-        <div id="profWork1Preview" class="img-preview-box square" style="margin-bottom:8px;"><img src="" alt="プレビュー"><span>作品1 プレビュー</span></div>
+        <label>代表作品（最大4枠） <span class="info-icon" id="tip-prof-works" data-tooltip="画像、音楽、動画、Webサイトの作品を最大4枠まで登録できます。">ℹ</span></label>
+        <div id="profWorksContainer">
+          <!-- 枠 1 -->
+          <div class="prof-work-block" style="border: 1px solid var(--border); border-radius: var(--radius); padding: 10px; margin-bottom: 8px; background: #fafafa;">
+            <div class="grid-2" style="grid-template-columns: 140px 1fr; margin-bottom: 6px;">
+              <select class="prof-work-type" onchange="toggleWorkImageInput(this)">
+                <option value="image">画像</option>
+                <option value="music">音楽・音声</option>
+                <option value="video">動画</option>
+                <option value="web">Webサイト</option>
+              </select>
+              <input type="text" class="prof-work-url" placeholder="作品URL 1（Googleドライブ可）">
+            </div>
+            <div class="prof-work-image-wrap hidden">
+              <input type="text" class="prof-work-image" placeholder="サムネイル・ジャケット画像URL（任意・Googleドライブ可）">
+            </div>
+          </div>
 
-        <input type="text" id="profWork2" placeholder="作品URL 2（Googleドライブリンク可）" style="margin-bottom:6px;" oninput="updateImagePreview('profWork2', 'profWork2Preview', true)">
-        <div id="profWork2Preview" class="img-preview-box square" style="margin-bottom:8px;"><img src="" alt="プレビュー"><span>作品2 プレビュー</span></div>
+          <!-- 枠 2 -->
+          <div class="prof-work-block" style="border: 1px solid var(--border); border-radius: var(--radius); padding: 10px; margin-bottom: 8px; background: #fafafa;">
+            <div class="grid-2" style="grid-template-columns: 140px 1fr; margin-bottom: 6px;">
+              <select class="prof-work-type" onchange="toggleWorkImageInput(this)">
+                <option value="image">画像</option>
+                <option value="music">音楽・音声</option>
+                <option value="video">動画</option>
+                <option value="web">Webサイト</option>
+              </select>
+              <input type="text" class="prof-work-url" placeholder="作品URL 2">
+            </div>
+            <div class="prof-work-image-wrap hidden">
+              <input type="text" class="prof-work-image" placeholder="サムネイル・ジャケット画像URL（任意・Googleドライブ可）">
+            </div>
+          </div>
 
-        <input type="text" id="profWork3" placeholder="作品URL 3（Googleドライブリンク可）" style="margin-bottom:6px;" oninput="updateImagePreview('profWork3', 'profWork3Preview', true)">
-        <div id="profWork3Preview" class="img-preview-box square" style="margin-bottom:8px;"><img src="" alt="プレビュー"><span>作品3 プレビュー</span></div>
+          <!-- 枠 3 -->
+          <div class="prof-work-block" style="border: 1px solid var(--border); border-radius: var(--radius); padding: 10px; margin-bottom: 8px; background: #fafafa;">
+            <div class="grid-2" style="grid-template-columns: 140px 1fr; margin-bottom: 6px;">
+              <select class="prof-work-type" onchange="toggleWorkImageInput(this)">
+                <option value="image">画像</option>
+                <option value="music">音楽・音声</option>
+                <option value="video">動画</option>
+                <option value="web">Webサイト</option>
+              </select>
+              <input type="text" class="prof-work-url" placeholder="作品URL 3">
+            </div>
+            <div class="prof-work-image-wrap hidden">
+              <input type="text" class="prof-work-image" placeholder="サムネイル・ジャケット画像URL（任意・Googleドライブ可）">
+            </div>
+          </div>
 
-        <input type="text" id="profWork4" placeholder="作品URL 4（Googleドライブリンク可）" oninput="updateImagePreview('profWork4', 'profWork4Preview', true)">
-        <div id="profWork4Preview" class="img-preview-box square"><img src="" alt="プレビュー"><span>作品4 プレビュー</span></div>
+          <!-- 枠 4 -->
+          <div class="prof-work-block" style="border: 1px solid var(--border); border-radius: var(--radius); padding: 10px; margin-bottom: 8px; background: #fafafa;">
+            <div class="grid-2" style="grid-template-columns: 140px 1fr; margin-bottom: 6px;">
+              <select class="prof-work-type" onchange="toggleWorkImageInput(this)">
+                <option value="image">画像</option>
+                <option value="music">音楽・音声</option>
+                <option value="video">動画</option>
+                <option value="web">Webサイト</option>
+              </select>
+              <input type="text" class="prof-work-url" placeholder="作品URL 4">
+            </div>
+            <div class="prof-work-image-wrap hidden">
+              <input type="text" class="prof-work-image" placeholder="サムネイル・ジャケット画像URL（任意・Googleドライブ可）">
+            </div>
+          </div>
+        </div>
       </div>
 
+      <!-- 活動プラットフォーム（最大3枠） -->
       <div class="form-group">
-        <label>活動プラットフォーム（最大3枠） <span class="info-icon" id="tip-prof-platformUrls">ℹ</span></label>
-        <input type="text" id="profPlatform1" placeholder="例: YouTubeチャンネルURL" style="margin-bottom:6px;">
-        <input type="text" id="profPlatform2" placeholder="例: Twitch / Skeb URL" style="margin-bottom:6px;">
-        <input type="text" id="profPlatform3" placeholder="例: BOOTH URL">
+        <label>活動プラットフォーム（最大3枠） <span class="info-icon" id="tip-prof-platforms" data-tooltip="YouTube、Twitch、BOOTHなどのリンク先と表示名を入力できます。">ℹ</span></label>
+        <div id="profPlatformsContainer">
+          <div class="grid-2 prof-platform-row" style="grid-template-columns: 140px 1fr; margin-bottom: 6px;">
+            <input type="text" class="prof-platform-label" placeholder="例: YouTube">
+            <input type="text" class="prof-platform-url" placeholder="https://...">
+          </div>
+          <div class="grid-2 prof-platform-row" style="grid-template-columns: 140px 1fr; margin-bottom: 6px;">
+            <input type="text" class="prof-platform-label" placeholder="例: Twitch">
+            <input type="text" class="prof-platform-url" placeholder="https://...">
+          </div>
+          <div class="grid-2 prof-platform-row" style="grid-template-columns: 140px 1fr; margin-bottom: 6px;">
+            <input type="text" class="prof-platform-label" placeholder="例: BOOTH">
+            <input type="text" class="prof-platform-url" placeholder="https://...">
+          </div>
+        </div>
       </div>
 
       <button type="submit" class="btn-primary" id="saveBtn">変更内容を保存する</button>
@@ -477,19 +538,63 @@
     document.getElementById('profContactInfo').value = userData.contactInfo || '';
     document.getElementById('profXUrl').value = userData.xUrl || '';
     document.getElementById('profPortfolioUrl').value = userData.portfolioUrl || '';
-    document.getElementById('profWork1').value = userData['workUrls-1'] || '';
-    document.getElementById('profWork2').value = userData['workUrls-2'] || '';
-    document.getElementById('profWork3').value = userData['workUrls-3'] || '';
-    document.getElementById('profWork4').value = userData['workUrls-4'] || '';
-    document.getElementById('profPlatform1').value = userData['platformUrls-1'] || '';
-    document.getElementById('profPlatform2').value = userData['platformUrls-2'] || '';
-    document.getElementById('profPlatform3').value = userData['platformUrls-3'] || '';
-    // 既存画像のプレビュー初期表示
-    updateImagePreview('profAvatarUrl', 'profAvatarPreview', false);
-    updateImagePreview('profWork1', 'profWork1Preview', true);
-    updateImagePreview('profWork2', 'profWork2Preview', true);
-    updateImagePreview('profWork3', 'profWork3Preview', true);
-    updateImagePreview('profWork4', 'profWork4Preview', true);
+
+    // 代表作品 (works配列) の反映
+    let worksList = userData.works || [];
+    if (typeof worksList === 'string' && worksList.startsWith('[')) {
+      try { worksList = JSON.parse(worksList); } catch(e) { worksList = []; }
+    }
+    const workBlocks = document.querySelectorAll('.prof-work-block');
+    workBlocks.forEach((block, i) => {
+      const typeSelect = block.querySelector('.prof-work-type');
+      const urlInput = block.querySelector('.prof-work-url');
+      const imageInput = block.querySelector('.prof-work-image');
+
+      if (worksList[i]) {
+        typeSelect.value = worksList[i].type || 'image';
+        urlInput.value = worksList[i].url || '';
+        imageInput.value = worksList[i].image || '';
+      } else {
+        typeSelect.value = 'image';
+        urlInput.value = '';
+        imageInput.value = '';
+      }
+      toggleWorkImageInput(typeSelect);
+    });
+
+    // 活動プラットフォーム (platforms配列) の反映
+    let platformList = userData.platforms || [];
+    if (typeof platformList === 'string' && platformList.startsWith('[')) {
+      try { platformList = JSON.parse(platformList); } catch(e) { platformList = []; }
+    }
+    const platformRows = document.querySelectorAll('.prof-platform-row');
+    platformRows.forEach((row, i) => {
+      const labelInput = row.querySelector('.prof-platform-label');
+      const urlInput = row.querySelector('.prof-platform-url');
+
+      if (platformList[i]) {
+        labelInput.value = platformList[i].label || '';
+        urlInput.value = platformList[i].url || '';
+      } else {
+        labelInput.value = '';
+        urlInput.value = '';
+      }
+    });
+
+    updateImagePreview('profAvatarUrl', 'profAvatarPreview');
+  }
+
+  function toggleWorkImageInput(selectEl) {
+    const block = selectEl.closest('.prof-work-block');
+    const imageWrap = block.querySelector('.prof-work-image-wrap');
+    const val = selectEl.value;
+
+    if (val === 'music' || val === 'web') {
+      imageWrap.classList.remove('hidden');
+    } else {
+      imageWrap.classList.add('hidden');
+      block.querySelector('.prof-work-image').value = '';
+    }
   }
 
   function applyInfoTips(prefix) {
@@ -563,17 +668,41 @@
       return;
     }
 
-    // GoogleドライブURLの検証と自動変換
     const rawAvatar = document.getElementById('profAvatarUrl').value;
     if (rawAvatar && !isValidImageUrl(rawAvatar)) {
       showStatus('アイコンURLには画像直リンク（.jpg/.png等）またはGoogleドライブの共有リンクを入力してください。', false);
       return;
     }
     const cleanedAvatarUrl = normalizeDriveUrl(rawAvatar, 'image');
-    const cleanedWork1 = normalizeDriveUrl(document.getElementById('profWork1').value, 'preview');
-    const cleanedWork2 = normalizeDriveUrl(document.getElementById('profWork2').value, 'preview');
-    const cleanedWork3 = normalizeDriveUrl(document.getElementById('profWork3').value, 'preview');
-    const cleanedWork4 = normalizeDriveUrl(document.getElementById('profWork4').value, 'preview');
+
+    // 作品配列の収集
+    const works = [];
+    document.querySelectorAll('.prof-work-block').forEach(block => {
+      const type = block.querySelector('.prof-work-type').value;
+      const rawUrl = block.querySelector('.prof-work-url').value.trim();
+      const rawImage = block.querySelector('.prof-work-image').value.trim();
+
+      if (rawUrl) {
+        const item = {
+          type: type,
+          url: normalizeDriveUrl(rawUrl, type === 'image' ? 'image' : 'preview')
+        };
+        if ((type === 'music' || type === 'web') && rawImage) {
+          item.image = normalizeDriveUrl(rawImage, 'image');
+        }
+        works.push(item);
+      }
+    });
+
+    // プラットフォーム配列の収集
+    const platforms = [];
+    document.querySelectorAll('.prof-platform-row').forEach(row => {
+      const label = row.querySelector('.prof-platform-label').value.trim();
+      const url = row.querySelector('.prof-platform-url').value.trim();
+      if (url) {
+        platforms.push({ label: label || '活動先', url: url });
+      }
+    });
 
     const btn = document.getElementById('saveBtn');
     btn.disabled = true;
@@ -588,7 +717,7 @@
       data: {
         userId: sessionUser.userId,
         password: sessionUser.password,
-        displayName: document.getElementById('profDisplayName').value.trim(),
+        displayName: displayName,
         isPublic: isPublic,
         isContactWelcome: isContactWelcome,
         category: selectedCategories.join(','),
@@ -598,15 +727,10 @@
         avatarUrl: cleanedAvatarUrl,
         description: document.getElementById('profDescription').value,
         contactInfo: document.getElementById('profContactInfo').value.trim(),
-        xUrl: document.getElementById('profXUrl').value.trim(),
+        xUrl: xUrl,
         portfolioUrl: document.getElementById('profPortfolioUrl').value.trim(),
-        'workUrls-1': cleanedWork1,
-        'workUrls-2': cleanedWork2,
-        'workUrls-3': cleanedWork3,
-        'workUrls-4': cleanedWork4,
-        'platformUrls-1': document.getElementById('profPlatform1').value.trim(),
-        'platformUrls-2': document.getElementById('profPlatform2').value.trim(),
-        'platformUrls-3': document.getElementById('profPlatform3').value.trim()
+        works: works,
+        platforms: platforms
       }
     };
 
@@ -635,10 +759,10 @@
 
   function logout() {
     sessionStorage.removeItem('castelier_session');
+    localStorage.removeItem('castelier_registered_at');
     window.location.href = './index.html';
   }
 
-  // ユーティリティ関数
   function normalizeDriveUrl(url, type = 'image') {
     if (!url || typeof url !== 'string') return '';
     const trimmed = url.trim();
@@ -647,7 +771,7 @@
     if (match && match[1]) {
       const fileId = match[1];
       return type === 'image'
-        ? `https://lh3.googleusercontent.com/d/${fileId}`
+        ? `https://drive.google.com/thumbnail?id=${fileId}&sz=w800`
         : `https://drive.google.com/file/d/${fileId}/preview`;
     }
     return trimmed;
@@ -662,8 +786,7 @@
     return isHttps && (isDirectImage || trimmed.includes('googleusercontent.com'));
   }
 
-  // リアルタイム画像プレビュー更新
-  function updateImagePreview(inputId, previewBoxId, isSquare = false) {
+  function updateImagePreview(inputId, previewBoxId) {
     const input = document.getElementById(inputId);
     const box = document.getElementById(previewBoxId);
     const img = box.querySelector('img');
@@ -685,22 +808,13 @@
     }
   }
 
-  // ツールチップのタップ開閉制御（スマホ・PC共通）
   function setupTooltipToggle() {
     document.addEventListener('click', (e) => {
       const targetIcon = e.target.closest('.info-icon');
-
-      // 他の開いているツールチップをすべて閉じる
       document.querySelectorAll('.info-icon.active').forEach(icon => {
-        if (icon !== targetIcon) {
-          icon.classList.remove('active');
-        }
+        if (icon !== targetIcon) icon.classList.remove('active');
       });
-
-      // タップしたアイコンの表示/非表示を切り替え
-      if (targetIcon) {
-        targetIcon.classList.toggle('active');
-      }
+      if (targetIcon) targetIcon.classList.toggle('active');
     });
   }
 </script>
