@@ -750,11 +750,11 @@
           <span style="font-size: 0.8rem; color: #94a3b8;">↗</span>
         </a>
       </li>
-      <!-- ★ 追加: お問い合わせ（メーラー起動） -->
+      <!-- お問い合わせ -->
       <li>
-        <a href="mailto:info@example.com?subject=【Castelier】お問い合わせ" class="drawer-nav-item">
+        <a href="#" onclick="handleContactClick(event)" class="drawer-nav-item">
           <span>✉️ お問い合わせ</span>
-          <span style="font-size: 0.8rem; color: #94a3b8;">›</span>
+          <span>›</span>
         </a>
       </li>
     </ul>
@@ -1547,6 +1547,35 @@
       const uid = currentUserId ? encodeURIComponent(currentUserId) : '';
       const url = `https://docs.google.com/forms/d/e/1FAIpQLSep1VRHITjUqvQ1aE31fhGs7EsHfuiC9FSPeqMJBxGaklqt2g/viewform?usp=pp_url&entry.267937224=${uid}`;
       window.open(url, '_blank', 'noopener,noreferrer');
+    }
+
+    // お問い合わせメーラー起動処理
+    async function handleContactClick(e) {
+      if (e) e.preventDefault();
+
+      try {
+        const res = await fetch('./config/contact.json');
+        if (!res.ok) throw new Error('設定ファイルが見つかりません');
+        const conf = await res.json();
+
+        const to = conf.to || '';
+        const subject = conf.subject || '【Castelier】お問い合わせ';
+    
+        // ログイン中の場合はIDを本文テンプレートへ自動挿入
+        let body = conf.body || '';
+        if (currentUserId) {
+          body = body.replace('ユーザーID（任意）：', `ユーザーID（任意）：${currentUserId}`);
+        }
+
+        // mailtoスキームを生成
+        const mailtoUrl = `mailto:${encodeURIComponent(to)}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+        window.location.href = mailtoUrl;
+
+      } catch (err) {
+        console.error('お問い合わせ設定の読み込みエラー:', err);
+        // フォールバック（最低限の起動）
+        window.location.href = 'mailto:support@castelier.jp?subject=' + encodeURIComponent('【Castelier】お問い合わせ');
+      }
     }
   </script>
 </body>
