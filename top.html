@@ -37,7 +37,7 @@
     header {
       background: #ffffff;
       border-bottom: 1px solid var(--border);
-      padding: 14px 20px;
+      padding: 12px 20px;
       display: flex;
       justify-content: space-between;
       align-items: center;
@@ -57,23 +57,246 @@
       border-radius: 6px;
       text-decoration: none;
       font-weight: 600;
-      margin-left: 8px;
       cursor: pointer;
-    }
-    .btn-manage {
-      background: #f1f5f9;
-      color: var(--text-main);
-      border: 1px solid var(--border);
-    }
-    .btn-logout {
-      background: #fee2e2;
-      color: #b91c1c;
-      border: 1px solid #fca5a5;
     }
     .btn-login {
       background: var(--primary);
       color: #fff;
       border: none;
+    }
+
+    /* ハンバーガーアイコンボタン */
+    .btn-hamburger {
+      background: transparent;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      width: 40px;
+      height: 40px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      gap: 5px;
+      cursor: pointer;
+      padding: 0;
+      transition: background 0.2s;
+    }
+    .btn-hamburger:hover { background: #f1f5f9; }
+    .btn-hamburger span {
+      display: block;
+      width: 20px;
+      height: 2px;
+      background: var(--text-main);
+      border-radius: 2px;
+    }
+
+    /* ハンバーガーサイドメニュー */
+    .menu-drawer-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.4);
+      backdrop-filter: blur(2px);
+      z-index: 90;
+      display: none;
+    }
+    .menu-drawer-overlay.open { display: block; }
+    .menu-drawer {
+      position: fixed;
+      top: 0;
+      right: -320px;
+      width: 280px;
+      height: 100vh;
+      background: #ffffff;
+      box-shadow: -4px 0 15px rgba(0,0,0,0.1);
+      z-index: 100;
+      display: flex;
+      flex-direction: column;
+      padding: 24px 20px;
+      transition: right 0.25s ease-in-out;
+    }
+    .menu-drawer.open { right: 0; }
+
+    .drawer-user-info {
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .drawer-user-badge {
+      background: #e0e7ff;
+      color: var(--primary);
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-size: 0.8rem;
+      font-weight: 700;
+    }
+    .drawer-close {
+      background: none;
+      border: none;
+      font-size: 1.4rem;
+      cursor: pointer;
+      color: var(--text-sub);
+      line-height: 1;
+    }
+
+    .drawer-nav-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .drawer-nav-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 14px;
+      border-radius: 8px;
+      text-decoration: none;
+      color: var(--text-main);
+      font-weight: 600;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    .drawer-nav-item:hover {
+      background: #f8fafc;
+      color: var(--primary);
+    }
+    .drawer-badge {
+      background: #f1f5f9;
+      color: var(--text-sub);
+      font-size: 0.75rem;
+      padding: 2px 8px;
+      border-radius: 12px;
+      font-weight: bold;
+    }
+    .drawer-divider {
+      border: 0;
+      border-top: 1px solid var(--border);
+      margin: 12px 0;
+    }
+    .btn-drawer-logout {
+      margin-top: auto;
+      background: #fee2e2;
+      color: #b91c1c;
+      border: 1px solid #fca5a5;
+      padding: 10px;
+      border-radius: 8px;
+      font-weight: 700;
+      font-size: 0.85rem;
+      cursor: pointer;
+      width: 100%;
+    }
+
+    /* お気に入り / フォロワー リストドロワー */
+    .list-drawer {
+      position: fixed;
+      top: 0;
+      right: -420px;
+      width: 380px;
+      max-width: 90vw;
+      height: 100vh;
+      background: #ffffff;
+      box-shadow: -4px 0 20px rgba(0,0,0,0.15);
+      z-index: 110;
+      display: flex;
+      flex-direction: column;
+      transition: right 0.25s ease-in-out;
+    }
+    .list-drawer.open { right: 0; }
+    .list-drawer-header {
+      padding: 18px 20px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: #fafafa;
+    }
+    .list-drawer-header h3 {
+      font-size: 1.05rem;
+      margin: 0;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .list-drawer-body {
+      flex-grow: 1;
+      overflow-y: auto;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    /* ドロワー内カード */
+    .drawer-user-card {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: #fff;
+      transition: background 0.15s;
+    }
+    .drawer-user-card:hover {
+      background: #f8fafc;
+    }
+    .drawer-user-avatar {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 1px solid var(--border);
+      background: #e2e8f0;
+      flex-shrink: 0;
+    }
+    .drawer-user-info-text {
+      flex-grow: 1;
+      overflow: hidden;
+      cursor: pointer;
+    }
+    .drawer-user-name {
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: var(--text-main);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .drawer-user-sub {
+      font-size: 0.75rem;
+      color: var(--text-sub);
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      margin-top: 2px;
+    }
+    .badge-mutual {
+      background: #fef3c7;
+      color: #92400e;
+      border: 1px solid #fde68a;
+      font-size: 0.65rem;
+      padding: 1px 5px;
+      border-radius: 10px;
+      font-weight: 700;
+    }
+    .btn-drawer-unfav {
+      background: none;
+      border: none;
+      color: #94a3b8;
+      font-size: 1.1rem;
+      cursor: pointer;
+      padding: 6px;
+      border-radius: 4px;
+    }
+    .btn-drawer-unfav:hover {
+      color: #ef4444;
+      background: #fee2e2;
     }
 
     /* メインコンテナ */
@@ -307,7 +530,7 @@
       align-items: center;
       justify-content: center;
       padding: 16px;
-      z-index: 100;
+      z-index: 120;
     }
     .modal-overlay.open { display: flex; }
     .modal-content {
@@ -429,14 +652,61 @@
       color: var(--text-sub);
       font-size: 0.95rem;
     }
+    .empty-drawer-notice {
+      text-align: center;
+      padding: 40px 10px;
+      color: var(--text-sub);
+      font-size: 0.85rem;
+      line-height: 1.6;
+    }
   </style>
 </head>
 <body oncontextmenu="return false;">
 
   <header>
     <a href="./top.html" class="header-logo">Castelier</a>
-    <div class="header-links" id="headerAuthNav"></div>
+    <div id="headerAuthNav"></div>
   </header>
+
+  <!-- ハンバーガーメニュー ドロワー -->
+  <div class="menu-drawer-overlay" id="menuDrawerOverlay" onclick="closeAllDrawers()"></div>
+  <div class="menu-drawer" id="menuDrawer">
+    <div class="drawer-user-info">
+      <span class="drawer-user-badge" id="drawerUserIdBadge">ID: ------</span>
+      <button class="drawer-close" onclick="closeAllDrawers()">×</button>
+    </div>
+    <ul class="drawer-nav-list">
+      <li>
+        <a href="./admin.html" class="drawer-nav-item">
+          <span>⚙️ 管理画面</span>
+          <span>›</span>
+        </a>
+      </li>
+      <hr class="drawer-divider">
+      <li>
+        <div class="drawer-nav-item" onclick="openFavoritesListDrawer()">
+          <span>⭐ お気に入り</span>
+          <span class="drawer-badge" id="drawerFavCount">0</span>
+        </div>
+      </li>
+      <li>
+        <div class="drawer-nav-item" onclick="openFollowersListDrawer()">
+          <span>👥 フォロワー</span>
+          <span class="drawer-badge" id="drawerFollowerCount">0</span>
+        </div>
+      </li>
+    </ul>
+    <button class="btn-drawer-logout" onclick="handleLogout()">ログアウト</button>
+  </div>
+
+  <!-- リスト表示用ドロワー（お気に入り／フォロワー共用） -->
+  <div class="list-drawer" id="listDrawer">
+    <div class="list-drawer-header">
+      <h3 id="listDrawerTitle">リスト</h3>
+      <button class="drawer-close" onclick="closeListDrawer()">×</button>
+    </div>
+    <div class="list-drawer-body" id="listDrawerBody"></div>
+  </div>
 
   <div class="container">
     <div class="filter-panel">
@@ -470,9 +740,12 @@
     const GAS_API_URL = 'https://script.google.com/macros/s/AKfycbyk1gWVq5JmKoz73D6zGB_k0WmpWgs4BGsH00J7WyewnW-iWAFzM6ORGOC4aR_ePRry4Q/exec';
 
     let allUsers = [];
+    let allUsersMap = new Map();
     let currentRole = 'all';
     let schemaData = null;
     let myFavoritesSet = new Set();
+    let interestedInMeList = [];
+    let mutualSet = new Set();
     let currentUserId = null;
 
     let labelMaps = {
@@ -682,14 +955,111 @@
 
       if (session) {
         nav.innerHTML = `
-          <a href="./admin.html" class="btn-manage">管理画面</a>
-          <button onclick="handleLogout()" class="btn-logout">ログアウト</button>
+          <button class="btn-hamburger" onclick="toggleMenuDrawer()" title="メニューを開く">
+            <span></span>
+            <span></span>
+            <span></span>
+          </button>
         `;
+        document.getElementById('drawerUserIdBadge').textContent = `ID: ${currentUserId}`;
       } else {
         nav.innerHTML = `
           <a href="./index.html" class="btn-login">ログイン / 登録</a>
         `;
       }
+    }
+
+    function toggleMenuDrawer() {
+      const drawer = document.getElementById('menuDrawer');
+      const overlay = document.getElementById('menuDrawerOverlay');
+      const isOpen = drawer.classList.contains('open');
+
+      if (isOpen) {
+        closeAllDrawers();
+      } else {
+        drawer.classList.add('open');
+        overlay.classList.add('open');
+      }
+    }
+
+    function closeAllDrawers() {
+      document.getElementById('menuDrawer').classList.remove('open');
+      document.getElementById('listDrawer').classList.remove('open');
+      document.getElementById('menuDrawerOverlay').classList.remove('open');
+    }
+
+    function closeListDrawer() {
+      document.getElementById('listDrawer').classList.remove('open');
+    }
+
+    function openFavoritesListDrawer() {
+      document.getElementById('menuDrawer').classList.remove('open');
+      document.getElementById('listDrawerTitle').innerHTML = '⭐ お気に入りリスト';
+      const body = document.getElementById('listDrawerBody');
+
+      const favIds = Array.from(myFavoritesSet);
+      if (favIds.length === 0) {
+        body.innerHTML = '<div class="empty-drawer-notice">お気に入りに登録したユーザーはいません。<br>カードの☆をタップしてキープしてみましょう！</div>';
+      } else {
+        body.innerHTML = favIds.map(uid => {
+          const u = allUsersMap.get(uid) || { userId: uid, displayName: '非公開または読み込み中', role: 'creator' };
+          const avatar = normalizeDriveUrl(u.avatarUrl, 'image');
+          const isMutual = mutualSet.has(uid);
+
+          return `
+            <div class="drawer-user-card" id="drawer-fav-item-${escapeHtml(uid)}">
+              ${avatar ? `<img src="${avatar}" class="drawer-user-avatar" alt="">` : '<div class="drawer-user-avatar"></div>'}
+              <div class="drawer-user-info-text" onclick="openModalByUserId('${escapeHtml(uid)}')">
+                <div class="drawer-user-name">${escapeHtml(u.displayName || '名無し')}</div>
+                <div class="drawer-user-sub">
+                  <span>${u.role === 'streamer' ? '配信者' : 'クリエイター'}</span>
+                  ${isMutual ? '<span class="badge-mutual">🤝 相互</span>' : ''}
+                </div>
+              </div>
+              <button class="btn-drawer-unfav" title="お気に入り解除" onclick="handleRemoveFromDrawer('${escapeHtml(uid)}')">✕</button>
+            </div>
+          `;
+        }).join('');
+      }
+
+      document.getElementById('listDrawer').classList.add('open');
+    }
+
+    function openFollowersListDrawer() {
+      document.getElementById('menuDrawer').classList.remove('open');
+      document.getElementById('listDrawerTitle').innerHTML = '👥 フォロワー（注目ユーザー）';
+      const body = document.getElementById('listDrawerBody');
+
+      if (interestedInMeList.length === 0) {
+        body.innerHTML = '<div class="empty-drawer-notice">あなたをフォロー・注目しているユーザーはまだいません。</div>';
+      } else {
+        body.innerHTML = interestedInMeList.map(uid => {
+          const u = allUsersMap.get(uid) || { userId: uid, displayName: '非公開または読み込み中', role: 'streamer' };
+          const avatar = normalizeDriveUrl(u.avatarUrl, 'image');
+          const isMutual = mutualSet.has(uid);
+
+          return `
+            <div class="drawer-user-card">
+              ${avatar ? `<img src="${avatar}" class="drawer-user-avatar" alt="">` : '<div class="drawer-user-avatar"></div>'}
+              <div class="drawer-user-info-text" onclick="openModalByUserId('${escapeHtml(uid)}')">
+                <div class="drawer-user-name">${escapeHtml(u.displayName || '名無し')}</div>
+                <div class="drawer-user-sub">
+                  <span>${u.role === 'streamer' ? '配信者' : 'クリエイター'}</span>
+                  ${isMutual ? '<span class="badge-mutual">🤝 相互</span>' : ''}
+                </div>
+              </div>
+            </div>
+          `;
+        }).join('');
+      }
+
+      document.getElementById('listDrawer').classList.add('open');
+    }
+
+    async function handleRemoveFromDrawer(targetUserId) {
+      if (!confirm('お気に入りを解除しますか？')) return;
+      await handleToggleFavorite(null, targetUserId);
+      openFavoritesListDrawer();
     }
 
     function handleLogout() {
@@ -702,26 +1072,23 @@
     }
 
     window.addEventListener('DOMContentLoaded', async () => {
-      renderHeaderNav();
-
       const registeredAt = localStorage.getItem('castelier_registered_at');
       const now = Date.now();
       const FIFTEEN_MINUTES = 15 * 60 * 1000;
       const isRecentlyRegistered = registeredAt && (now - parseInt(registeredAt, 10) < FIFTEEN_MINUTES);
 
-      // セッションから自分のIDを取得
       const session = sessionStorage.getItem('castelier_session');
       currentUserId = session ? JSON.parse(session).userId : null;
+
+      renderHeaderNav();
 
       try {
         const fetchSchema = fetch('./schema/accounts.yaml').then(r => r.text());
 
-        // 1. 静的 json の取得
         const fetchJsonUsers = fetch(`./data/users.json?t=${now}`)
           .then(r => r.ok ? r.json() : [])
           .catch(() => []);
 
-        // 2. 登録15分以内なら自分1人分の最新データを取得
         const fetchSelfUser = (async () => {
           if (isRecentlyRegistered && currentUserId) {
             try {
@@ -735,9 +1102,8 @@
           return null;
         })();
 
-        // 3. ログイン中の場合、自分のお気に入り一覧（myFavorites）を取得
         const fetchMyFavorites = (async () => {
-          if (!currentUserId) return [];
+          if (!currentUserId) return null;
           try {
             const res = await fetch(GAS_API_URL, {
               method: 'POST',
@@ -747,19 +1113,25 @@
                 data: { userId: currentUserId }
               })
             });
-            const data = await res.json();
-            return data.success ? (data.myFavorites || []) : [];
+            return await res.json();
           } catch (e) {
             console.warn('お気に入りデータの取得失敗:', e);
-            return [];
+            return null;
           }
         })();
 
-        const [schemaYaml, baseUsers, selfUser, favList] = await Promise.all([
+        const [schemaYaml, baseUsers, selfUser, favResult] = await Promise.all([
           fetchSchema, fetchJsonUsers, fetchSelfUser, fetchMyFavorites
         ]);
 
-        myFavoritesSet = new Set(favList);
+        if (favResult && favResult.success) {
+          myFavoritesSet = new Set(favResult.myFavorites || []);
+          interestedInMeList = favResult.interestedInMe || [];
+          mutualSet = new Set(favResult.mutual || []);
+
+          document.getElementById('drawerFavCount').textContent = myFavoritesSet.size;
+          document.getElementById('drawerFollowerCount').textContent = interestedInMeList.length;
+        }
 
         const loadedYaml = jsyaml.load(schemaYaml);
         schemaData = loadedYaml.accounts.columns;
@@ -772,6 +1144,11 @@
         }
 
         allUsers = mergedList;
+        allUsersMap.clear();
+        allUsers.forEach(u => {
+          if (u.userId) allUsersMap.set(u.userId, u);
+        });
+
         renderFilteredUsers();
 
       } catch (err) {
@@ -861,7 +1238,6 @@
         const freeTags = (u.freeTags ? String(u.freeTags).split(',') : []).map(t => t.trim()).filter(Boolean);
         const allCardTags = standardTags.concat(freeTags);
 
-        // お気に入り状態の判定
         const isFav = myFavoritesSet.has(u.userId);
         const isSelf = currentUserId && (currentUserId === u.userId);
 
@@ -900,6 +1276,14 @@
       }).join('');
     }
 
+    function openModalByUserId(uid) {
+      const idx = allUsers.findIndex(u => u.userId === uid);
+      if (idx !== -1) {
+        closeAllDrawers();
+        openModal(idx);
+      }
+    }
+
     function openModal(index) {
       const u = allUsers[index];
       if (!u) return;
@@ -921,7 +1305,6 @@
         }
       });
 
-      // モーダル用お気に入りボタンの生成
       const isFav = myFavoritesSet.has(u.userId);
       const isSelf = currentUserId && (currentUserId === u.userId);
       const favContainer = document.getElementById('modalFavContainer');
@@ -934,7 +1317,7 @@
             onclick="handleToggleFavorite(event, '${escapeHtml(u.userId)}', true)"
           >
             <span>${isFav ? '★' : '☆'}</span>
-            <span id="modal-fav-label">${isFav ? '気になるリスト登録中' : '気になるに追加'}</span>
+            <span id="modal-fav-label">${isFav ? 'お気に入り登録中' : 'お気に入りに追加'}</span>
           </button>
         `;
       } else {
@@ -985,8 +1368,7 @@
       document.getElementById('userModal').classList.remove('open');
     }
 
-    // ★ お気に入りトグル処理
-    async function handleToggleFavorite(event, targetUserId, isModal = false) {
+    async function handleToggleFavorite(event, targetUserId) {
       if (event) event.stopPropagation();
 
       if (!currentUserId) {
@@ -998,11 +1380,14 @@
 
       const isAdding = !myFavoritesSet.has(targetUserId);
 
-      // UIを即座に楽観的更新
       if (isAdding) {
         myFavoritesSet.add(targetUserId);
+        if (interestedInMeList.includes(targetUserId)) {
+          mutualSet.add(targetUserId);
+        }
       } else {
         myFavoritesSet.delete(targetUserId);
+        mutualSet.delete(targetUserId);
       }
       updateFavUI(targetUserId);
 
@@ -1021,25 +1406,22 @@
         const result = await res.json();
 
         if (!result.success) {
-          // 失敗した場合は元の状態にロールバック
           if (isAdding) myFavoritesSet.delete(targetUserId);
           else myFavoritesSet.add(targetUserId);
           updateFavUI(targetUserId);
           alert(result.message || '操作に失敗しました。');
         }
       } catch (err) {
-        // 通信失敗時のロールバック
         if (isAdding) myFavoritesSet.delete(targetUserId);
         else myFavoritesSet.add(targetUserId);
         updateFavUI(targetUserId);
-        alert('通信に失敗しました。ネットワーク状況を確認してください。');
+        alert('通信に失敗しました。');
       }
     }
 
     function updateFavUI(targetUserId) {
       const isFav = myFavoritesSet.has(targetUserId);
 
-      // カード側のボタン更新
       const cardBtn = document.getElementById(`fav-card-${targetUserId}`);
       if (cardBtn) {
         cardBtn.classList.toggle('active', isFav);
@@ -1047,14 +1429,16 @@
         cardBtn.title = isFav ? 'お気に入り解除' : 'お気に入りに追加';
       }
 
-      // モーダル側のボタン更新
       const modalBtn = document.getElementById('modal-fav-btn');
       const modalLabel = document.getElementById('modal-fav-label');
       if (modalBtn && modalLabel) {
         modalBtn.classList.toggle('active', isFav);
         modalBtn.querySelector('span:first-child').textContent = isFav ? '★' : '☆';
-        modalLabel.textContent = isFav ? '気になるリスト登録中' : '気になるに追加';
+        modalLabel.textContent = isFav ? 'お気に入り登録中' : 'お気に入りに追加';
       }
+
+      const badge = document.getElementById('drawerFavCount');
+      if (badge) badge.textContent = myFavoritesSet.size;
     }
 
     function escapeHtml(str) {
