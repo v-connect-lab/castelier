@@ -58,9 +58,9 @@
   },
   {
     "userId": "usr_4e86b6f4",
-    "role": "streamer",
+    "role": "",
     "displayName": "テスト2",
-    "isContactWelcome": true,
+    "isContactWelcome": false,
     "category": "VLiveStreamer",
     "tags": "Androgynous",
     "freeTags": "",
@@ -72,6 +72,6 @@
     "contactInfo": "",
     "description": "よろしくお願いします。",
     "priceGuide": "",
-    "updatedAt": "2026-09-04T00:28:03.000Z"
+    "updatedAt": "2026-09-04T00:55:42.000Z"
   }
 ]
