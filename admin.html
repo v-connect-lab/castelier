@@ -7,7 +7,7 @@
   <!-- AI学習抑止メタタグ -->
   <meta name="robots" content="noai, noimageai">
   
-  <title>Castelier | プロフィール管理</title>
+  <title>Castelier | マイページ・管理</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/js-yaml/4.1.0/js-yaml.min.js"></script>
   <style>
     :root {
@@ -19,6 +19,8 @@
       --text-sub: #64748b;
       --border: #e2e8f0;
       --radius: 8px;
+      --creator-color: #ec4899;
+      --streamer-color: #3b82f6;
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -27,14 +29,14 @@
       background-color: var(--bg);
       color: var(--text);
       line-height: 1.5;
-      padding: 24px 16px;
+      padding: 24px 16px 60px;
     }
 
     .container {
-      max-width: 720px;
+      max-width: 760px;
       margin: 0 auto;
       background: var(--card-bg);
-      padding: 32px 28px;
+      padding: 28px 24px;
       border-radius: var(--radius);
       box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
       border: 1px solid var(--border);
@@ -61,9 +63,9 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 8px;
+      margin-bottom: 16px;
     }
-    h1 { font-size: 1.4rem; }
+    h1 { font-size: 1.35rem; }
     .user-badge {
       background: #e0e7ff;
       color: var(--primary);
@@ -71,6 +73,46 @@
       border-radius: 4px;
       font-size: 0.8rem;
       font-weight: bold;
+    }
+
+    /* 管理タブ切り替え */
+    .admin-tabs {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 24px;
+      border-bottom: 2px solid var(--border);
+      padding-bottom: 8px;
+    }
+    .admin-tab-btn {
+      padding: 8px 16px;
+      border-radius: 6px;
+      font-size: 0.85rem;
+      font-weight: 700;
+      cursor: pointer;
+      border: 1px solid transparent;
+      background: #f1f5f9;
+      color: var(--text-sub);
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s;
+    }
+    .admin-tab-btn:hover {
+      background: #e2e8f0;
+    }
+    .admin-tab-btn.active {
+      background: var(--primary);
+      color: #ffffff;
+    }
+    .tab-badge {
+      font-size: 0.75rem;
+      padding: 2px 6px;
+      border-radius: 10px;
+      background: rgba(0, 0, 0, 0.15);
+    }
+    .admin-tab-btn.active .tab-badge {
+      background: rgba(255, 255, 255, 0.3);
+      color: #fff;
     }
 
     .lead { font-size: 0.85rem; color: var(--text-sub); margin-bottom: 24px; }
@@ -178,7 +220,7 @@
 
     .btn-logout {
       width: 100%;
-      margin-top: 10px;
+      margin-top: 14px;
       padding: 8px;
       background: none;
       border: none;
@@ -231,6 +273,162 @@
       font-size: 0.8rem;
       color: var(--text-sub);
     }
+
+    /* お気に入り・気になるリスト用カードスタイル */
+    .fav-list-container {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .fav-card {
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 14px 16px;
+      background: #ffffff;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      transition: all 0.2s;
+    }
+    .fav-card:hover {
+      border-color: #cbd5e1;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.04);
+    }
+    .fav-avatar {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      object-fit: cover;
+      background: #e2e8f0;
+      flex-shrink: 0;
+      border: 1px solid var(--border);
+    }
+    .fav-info {
+      flex-grow: 1;
+      overflow: hidden;
+    }
+    .fav-meta {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 2px;
+    }
+    .role-badge-sm {
+      font-size: 0.7rem;
+      font-weight: bold;
+      padding: 2px 6px;
+      border-radius: 4px;
+      color: #ffffff;
+    }
+    .role-badge-sm.creator { background: var(--creator-color); }
+    .role-badge-sm.streamer { background: var(--streamer-color); }
+
+    .mutual-badge {
+      font-size: 0.7rem;
+      font-weight: bold;
+      background: #fef3c7;
+      color: #92400e;
+      border: 1px solid #fde68a;
+      padding: 2px 8px;
+      border-radius: 12px;
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+    }
+
+    .fav-name {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--text);
+      cursor: pointer;
+    }
+    .fav-name:hover {
+      color: var(--primary);
+    }
+    .fav-desc {
+      font-size: 0.8rem;
+      color: var(--text-sub);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      margin-top: 2px;
+    }
+    .fav-actions {
+      display: flex;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+    .btn-sm-view {
+      padding: 6px 12px;
+      background: #f1f5f9;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--text);
+      cursor: pointer;
+    }
+    .btn-sm-view:hover {
+      background: #e2e8f0;
+    }
+    .btn-sm-remove {
+      padding: 6px 10px;
+      background: #fee2e2;
+      border: 1px solid #fca5a5;
+      border-radius: 6px;
+      font-size: 0.8rem;
+      color: #b91c1c;
+      cursor: pointer;
+    }
+    .btn-sm-remove:hover {
+      background: #fecaca;
+    }
+
+    /* 簡易モーダル */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.6);
+      backdrop-filter: blur(4px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      z-index: 100;
+    }
+    .modal-overlay.open { display: flex; }
+    .modal-content {
+      background: #ffffff;
+      width: 100%;
+      max-width: 600px;
+      max-height: 85vh;
+      border-radius: var(--radius);
+      overflow-y: auto;
+      box-shadow: 0 20px 25px -5px rgba(0,0,0,0.2);
+      position: relative;
+      padding: 24px;
+    }
+    .modal-close {
+      position: absolute;
+      top: 14px;
+      right: 14px;
+      background: #f1f5f9;
+      border: none;
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      font-size: 1.1rem;
+      cursor: pointer;
+    }
+    .empty-list-notice {
+      text-align: center;
+      padding: 48px 16px;
+      color: var(--text-sub);
+      font-size: 0.85rem;
+      background: #f8fafc;
+      border-radius: var(--radius);
+      border: 1px dashed var(--border);
+    }
   </style>
 </head>
 <body>
@@ -245,197 +443,230 @@
     アカウントデータを読み込み中...
   </div>
 
-  <div id="mainFormView" class="hidden">
+  <div id="mainContentView" class="hidden">
     <div class="title-row">
-      <h1>プロフィール編集</h1>
+      <h1 id="viewTitle">アカウント管理</h1>
       <span class="user-badge" id="displayUserId"></span>
     </div>
-    <p class="lead" style="margin-bottom: 20px; line-height: 1.6;">
-      登録・更新内容はデータベースに保存され、一覧ページへは最大10分程度で反映されます。<br>
-      <span style="color: #ef4444; font-size: 0.8rem; font-weight: 600; display: inline-block; margin-top: 4px;">
-        ⚠️ 登録から3日以内に「アイコン画像」と「自己紹介文（初期値からの変更）」が設定されない場合、一覧への掲載が一時停止されます（再設定で復帰します）。
-      </span>
-    </p>
 
-    <form id="profileForm" onsubmit="handleUpdate(event)">
-      <div class="grid-2">
+    <!-- 管理ナビタブ -->
+    <div class="admin-tabs">
+      <button class="admin-tab-btn active" data-tab="profile" onclick="switchAdminTab('profile')">
+        プロフィール編集
+      </button>
+      <button class="admin-tab-btn" data-tab="favorites" onclick="switchAdminTab('favorites')">
+        お気に入り <span class="tab-badge" id="badgeMyFavorites">0</span>
+      </button>
+      <button class="admin-tab-btn" data-tab="interested" onclick="switchAdminTab('interested')">
+        気になるリスト <span class="tab-badge" id="badgeInterested">0</span>
+      </button>
+    </div>
+
+    <!-- 1. プロフィール編集タブ -->
+    <div id="tabView-profile">
+      <p class="lead" style="margin-bottom: 20px; line-height: 1.6;">
+        登録・更新内容はデータベースに保存され、一覧ページへは最大10分程度で反映されます。<br>
+        <span style="color: #ef4444; font-size: 0.8rem; font-weight: 600; display: inline-block; margin-top: 4px;">
+          ⚠️ 登録から3日以内に「アイコン画像」と「自己紹介文（初期値からの変更）」が設定されない場合、一覧への掲載が一時停止されます（再設定で復帰します）。
+        </span>
+      </p>
+
+      <form id="profileForm" onsubmit="handleUpdate(event)">
+        <div class="grid-2">
+          <div class="form-group">
+            <label>ユーザー区分 <span class="info-icon" id="tip-prof-role">ℹ</span></label>
+            <select id="profRole" disabled style="background:#f1f5f9; cursor:not-allowed;">
+              <option value="creator">クリエイター</option>
+              <option value="streamer">配信者</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>活動名（表示名） * <span class="info-icon" id="tip-prof-displayName">ℹ</span></label>
+            <input type="text" id="profDisplayName" required>
+          </div>
+        </div>
+
+        <div class="grid-2 hidden" id="profStreamerSettingsGroup">
+          <div class="form-group">
+            <label>公開設定 <span class="info-icon" id="tip-prof-isPublic">ℹ</span></label>
+            <select id="profIsPublic" onchange="handlePublicChange('prof')">
+              <option value="true">公開</option>
+              <option value="false">非公開</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label id="lbl-profIsContactWelcome">お声がけ歓迎設定 <span class="info-icon" id="tip-prof-isContactWelcome">ℹ</span></label>
+            <select id="profIsContactWelcome">
+              <option value="true">声掛け歓迎</option>
+              <option value="false">閲覧のみ</option>
+            </select>
+          </div>
+        </div>
+
         <div class="form-group">
-          <label>ユーザー区分 <span class="info-icon" id="tip-prof-role">ℹ</span></label>
-          <select id="profRole" disabled style="background:#f1f5f9; cursor:not-allowed;">
-            <option value="creator">クリエイター</option>
-            <option value="streamer">配信者</option>
-          </select>
+          <label>メインカテゴリ（複数選択可・最低1つ） * <span class="info-icon" id="tip-prof-category">ℹ</span></label>
+          <div id="profCategoryContainer" class="checkbox-group"></div>
         </div>
+
         <div class="form-group">
-          <label>活動名（表示名） * <span class="info-icon" id="tip-prof-displayName">ℹ</span></label>
-          <input type="text" id="profDisplayName" required>
+          <label>属性・作風タグ（複数選択可・最低1つ） * <span class="info-icon" id="tip-prof-tags">ℹ</span></label>
+          <div id="profTagsContainer" class="checkbox-group"></div>
         </div>
-      </div>
 
-      <!-- 配信者のみ表示する設定 -->
-      <div class="grid-2 hidden" id="profStreamerSettingsGroup">
         <div class="form-group">
-          <label>公開設定 <span class="info-icon" id="tip-prof-isPublic">ℹ</span></label>
-          <select id="profIsPublic" onchange="handlePublicChange('prof')">
-            <option value="true">公開</option>
-            <option value="false">非公開</option>
-          </select>
+          <label>フリータグ（カンマ区切り） <span class="info-icon" id="tip-prof-freeTags">ℹ</span></label>
+          <input type="text" id="profFreeTags" placeholder="例: 青年声, SF好き, 短納期相談可">
         </div>
+
+        <div class="form-group" id="profPriceGuideGroup">
+          <label>料金目安（クリエイター） * <span class="info-icon" id="tip-prof-priceGuide">ℹ</span></label>
+          <select id="profPriceGuide"></select>
+        </div>
+
+        <hr class="section-divider">
+
         <div class="form-group">
-          <label id="lbl-profIsContactWelcome">お声がけ歓迎設定 <span class="info-icon" id="tip-prof-isContactWelcome">ℹ</span></label>
-          <select id="profIsContactWelcome">
-            <option value="true">声掛け歓迎</option>
-            <option value="false">閲覧のみ</option>
-          </select>
+          <label>アイコン画像URL <span class="info-icon" id="tip-prof-avatarUrl">ℹ</span></label>
+          <input type="text" id="profAvatarUrl" placeholder="https://...（Googleドライブリンク可）" oninput="updateImagePreview('profAvatarUrl', 'profAvatarPreview')">
+          <div id="profAvatarPreview" class="img-preview-box">
+            <img src="" alt="アイコンプレビュー">
+            <span>アイコン表示プレビュー</span>
+          </div>
         </div>
-      </div>
 
-      <div class="form-group">
-        <label>メインカテゴリ（複数選択可・最低1つ） * <span class="info-icon" id="tip-prof-category">ℹ</span></label>
-        <div id="profCategoryContainer" class="checkbox-group"></div>
-      </div>
-
-      <div class="form-group">
-        <label>属性・作風タグ（複数選択可・最低1つ） * <span class="info-icon" id="tip-prof-tags">ℹ</span></label>
-        <div id="profTagsContainer" class="checkbox-group"></div>
-      </div>
-
-      <div class="form-group">
-        <label>フリータグ（カンマ区切り） <span class="info-icon" id="tip-prof-freeTags">ℹ</span></label>
-        <input type="text" id="profFreeTags" placeholder="例: 青年声, SF好き, 短納期相談可">
-      </div>
-
-      <div class="form-group" id="profPriceGuideGroup">
-        <label>料金目安（クリエイター） * <span class="info-icon" id="tip-prof-priceGuide">ℹ</span></label>
-        <select id="profPriceGuide"></select>
-      </div>
-
-      <hr class="section-divider">
-
-      <div class="form-group">
-        <label>アイコン画像URL <span class="info-icon" id="tip-prof-avatarUrl">ℹ</span></label>
-        <input type="text" id="profAvatarUrl" placeholder="https://...（Googleドライブリンク可）" oninput="updateImagePreview('profAvatarUrl', 'profAvatarPreview')">
-        <div id="profAvatarPreview" class="img-preview-box">
-          <img src="" alt="アイコンプレビュー">
-          <span>アイコン表示プレビュー</span>
+        <div class="form-group">
+          <label>自己紹介・アピール文 <span class="info-icon" id="tip-prof-description">ℹ</span></label>
+          <textarea id="profDescription"></textarea>
         </div>
-      </div>
 
-      <div class="form-group">
-        <label>自己紹介・アピール文 <span class="info-icon" id="tip-prof-description">ℹ</span></label>
-        <textarea id="profDescription"></textarea>
-      </div>
+        <div class="form-group">
+          <label>連絡先窓口 <span class="info-icon" id="tip-prof-contactInfo">ℹ</span></label>
+          <input type="text" id="profContactInfo" placeholder="例: XのDM / contact@example.com">
+        </div>
 
-      <div class="form-group">
-        <label>連絡先窓口 <span class="info-icon" id="tip-prof-contactInfo">ℹ</span></label>
-        <input type="text" id="profContactInfo" placeholder="例: XのDM / contact@example.com">
-      </div>
+        <div class="form-group">
+          <label>X (Twitter) URL</label>
+          <input type="text" id="profXUrl" placeholder="https://x.com/ユーザー名">
+        </div>
 
-      <div class="form-group">
-        <label>X (Twitter) URL</label>
-        <input type="text" id="profXUrl" placeholder="https://x.com/ユーザー名">
-      </div>
+        <div class="form-group">
+          <label>ポートフォリオ・個人HP <span class="info-icon" id="tip-prof-portfolioUrl">ℹ</span></label>
+          <input type="text" id="profPortfolioUrl" placeholder="https://...">
+        </div>
 
-      <div class="form-group">
-        <label>ポートフォリオ・個人HP <span class="info-icon" id="tip-prof-portfolioUrl">ℹ</span></label>
-        <input type="text" id="profPortfolioUrl" placeholder="https://...">
-      </div>
-
-      <!-- 代表作品URL（最大4枠） -->
-      <div class="form-group">
-        <label>代表作品（最大4枠） <span class="info-icon" id="tip-prof-works" data-tooltip="画像、音楽、動画、Webサイトの作品を最大4枠まで登録できます。">ℹ</span></label>
-        <div id="profWorksContainer">
-          <!-- 枠 1 -->
-          <div class="prof-work-block" style="border: 1px solid var(--border); border-radius: var(--radius); padding: 10px; margin-bottom: 8px; background: #fafafa;">
-            <div class="grid-2" style="grid-template-columns: 140px 1fr; margin-bottom: 6px;">
-              <select class="prof-work-type" onchange="toggleWorkImageInput(this)">
-                <option value="image">画像</option>
-                <option value="music">音楽・音声</option>
-                <option value="video">動画</option>
-                <option value="web">Webサイト</option>
-              </select>
-              <input type="text" class="prof-work-url" placeholder="作品URL 1（Googleドライブ可）">
+        <!-- 代表作品URL（最大4枠） -->
+        <div class="form-group">
+          <label>代表作品（最大4枠） <span class="info-icon" id="tip-prof-works" data-tooltip="画像、音楽、動画、Webサイトの作品を最大4枠まで登録できます。">ℹ</span></label>
+          <div id="profWorksContainer">
+            <div class="prof-work-block" style="border: 1px solid var(--border); border-radius: var(--radius); padding: 10px; margin-bottom: 8px; background: #fafafa;">
+              <div class="grid-2" style="grid-template-columns: 140px 1fr; margin-bottom: 6px;">
+                <select class="prof-work-type" onchange="toggleWorkImageInput(this)">
+                  <option value="image">画像</option>
+                  <option value="music">音楽・音声</option>
+                  <option value="video">動画</option>
+                  <option value="web">Webサイト</option>
+                </select>
+                <input type="text" class="prof-work-url" placeholder="作品URL 1（Googleドライブ可）">
+              </div>
+              <div class="prof-work-image-wrap hidden">
+                <input type="text" class="prof-work-image" placeholder="サムネイル・ジャケット画像URL（任意・Googleドライブ可）">
+              </div>
             </div>
-            <div class="prof-work-image-wrap hidden">
-              <input type="text" class="prof-work-image" placeholder="サムネイル・ジャケット画像URL（任意・Googleドライブ可）">
-            </div>
-          </div>
 
-          <!-- 枠 2 -->
-          <div class="prof-work-block" style="border: 1px solid var(--border); border-radius: var(--radius); padding: 10px; margin-bottom: 8px; background: #fafafa;">
-            <div class="grid-2" style="grid-template-columns: 140px 1fr; margin-bottom: 6px;">
-              <select class="prof-work-type" onchange="toggleWorkImageInput(this)">
-                <option value="image">画像</option>
-                <option value="music">音楽・音声</option>
-                <option value="video">動画</option>
-                <option value="web">Webサイト</option>
-              </select>
-              <input type="text" class="prof-work-url" placeholder="作品URL 2">
+            <div class="prof-work-block" style="border: 1px solid var(--border); border-radius: var(--radius); padding: 10px; margin-bottom: 8px; background: #fafafa;">
+              <div class="grid-2" style="grid-template-columns: 140px 1fr; margin-bottom: 6px;">
+                <select class="prof-work-type" onchange="toggleWorkImageInput(this)">
+                  <option value="image">画像</option>
+                  <option value="music">音楽・音声</option>
+                  <option value="video">動画</option>
+                  <option value="web">Webサイト</option>
+                </select>
+                <input type="text" class="prof-work-url" placeholder="作品URL 2">
+              </div>
+              <div class="prof-work-image-wrap hidden">
+                <input type="text" class="prof-work-image" placeholder="サムネイル・ジャケット画像URL（任意・Googleドライブ可）">
+              </div>
             </div>
-            <div class="prof-work-image-wrap hidden">
-              <input type="text" class="prof-work-image" placeholder="サムネイル・ジャケット画像URL（任意・Googleドライブ可）">
-            </div>
-          </div>
 
-          <!-- 枠 3 -->
-          <div class="prof-work-block" style="border: 1px solid var(--border); border-radius: var(--radius); padding: 10px; margin-bottom: 8px; background: #fafafa;">
-            <div class="grid-2" style="grid-template-columns: 140px 1fr; margin-bottom: 6px;">
-              <select class="prof-work-type" onchange="toggleWorkImageInput(this)">
-                <option value="image">画像</option>
-                <option value="music">音楽・音声</option>
-                <option value="video">動画</option>
-                <option value="web">Webサイト</option>
-              </select>
-              <input type="text" class="prof-work-url" placeholder="作品URL 3">
+            <div class="prof-work-block" style="border: 1px solid var(--border); border-radius: var(--radius); padding: 10px; margin-bottom: 8px; background: #fafafa;">
+              <div class="grid-2" style="grid-template-columns: 140px 1fr; margin-bottom: 6px;">
+                <select class="prof-work-type" onchange="toggleWorkImageInput(this)">
+                  <option value="image">画像</option>
+                  <option value="music">音楽・音声</option>
+                  <option value="video">動画</option>
+                  <option value="web">Webサイト</option>
+                </select>
+                <input type="text" class="prof-work-url" placeholder="作品URL 3">
+              </div>
+              <div class="prof-work-image-wrap hidden">
+                <input type="text" class="prof-work-image" placeholder="サムネイル・ジャケット画像URL（任意・Googleドライブ可）">
+              </div>
             </div>
-            <div class="prof-work-image-wrap hidden">
-              <input type="text" class="prof-work-image" placeholder="サムネイル・ジャケット画像URL（任意・Googleドライブ可）">
-            </div>
-          </div>
 
-          <!-- 枠 4 -->
-          <div class="prof-work-block" style="border: 1px solid var(--border); border-radius: var(--radius); padding: 10px; margin-bottom: 8px; background: #fafafa;">
-            <div class="grid-2" style="grid-template-columns: 140px 1fr; margin-bottom: 6px;">
-              <select class="prof-work-type" onchange="toggleWorkImageInput(this)">
-                <option value="image">画像</option>
-                <option value="music">音楽・音声</option>
-                <option value="video">動画</option>
-                <option value="web">Webサイト</option>
-              </select>
-              <input type="text" class="prof-work-url" placeholder="作品URL 4">
-            </div>
-            <div class="prof-work-image-wrap hidden">
-              <input type="text" class="prof-work-image" placeholder="サムネイル・ジャケット画像URL（任意・Googleドライブ可）">
+            <div class="prof-work-block" style="border: 1px solid var(--border); border-radius: var(--radius); padding: 10px; margin-bottom: 8px; background: #fafafa;">
+              <div class="grid-2" style="grid-template-columns: 140px 1fr; margin-bottom: 6px;">
+                <select class="prof-work-type" onchange="toggleWorkImageInput(this)">
+                  <option value="image">画像</option>
+                  <option value="music">音楽・音声</option>
+                  <option value="video">動画</option>
+                  <option value="web">Webサイト</option>
+                </select>
+                <input type="text" class="prof-work-url" placeholder="作品URL 4">
+              </div>
+              <div class="prof-work-image-wrap hidden">
+                <input type="text" class="prof-work-image" placeholder="サムネイル・ジャケット画像URL（任意・Googleドライブ可）">
+              </div>
             </div>
           </div>
         </div>
-      </div>
 
-      <!-- 活動プラットフォーム（最大3枠） -->
-      <div class="form-group">
-        <label>活動プラットフォーム（最大3枠） <span class="info-icon" id="tip-prof-platforms" data-tooltip="YouTube、Twitch、BOOTHなどのリンク先と表示名を入力できます。">ℹ</span></label>
-        <div id="profPlatformsContainer">
-          <div class="grid-2 prof-platform-row" style="grid-template-columns: 140px 1fr; margin-bottom: 6px;">
-            <input type="text" class="prof-platform-label" placeholder="例: YouTube">
-            <input type="text" class="prof-platform-url" placeholder="https://...">
-          </div>
-          <div class="grid-2 prof-platform-row" style="grid-template-columns: 140px 1fr; margin-bottom: 6px;">
-            <input type="text" class="prof-platform-label" placeholder="例: Twitch">
-            <input type="text" class="prof-platform-url" placeholder="https://...">
-          </div>
-          <div class="grid-2 prof-platform-row" style="grid-template-columns: 140px 1fr; margin-bottom: 6px;">
-            <input type="text" class="prof-platform-label" placeholder="例: BOOTH">
-            <input type="text" class="prof-platform-url" placeholder="https://...">
+        <!-- 活動プラットフォーム（最大3枠） -->
+        <div class="form-group">
+          <label>活動プラットフォーム（最大3枠） <span class="info-icon" id="tip-prof-platforms" data-tooltip="YouTube、Twitch、BOOTHなどのリンク先と表示名を入力できます。">ℹ</span></label>
+          <div id="profPlatformsContainer">
+            <div class="grid-2 prof-platform-row" style="grid-template-columns: 140px 1fr; margin-bottom: 6px;">
+              <input type="text" class="prof-platform-label" placeholder="例: YouTube">
+              <input type="text" class="prof-platform-url" placeholder="https://...">
+            </div>
+            <div class="grid-2 prof-platform-row" style="grid-template-columns: 140px 1fr; margin-bottom: 6px;">
+              <input type="text" class="prof-platform-label" placeholder="例: Twitch">
+              <input type="text" class="prof-platform-url" placeholder="https://...">
+            </div>
+            <div class="grid-2 prof-platform-row" style="grid-template-columns: 140px 1fr; margin-bottom: 6px;">
+              <input type="text" class="prof-platform-label" placeholder="例: BOOTH">
+              <input type="text" class="prof-platform-url" placeholder="https://...">
+            </div>
           </div>
         </div>
-      </div>
 
-      <button type="submit" class="btn-primary" id="saveBtn">変更内容を保存する</button>
-      <button type="button" class="btn-logout" onclick="logout()">ログアウト</button>
-    </form>
+        <button type="submit" class="btn-primary" id="saveBtn">変更内容を保存する</button>
+        <button type="button" class="btn-logout" onclick="logout()">ログアウト</button>
+      </form>
+    </div>
+
+    <!-- 2. お気に入り一覧タブ -->
+    <div id="tabView-favorites" class="hidden">
+      <p class="lead">あなたがキープ・お気に入りに登録したユーザーです（他のユーザーには非公開です）。</p>
+      <div id="myFavoritesList" class="fav-list-container"></div>
+    </div>
+
+    <!-- 3. 気になるリストタブ -->
+    <div id="tabView-interested" class="hidden">
+      <p class="lead">あなたをキープ・お気に入りに登録してくれたユーザーです。相互に関心を持っている場合はバッジが表示されます。</p>
+      <div id="interestedList" class="fav-list-container"></div>
+    </div>
+
   </div>
 
   <div id="statusMsg" class="status-box"></div>
+</div>
+
+<!-- 相手プロフィール簡易モーダル -->
+<div class="modal-overlay" id="userModal" onclick="closeUserModal(event)">
+  <div class="modal-content" onclick="event.stopPropagation()">
+    <button class="modal-close" onclick="closeUserModal()">×</button>
+    <div id="modalUserContent"></div>
+  </div>
 </div>
 
 <script>
@@ -444,6 +675,13 @@
   let sessionUser = null;
   let schemaData = null;
   let currentUserRole = "creator";
+
+  let allUsersMap = new Map(); // 全ユーザー情報マップ (userId -> userObj)
+  let favoriteData = {
+    myFavorites: [],
+    interestedInMe: [],
+    mutual: []
+  };
 
   window.addEventListener('DOMContentLoaded', async () => {
     const stored = sessionStorage.getItem('castelier_session');
@@ -454,7 +692,8 @@
     sessionUser = JSON.parse(stored);
 
     try {
-      const [schemaRes, userRes] = await Promise.all([
+      const now = Date.now();
+      const [schemaRes, userRes, usersJsonRes, favRes] = await Promise.all([
         fetch('./schema/accounts.yaml').then(r => r.text()),
         fetch(GAS_API_URL, {
           method: 'POST',
@@ -462,13 +701,35 @@
           body: JSON.stringify({
             action: 'login',
             data: { userId: sessionUser.userId, password: sessionUser.password }
-          }),
-          redirect: 'follow'
-        }).then(r => r.json())
+          })
+        }).then(r => r.json()),
+        fetch(`./data/users.json?t=${now}`).then(r => r.ok ? r.json() : []).catch(() => []),
+        fetch(GAS_API_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain' },
+          body: JSON.stringify({
+            action: 'getFavoriteRelations',
+            data: { userId: sessionUser.userId }
+          })
+        }).then(r => r.json()).catch(() => ({ success: false }))
       ]);
 
       const loaded = jsyaml.load(schemaRes);
       schemaData = loaded.accounts.columns;
+
+      // 全公開ユーザーをMap化
+      (usersJsonRes || []).forEach(u => {
+        if (u.userId) allUsersMap.set(u.userId, u);
+      });
+
+      if (favRes && favRes.success) {
+        favoriteData = {
+          myFavorites: favRes.myFavorites || [],
+          interestedInMe: favRes.interestedInMe || [],
+          mutual: favRes.mutual || []
+        };
+        updateBadges();
+      }
 
       if (userRes.success) {
         initForm(userRes.userData);
@@ -483,9 +744,163 @@
     }
   });
 
+  function updateBadges() {
+    document.getElementById('badgeMyFavorites').textContent = favoriteData.myFavorites.length;
+    document.getElementById('badgeInterested').textContent = favoriteData.interestedInMe.length;
+  }
+
+  function switchAdminTab(tabName) {
+    document.querySelectorAll('.admin-tab-btn').forEach(btn => {
+      btn.classList.toggle('active', btn.dataset.tab === tabName);
+    });
+
+    document.getElementById('tabView-profile').classList.toggle('hidden', tabName !== 'profile');
+    document.getElementById('tabView-favorites').classList.toggle('hidden', tabName !== 'favorites');
+    document.getElementById('tabView-interested').classList.toggle('hidden', tabName !== 'interested');
+
+    if (tabName === 'profile') {
+      document.getElementById('viewTitle').textContent = 'プロフィール編集';
+    } else if (tabName === 'favorites') {
+      document.getElementById('viewTitle').textContent = 'お気に入り一覧';
+      renderFavoritesTab();
+    } else if (tabName === 'interested') {
+      document.getElementById('viewTitle').textContent = '気になるリスト';
+      renderInterestedTab();
+    }
+  }
+
+  // お気に入りタブの描画
+  function renderFavoritesTab() {
+    const listEl = document.getElementById('myFavoritesList');
+    if (favoriteData.myFavorites.length === 0) {
+      listEl.innerHTML = '<div class="empty-list-notice">お気に入りに登録したユーザーはいません。<br>TOPページから気になる相手を★でキープしてみましょう。</div>';
+      return;
+    }
+
+    listEl.innerHTML = favoriteData.myFavorites.map(targetId => {
+      const u = allUsersMap.get(targetId) || { userId: targetId, displayName: '掲載終了または非公開ユーザー', role: 'creator', description: '' };
+      const isMutual = favoriteData.mutual.includes(targetId);
+      return renderUserListItem(u, isMutual, true);
+    }).join('');
+  }
+
+  // 気になるリストタブの描画
+  function renderInterestedTab() {
+    const listEl = document.getElementById('interestedList');
+    if (favoriteData.interestedInMe.length === 0) {
+      listEl.innerHTML = '<div class="empty-list-notice">あなたを気になる登録したユーザーはまだいません。<br>プロフィールや代表作品を充実させてお声がけを待ちましょう！</div>';
+      return;
+    }
+
+    listEl.innerHTML = favoriteData.interestedInMe.map(targetId => {
+      const u = allUsersMap.get(targetId) || { userId: targetId, displayName: '掲載終了または非公開ユーザー', role: 'streamer', description: '' };
+      const isMutual = favoriteData.mutual.includes(targetId);
+      return renderUserListItem(u, isMutual, false);
+    }).join('');
+  }
+
+  function renderUserListItem(u, isMutual, showRemoveBtn) {
+    const avatar = normalizeDriveUrl(u.avatarUrl, 'image');
+    const roleLabel = u.role === 'streamer' ? '配信者' : 'クリエイター';
+
+    return `
+      <div class="fav-card" id="fav-row-${escapeHtml(u.userId)}">
+        ${avatar ? `<img src="${avatar}" class="fav-avatar" alt="">` : '<div class="fav-avatar"></div>'}
+        <div class="fav-info">
+          <div class="fav-meta">
+            <span class="role-badge-sm ${u.role}">${roleLabel}</span>
+            ${isMutual ? '<span class="mutual-badge">🤝 相互マッチ！</span>' : ''}
+          </div>
+          <div class="fav-name" onclick="showUserProfileModal('${escapeHtml(u.userId)}')">${escapeHtml(u.displayName || '名無し')}</div>
+          <div class="fav-desc">${escapeHtml(u.description || '自己紹介はありません。')}</div>
+        </div>
+        <div class="fav-actions">
+          <button class="btn-sm-view" onclick="showUserProfileModal('${escapeHtml(u.userId)}')">詳細</button>
+          ${showRemoveBtn ? `
+            <button class="btn-sm-remove" title="お気に入り解除" onclick="handleRemoveFavorite('${escapeHtml(u.userId)}')">解除</button>
+          ` : ''}
+        </div>
+      </div>
+    `;
+  }
+
+  // お気に入り解除処理
+  async function handleRemoveFavorite(targetUserId) {
+    if (!confirm('このユーザーのお気に入りを解除しますか？')) return;
+
+    favoriteData.myFavorites = favoriteData.myFavorites.filter(id => id !== targetUserId);
+    favoriteData.mutual = favoriteData.mutual.filter(id => id !== targetUserId);
+    updateBadges();
+    renderFavoritesTab();
+
+    try {
+      await fetch(GAS_API_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain' },
+        body: JSON.stringify({
+          action: 'toggleFavorite',
+          data: {
+            fromUserId: sessionUser.userId,
+            toUserId: targetUserId
+          }
+        })
+      });
+    } catch (e) {
+      console.warn('解除通信エラー:', e);
+    }
+  }
+
+  // 相手の詳細モーダル表示
+  function showUserProfileModal(userId) {
+    const u = allUsersMap.get(userId);
+    if (!u) {
+      alert('ユーザー詳細データを読み込めませんでした。');
+      return;
+    }
+
+    const avatar = normalizeDriveUrl(u.avatarUrl, 'image');
+    const roleLabel = u.role === 'streamer' ? '配信者' : 'クリエイター';
+    const isMutual = favoriteData.mutual.includes(userId);
+
+    const links = [];
+    if (u.xUrl) links.push(`<a href="${u.xUrl}" target="_blank" rel="noopener" style="color:var(--primary); text-decoration:none; margin-right:8px;">X (Twitter) ↗</a>`);
+    if (u.portfolioUrl) links.push(`<a href="${u.portfolioUrl}" target="_blank" rel="noopener" style="color:var(--primary); text-decoration:none;">ポートフォリオ ↗</a>`);
+
+    document.getElementById('modalUserContent').innerHTML = `
+      <div style="display:flex; align-items:center; gap:14px; margin-bottom:14px;">
+        ${avatar ? `<img src="${avatar}" style="width:60px; height:60px; border-radius:50%; object-fit:cover; border:1px solid var(--border);" alt="">` : ''}
+        <div>
+          <div style="display:flex; gap:6px; align-items:center;">
+            <span class="role-badge-sm ${u.role}">${roleLabel}</span>
+            ${isMutual ? '<span class="mutual-badge">🤝 相互マッチ</span>' : ''}
+          </div>
+          <h2 style="font-size:1.25rem; margin-top:4px;">${escapeHtml(u.displayName || '')}</h2>
+        </div>
+      </div>
+
+      <div style="font-size:0.9rem; line-height:1.6; color:#334155; margin-bottom:16px; white-space:pre-wrap;">${escapeHtml(u.description || '自己紹介文はありません。')}</div>
+
+      ${links.length > 0 ? `
+        <div style="margin-bottom:14px; font-size:0.85rem;">${links.join('')}</div>
+      ` : ''}
+
+      ${u.contactInfo ? `
+        <div style="background:#f8fafc; padding:10px 12px; border-radius:6px; font-size:0.85rem; border:1px solid var(--border);">
+          <strong>連絡先窓口:</strong> ${escapeHtml(u.contactInfo)}
+        </div>
+      ` : ''}
+    `;
+
+    document.getElementById('userModal').classList.add('open');
+  }
+
+  function closeUserModal() {
+    document.getElementById('userModal').classList.remove('open');
+  }
+
   function initForm(userData) {
     document.getElementById('loadingView').classList.add('hidden');
-    document.getElementById('mainFormView').classList.remove('hidden');
+    document.getElementById('mainContentView').classList.remove('hidden');
     document.getElementById('displayUserId').textContent = `ID: ${userData.userId}`;
 
     applyInfoTips('prof');
@@ -494,7 +909,6 @@
     const isStreamer = currentUserRole === 'streamer';
     document.getElementById('profRole').value = currentUserRole;
 
-    // タグ一覧
     const tagsContainer = document.getElementById('profTagsContainer');
     tagsContainer.innerHTML = schemaData.tags.options.map((val, i) => `
       <label class="checkbox-label">
@@ -503,13 +917,11 @@
       </label>
     `).join('');
 
-    // 料金目安一覧
     const priceSelect = document.getElementById('profPriceGuide');
     priceSelect.innerHTML = schemaData.priceGuide.options.map((val, i) => `
       <option value="${val}">${schemaData.priceGuide.optionLabels[i] || val}</option>
     `).join('');
 
-    // カテゴリ一覧
     const catContainer = document.getElementById('profCategoryContainer');
     const categories = schemaData.category.options[currentUserRole] || [];
     const catLabels = schemaData.category.optionLabels[currentUserRole] || [];
@@ -520,7 +932,6 @@
       </label>
     `).join('');
 
-    // 出し分け制御
     if (isStreamer) {
       document.getElementById('profStreamerSettingsGroup').classList.remove('hidden');
       document.getElementById('profPriceGuideGroup').classList.add('hidden');
@@ -544,7 +955,6 @@
     document.getElementById('profXUrl').value = userData.xUrl || '';
     document.getElementById('profPortfolioUrl').value = userData.portfolioUrl || '';
 
-    // ★ 代表作品 1〜4 を各列から直接セット
     const workBlocks = document.querySelectorAll('.prof-work-block');
     workBlocks.forEach((block, idx) => {
       const i = idx + 1;
@@ -558,7 +968,6 @@
       toggleWorkImageInput(typeSelect);
     });
 
-    // ★ プラットフォーム 1〜3 を各列から直接セット
     const platformRows = document.querySelectorAll('.prof-platform-row');
     platformRows.forEach((row, idx) => {
       const i = idx + 1;
@@ -624,7 +1033,6 @@
     document.getElementById('statusMsg').style.display = 'none';
   }
 
-  // プロフィール更新処理
   async function handleUpdate(e) {
     e.preventDefault();
     hideStatus();
@@ -668,7 +1076,6 @@
     const isPublic = isStreamer ? (document.getElementById('profIsPublic').value === 'true') : true;
     const isContactWelcome = (isStreamer && isPublic) ? (document.getElementById('profIsContactWelcome').value === 'true') : (!isStreamer ? true : false);
 
-    // ★ スプレッドシートの列名に合わせてフラットに送信
     const payloadData = {
       userId: sessionUser.userId,
       password: sessionUser.password,
@@ -686,7 +1093,6 @@
       portfolioUrl: document.getElementById('profPortfolioUrl').value.trim()
     };
 
-    // 代表作品 1〜4 を列名でセット
     const workBlocks = document.querySelectorAll('.prof-work-block');
     workBlocks.forEach((block, idx) => {
       const i = idx + 1;
@@ -699,7 +1105,6 @@
       payloadData[`works_image-${i}`] = rawImg ? normalizeDriveUrl(rawImg, 'image') : '';
     });
 
-    // プラットフォーム 1〜3 を列名でセット
     const platformRows = document.querySelectorAll('.prof-platform-row');
     platformRows.forEach((row, idx) => {
       const i = idx + 1;
@@ -792,6 +1197,16 @@
       });
       if (targetIcon) targetIcon.classList.toggle('active');
     });
+  }
+
+  function escapeHtml(str) {
+    if (!str) return '';
+    return String(str)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#039;');
   }
 </script>
 </body>
