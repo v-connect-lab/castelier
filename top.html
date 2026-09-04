@@ -659,44 +659,53 @@
       const FIFTEEN_MINUTES = 15 * 60 * 1000;
       const isRecentlyRegistered = registeredAt && (now - parseInt(registeredAt, 10) < FIFTEEN_MINUTES);
 
+      // セッションから自分のIDを取得
+      const session = sessionStorage.getItem('castelier_session');
+      const currentUserId = session ? JSON.parse(session).userId : null;
+
       try {
         const fetchSchema = fetch('./schema/accounts.yaml').then(r => r.text());
-        const fetchUserData = (async () => {
-          if (isRecentlyRegistered) {
-            console.log('登録直後のため、最新データをGASから取得します。');
-            const res = await fetch(`${GAS_API_URL}?action=getPublicUsers`);
-            return await res.json();
-          } else {
-            const res = await fetch(`./data/users.json?t=${now}`);
-            if (!res.ok) throw new Error('users.json fetch error');
-            const json = await res.json();
-            return { success: true, users: json };
+
+        // 1. 基本は常に静的 json を取得（高速・キャッシュ対応）
+        const fetchJsonUsers = fetch(`./data/users.json?t=${now}`)
+          .then(r => r.ok ? r.json() : [])
+          .catch(() => []);
+
+        // 2. 登録15分以内で自分IDがあれば、GASから自分1人分だけ取得
+        const fetchSelfUser = (async () => {
+          if (isRecentlyRegistered && currentUserId) {
+            try {
+              const res = await fetch(`${GAS_API_URL}?action=getUserById&userId=${encodeURIComponent(currentUserId)}`);
+              const data = await res.json();
+              return data.success ? data.user : null;
+            } catch(e) {
+              return null;
+            }
           }
+          return null;
         })();
 
-        const [schemaYaml, userResult] = await Promise.all([fetchSchema, fetchUserData]);
+        const [schemaYaml, baseUsers, selfUser] = await Promise.all([fetchSchema, fetchJsonUsers, fetchSelfUser]);
 
         const loadedYaml = jsyaml.load(schemaYaml);
         schemaData = loadedYaml.accounts.columns;
         buildLabelMaps(schemaData);
 
-        if (userResult.success) {
-          allUsers = userResult.users || [];
-          renderFilteredUsers();
-        } else {
-          throw new Error(userResult.message || 'データ取得失敗');
+        // 3. データを合成
+        let mergedList = [...baseUsers];
+
+        if (selfUser) {
+          // json内にすでに自分が存在する場合は除去し、最新の自分を先頭に追加
+          mergedList = mergedList.filter(u => u.userId !== selfUser.userId);
+          mergedList.unshift(selfUser);
         }
 
+        allUsers = mergedList;
+        renderFilteredUsers();
+
       } catch (err) {
-        console.warn('初期読み込みフォールバック:', err);
-        try {
-          const fbRes = await fetch(`${GAS_API_URL}?action=getPublicUsers`);
-          const fbData = await fbRes.json();
-          allUsers = fbData.users || [];
-          renderFilteredUsers();
-        } catch (fbErr) {
-          document.getElementById('userGrid').innerHTML = '<div class="loading-state">ユーザー一覧の取得に失敗しました。</div>';
-        }
+        console.warn('読み込みエラー:', err);
+        document.getElementById('userGrid').innerHTML = '<div class="loading-state">ユーザー一覧の取得に失敗しました。</div>';
       }
     });
 
