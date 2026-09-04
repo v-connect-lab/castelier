@@ -1,7 +1,7 @@
 [
   {
     "userId": "usr_beebb209",
-    "role": "creator",
+    "role": "",
     "displayName": "潤華ねろ",
     "isContactWelcome": true,
     "category": "Web",
@@ -36,6 +36,24 @@
     "contactInfo": "urukanero.works@gmail.com",
     "description": "よろしくお願いします！",
     "priceGuide": "Free",
-    "updatedAt": "2026-09-04T00:09:34.000Z"
+    "updatedAt": "2026-09-04T00:20:23.000Z"
+  },
+  {
+    "userId": "usr_8456be69",
+    "role": "streamer",
+    "displayName": "テスト",
+    "isContactWelcome": true,
+    "category": "VTuber",
+    "tags": "JapaneseStyle",
+    "freeTags": "",
+    "avatarUrl": "",
+    "works": [],
+    "portfolioUrl": "",
+    "xUrl": "",
+    "platforms": [],
+    "contactInfo": "",
+    "description": "よろしくお願いします。",
+    "priceGuide": "",
+    "updatedAt": "2026-09-04T00:17:19.000Z"
   }
 ]
