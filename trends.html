@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Castelier | 需要トレンド統計</title>
+  <style>
+    :root {
+      --bg: #f8fafc;
+      --card-bg: #ffffff;
+      --text-main: #1e293b;
+      --text-sub: #64748b;
+      --border: #e2e8f0;
+      --creator-color: #ec4899;
+      --creator-bg: #fdf2f8;
+      --streamer-color: #3b82f6;
+      --streamer-bg: #eff6ff;
+      --accent: #f59e0b;
+      --radius: 12px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background-color: var(--bg);
+      color: var(--text-main);
+      line-height: 1.6;
+      padding: 24px 16px 80px;
+    }
+
+    .container {
+      max-width: 860px;
+      margin: 0 auto;
+    }
+
+    /* ヘッダー */
+    .trend-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--border);
+    }
+    .trend-title h1 {
+      font-size: 1.4rem;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .trend-title p {
+      font-size: 0.8rem;
+      color: var(--text-sub);
+      margin-top: 4px;
+    }
+    .btn-back {
+      text-decoration: none;
+      background: #fff;
+      border: 1px solid var(--border);
+      color: var(--text-main);
+      padding: 8px 14px;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      font-weight: bold;
+      transition: background 0.15s;
+    }
+    .btn-back:hover { background: #f1f5f9; }
+
+    /* カード */
+    .trend-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px;
+      margin-bottom: 24px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.03);
+    }
+    .card-title {
+      font-size: 1.05rem;
+      font-weight: 700;
+      margin-bottom: 6px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .card-desc {
+      font-size: 0.8rem;
+      color: var(--text-sub);
+      margin-bottom: 18px;
+    }
+
+    /* 全体サマリー比率 */
+    .ratio-summary-bar {
+      height: 24px;
+      border-radius: 12px;
+      overflow: hidden;
+      display: flex;
+      margin-bottom: 12px;
+      background: #e2e8f0;
+    }
+    .ratio-part-creator {
+      background: var(--creator-color);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      font-size: 0.75rem;
+      font-weight: bold;
+      transition: width 0.5s ease;
+    }
+    .ratio-part-streamer {
+      background: var(--streamer-color);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      font-size: 0.75rem;
+      font-weight: bold;
+      transition: width 0.5s ease;
+    }
+    .ratio-labels {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.85rem;
+      font-weight: 600;
+    }
+
+    /* カテゴリ別バー */
+    .category-row {
+      margin-bottom: 16px;
+      padding-bottom: 14px;
+      border-bottom: 1px dashed var(--border);
+    }
+    .category-row:last-child {
+      margin-bottom: 0;
+      padding-bottom: 0;
+      border-bottom: none;
+    }
+    .category-meta {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.85rem;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+    .balance-track {
+      height: 12px;
+      background: #e2e8f0;
+      border-radius: 6px;
+      overflow: hidden;
+      display: flex;
+    }
+
+    /* 需要タグランキング */
+    .tag-rank-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 10px;
+    }
+    .tag-rank-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: #f8fafc;
+      border: 1px solid var(--border);
+      padding: 8px 12px;
+      border-radius: 8px;
+    }
+    .tag-rank-num {
+      font-size: 0.75rem;
+      font-weight: 800;
+      color: var(--text-sub);
+      width: 20px;
+    }
+    .tag-rank-name {
+      font-size: 0.85rem;
+      font-weight: 600;
+      flex-grow: 1;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .tag-rank-count {
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: var(--streamer-color);
+      background: var(--streamer-bg);
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+
+    /* ブルーオーシャン (ギャップ注記) */
+    .insight-box {
+      background: #fffbeb;
+      border: 1px solid #fde68a;
+      border-radius: 8px;
+      padding: 12px 16px;
+      margin-top: 14px;
+      font-size: 0.85rem;
+      color: #92400e;
+    }
+
+    .loading-text {
+      text-align: center;
+      padding: 40px;
+      color: var(--text-sub);
+      font-size: 0.9rem;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <div class="trend-header">
+    <div class="trend-title">
+      <h1>📊 需要トレンド統計</h1>
+      <p>個人を比較せず、プラットフォーム全体の分野・作風の需給バランスを集計したデータです。</p>
+    </div>
+    <a href="./top.html" class="btn-back">← TOPへ戻る</a>
+  </div>
+
+  <div id="loadingView" class="loading-text">統計データを集計中...</div>
+
+  <div id="contentView" style="display: none;">
+    <!-- 1. 全体比率サマリー -->
+    <div class="trend-card">
+      <div class="card-title">👥 全体の活動者比率</div>
+      <div class="card-desc">公開中のアカウント構成比です。</div>
+      <div class="ratio-summary-bar">
+        <div class="ratio-part-creator" id="barTotalCreator" style="width: 50%;">0%</div>
+        <div class="ratio-part-streamer" id="barTotalStreamer" style="width: 50%;">0%</div>
+      </div>
+      <div class="ratio-labels">
+        <span style="color: var(--creator-color);">🎨 クリエイター: <span id="countTotalCreator">0</span>人</span>
+        <span style="color: var(--streamer-color);">🎙️ 配信者: <span id="countTotalStreamer">0</span>人</span>
+      </div>
+    </div>
+
+    <!-- 2. カテゴリ別 需給バランス -->
+    <div class="trend-card">
+      <div class="card-title">⚖️ 制作分野別の需給バランス</div>
+      <div class="card-desc">各分野における「制作受付（クリエイター）」と「依頼希望（配信者）」の対比です。</div>
+      <div id="categoryBalanceList"></div>
+    </div>
+
+    <!-- 3. 配信者が求めている作風ランキング -->
+    <div class="trend-card">
+      <div class="card-title">🔥 配信者が求めている作風・テイスト</div>
+      <div class="card-desc">配信者アカウントがプロフィールで指定している希望タグの集計です。</div>
+      <div class="tag-rank-grid" id="streamerTagGrid"></div>
+
+      <div class="insight-box" id="insightBox">
+        💡 <strong>クリエイター向けヒント:</strong> <span id="insightText">データを分析中...</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // マスター定義（top.htmlの定義と整合）
+  const CATEGORY_NAMES = {
+    'ill': 'イラスト・キャラクターデザイン',
+    'live2d': 'Live2D・3Dモデリング',
+    'movie': '動画編集・アニメーション',
+    'music': '楽曲制作・BGM・SE',
+    'mix': '歌ってみたMIX・音響編集',
+    'design': 'ロゴ・サムネイル・UIデザイン',
+    'writing': '台本・シナリオ・作詞',
+    'voice': '声優・ナレーション',
+    'support': '配信機材サポート・マネジメント',
+    'other': 'その他'
+  };
+
+  window.addEventListener('DOMContentLoaded', async () => {
+    try {
+      const res = await fetch('./data/users.json');
+      if (!res.ok) throw new Error('users.json の取得に失敗しました');
+      const users = await res.json();
+
+      calculateAndRender(users);
+    } catch (err) {
+      document.getElementById('loadingView').textContent = 'データの読み込みに失敗しました: ' + err.message;
+    }
+  });
+
+  function calculateAndRender(users) {
+    const creators = users.filter(u => u.role === 'creator');
+    const streamers = users.filter(u => u.role === 'streamer');
+
+    const totalC = creators.length;
+    const totalS = streamers.length;
+    const total = totalC + totalS;
+
+    if (total === 0) {
+      document.getElementById('loadingView').textContent = '集計対象の公開ユーザーがいません。';
+      return;
+    }
+
+    // 1. 全体比率
+    const cRate = Math.round((totalC / total) * 100) || 0;
+    const sRate = 100 - cRate;
+    document.getElementById('barTotalCreator').style.width = `${cRate}%`;
+    document.getElementById('barTotalCreator').textContent = `${cRate}%`;
+    document.getElementById('barTotalStreamer').style.width = `${sRate}%`;
+    document.getElementById('barTotalStreamer').textContent = `${sRate}%`;
+    document.getElementById('countTotalCreator').textContent = totalC;
+    document.getElementById('countTotalStreamer').textContent = totalS;
+
+    // 2. カテゴリ別集計
+    const catStats = {};
+    Object.keys(CATEGORY_NAMES).forEach(k => {
+      catStats[k] = { creator: 0, streamer: 0 };
+    });
+
+    creators.forEach(u => {
+      splitComma(u.category).forEach(cat => {
+        if (catStats[cat]) catStats[cat].creator++;
+      });
+    });
+    streamers.forEach(u => {
+      splitComma(u.category).forEach(cat => {
+        if (catStats[cat]) catStats[cat].streamer++;
+      });
+    });
+
+    const catListEl = document.getElementById('categoryBalanceList');
+    let catHtml = '';
+
+    Object.keys(catStats).forEach(key => {
+      const cCount = catStats[key].creator;
+      const sCount = catStats[key].streamer;
+      const catSum = cCount + sCount;
+      if (catSum === 0) return; // 誰も選んでいないカテゴリは省略
+
+      const catCRate = Math.round((cCount / catSum) * 100);
+      const catSRate = 100 - catCRate;
+      const label = CATEGORY_NAMES[key] || key;
+
+      catHtml += `
+        <div class="category-row">
+          <div class="category-meta">
+            <span>${escapeHtml(label)}</span>
+            <span style="font-size:0.75rem; color:var(--text-sub);">
+              <span style="color:var(--creator-color);">受付: ${cCount}件</span> / 
+              <span style="color:var(--streamer-color);">需要: ${sCount}件</span>
+            </span>
+          </div>
+          <div class="balance-track">
+            <div style="width: ${catCRate}%; background: var(--creator-color);" title="クリエイター: ${catCRate}%"></div>
+            <div style="width: ${catSRate}%; background: var(--streamer-color);" title="配信者: ${catSRate}%"></div>
+          </div>
+        </div>
+      `;
+    });
+    catListEl.innerHTML = catHtml || '<div style="color:var(--text-sub); font-size:0.85rem;">該当データがありません</div>';
+
+    // 3. 配信者が求めている作風タグランキング
+    const streamerTagCount = {};
+    streamers.forEach(u => {
+      splitComma(u.tags).forEach(tag => {
+        if (!tag) return;
+        streamerTagCount[tag] = (streamerTagCount[tag] || 0) + 1;
+      });
+    });
+
+    const sortedTags = Object.entries(streamerTagCount)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 12); // 上位12件
+
+    const tagGridEl = document.getElementById('streamerTagGrid');
+    if (sortedTags.length > 0) {
+      tagGridEl.innerHTML = sortedTags.map(([tag, count], idx) => `
+        <div class="tag-rank-item">
+          <span class="tag-rank-num">#${idx + 1}</span>
+          <span class="tag-rank-name">${escapeHtml(tag)}</span>
+          <span class="tag-rank-count">${count}件</span>
+        </div>
+      `).join('');
+
+      // クリエイター供給タグとのギャップ（ブルーオーシャン分析）
+      const creatorTagCount = {};
+      creators.forEach(u => {
+        splitComma(u.tags).forEach(tag => {
+          if (!tag) return;
+          creatorTagCount[tag] = (creatorTagCount[tag] || 0) + 1;
+        });
+      });
+
+      // 配信者需要が高いが、クリエイター登録が少ないタグを探す
+      let bestGapTag = '';
+      let maxGap = -999;
+      sortedTags.forEach(([tag, sCount]) => {
+        const cCount = creatorTagCount[tag] || 0;
+        const gap = sCount - cCount;
+        if (gap > maxGap) {
+          maxGap = gap;
+          bestGapTag = tag;
+        }
+      });
+
+      if (bestGapTag && maxGap > 0) {
+        document.getElementById('insightText').innerHTML = 
+          `現在、作風「<strong>${escapeHtml(bestGapTag)}</strong>」は配信者からの需要に対して受付クリエイターが少なめです。対応可能なクリエイターはこのタグを設定するとマッチング率が上がる傾向にあります。`;
+      } else {
+        document.getElementById('insightText').textContent = 
+          `上位タグの「${sortedTags[0][0]}」を中心に需要が集まっています。`;
+      }
+
+    } else {
+      tagGridEl.innerHTML = '<div style="color:var(--text-sub); font-size:0.85rem;">集計可能なタグデータがまだありません</div>';
+      document.getElementById('insightBox').style.display = 'none';
+    }
+
+    document.getElementById('loadingView').style.display = 'none';
+    document.getElementById('contentView').style.display = 'block';
+  }
+
+  function splitComma(str) {
+    if (!str) return [];
+    return String(str).split(',').map(s => s.trim()).filter(Boolean);
+  }
+
+  function escapeHtml(str) {
+    if (!str) return '';
+    return String(str)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#039;');
+  }
+</script>
+</body>
+</html>
