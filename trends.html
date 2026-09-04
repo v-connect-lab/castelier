@@ -178,6 +178,26 @@
     .badge-count.creator { background: var(--creator-bg); color: var(--creator-color); }
     .badge-count.streamer { background: var(--streamer-bg); color: var(--streamer-color); }
 
+    /* ヒントボックス（ブルーオーシャン分析） */
+    .insight-box {
+      margin-top: 20px;
+      padding: 14px 18px;
+      background: #fffbeb;
+      border: 1px solid #fde68a;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      line-height: 1.6;
+      color: #92400e;
+    }
+    .insight-title {
+      font-weight: 800;
+      margin-bottom: 4px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      color: #b45309;
+    }
+
     /* フリータグクラウド・ランキング */
     .freetag-grid {
       display: grid;
@@ -265,7 +285,7 @@
       </div>
     </div>
 
-    <!-- 3. 属性・作風タグ（tags）の登録傾向 -->
+    <!-- 3. 属性・作風タグ（tags）の登録傾向 & ヒントボックス -->
     <div class="trend-card">
       <div class="card-title">🏷️ 属性・作風タグの傾向</div>
       <div class="card-desc">プロフィールで設定されている基本タグの比較です。</div>
@@ -283,6 +303,12 @@
           <div id="streamerTagList"></div>
         </div>
       </div>
+
+      <!-- ブルーオーシャン分析 ヒントボックス -->
+      <div class="insight-box" id="insightBox">
+        <div class="insight-title">💡 クリエイター向け 狙い目トレンド（需要ギャップ分析）</div>
+        <div id="insightText">データを集計・分析中...</div>
+      </div>
     </div>
 
     <!-- 4. 設定されているフリータグ（freeTags）上位20件 -->
@@ -295,7 +321,6 @@
 </div>
 
 <script>
-  // 動的辞書マップ（schema/accounts.yaml から自動生成）
   let DICTIONARY = {};
 
   function getLabel(key) {
@@ -305,7 +330,6 @@
 
   window.addEventListener('DOMContentLoaded', async () => {
     try {
-      // accounts.yaml と users.json を並行取得
       const [yamlRes, usersRes] = await Promise.all([
         fetch('./schema/accounts.yaml'),
         fetch('./data/users.json')
@@ -318,26 +342,20 @@
       const schema = jsyaml.load(yamlText);
       const users = await usersRes.json();
 
-      // YAMLから options と optionLabels のペアを自動抽出して辞書を構築
       buildDictionaryFromYaml(schema);
-
-      // 集計と描画
       calculateAndRender(users);
     } catch (err) {
       document.getElementById('loadingView').textContent = 'データの読み込みに失敗しました: ' + err.message;
     }
   });
 
-  /**
-   * accounts.yaml の構造を走査して DICTIONARY を動的生成する
-   */
   function buildDictionaryFromYaml(schema) {
     const cols = schema?.accounts?.columns;
     if (!cols) return;
 
     DICTIONARY = {};
 
-    // 1. category（ロール別にオブジェクト分割されている形式に対応）
+    // 1. category
     const catCol = cols.category;
     if (catCol && catCol.options && catCol.optionLabels) {
       ['creator', 'streamer'].forEach(role => {
@@ -349,7 +367,7 @@
       });
     }
 
-    // 2. tags（配列形式に対応）
+    // 2. tags
     const tagCol = cols.tags;
     if (tagCol && Array.isArray(tagCol.options) && Array.isArray(tagCol.optionLabels)) {
       tagCol.options.forEach((opt, idx) => {
@@ -357,7 +375,7 @@
       });
     }
 
-    // 3. priceGuide などの単一選択項目（将来的な拡張用）
+    // 3. priceGuide
     if (cols.priceGuide && Array.isArray(cols.priceGuide.options) && Array.isArray(cols.priceGuide.optionLabels)) {
       cols.priceGuide.options.forEach((opt, idx) => {
         if (cols.priceGuide.optionLabels[idx]) DICTIONARY[opt] = cols.priceGuide.optionLabels[idx];
@@ -388,13 +406,17 @@
     document.getElementById('countTotalCreator').textContent = totalC;
     document.getElementById('countTotalStreamer').textContent = totalS;
 
-    // 2. メインカテゴリ集計（辞書で optionLabels に変換）
+    // 2. メインカテゴリ集計
     renderRankList(creators, 'category', 'creatorCatList', 'creator');
     renderRankList(streamers, 'category', 'streamerCatList', 'streamer');
 
-    // 3. 属性・作風タグ集計（辞書で optionLabels に変換）
-    renderRankList(creators, 'tags', 'creatorTagList', 'creator');
-    renderRankList(streamers, 'tags', 'streamerTagList', 'streamer');
+    // 3. 属性・作風タグ集計 & ブルーオーシャン分析
+    const creatorTagCounts = getTagCounts(creators, 'tags');
+    const streamerTagCounts = getTagCounts(streamers, 'tags');
+
+    renderRankListFromCounts(creatorTagCounts, 'creatorTagList', 'creator');
+    renderRankListFromCounts(streamerTagCounts, 'streamerTagList', 'streamer');
+    generateInsight(creatorTagCounts, streamerTagCounts);
 
     // 4. フリータグ上位20件集計
     renderFreeTags(users);
@@ -403,8 +425,7 @@
     document.getElementById('contentView').style.display = 'block';
   }
 
-  // ランキング描画関数（YAML変換対応）
-  function renderRankList(userGroup, keyName, containerId, role) {
+  function getTagCounts(userGroup, keyName) {
     const countMap = {};
     userGroup.forEach(u => {
       splitComma(u[keyName]).forEach(rawKey => {
@@ -413,7 +434,15 @@
         countMap[label] = (countMap[label] || 0) + 1;
       });
     });
+    return countMap;
+  }
 
+  function renderRankList(userGroup, keyName, containerId, role) {
+    const countMap = getTagCounts(userGroup, keyName);
+    renderRankListFromCounts(countMap, containerId, role);
+  }
+
+  function renderRankListFromCounts(countMap, containerId, role) {
     const sorted = Object.entries(countMap).sort((a, b) => b[1] - a[1]);
     const el = document.getElementById(containerId);
 
@@ -430,7 +459,34 @@
     `).join('');
   }
 
-  // フリータグTOP20描画関数
+  // ブルーオーシャン（需要過多）自動判定ロジック
+  function generateInsight(creatorCounts, streamerCounts) {
+    const el = document.getElementById('insightText');
+    const streamerEntries = Object.entries(streamerCounts);
+
+    if (streamerEntries.length === 0) {
+      el.textContent = '配信者のタグデータが集まると、ここに需要の高い穴場トレンドが表示されます。';
+      return;
+    }
+
+    // 配信者需要に対してクリエイター登録が少ないギャップ順にソート
+    const gaps = streamerEntries.map(([tag, sCount]) => {
+      const cCount = creatorCounts[tag] || 0;
+      return { tag, sCount, cCount, gap: sCount - cCount };
+    }).sort((a, b) => b.gap - a.gap);
+
+    // 配信者登録があり、かつクリエイターが同数以下（需要過多）な上位タグを抽出
+    const blueOceans = gaps.filter(g => g.gap >= 0 && g.sCount > 0);
+
+    if (blueOceans.length > 0 && blueOceans[0].gap > 0) {
+      const topOceans = blueOceans.slice(0, 2).map(g => `「<strong>${escapeHtml(g.tag)}</strong>」`).join(' や ');
+      el.innerHTML = `現在、作風${topOceans}は配信者の登録に対して対応可能なクリエイターが少なめです。該当する作風に対応できるクリエイターは、プロフィールタグに設定しておくと声がかかりやすくなります。`;
+    } else {
+      const popular = streamerEntries.sort((a, b) => b[1] - a[1])[0];
+      el.innerHTML = `現在、配信者側では「<strong>${escapeHtml(popular[0])}</strong>」を設定している活動者が最多です。王道スタイルとして安定した需要が見込めます。`;
+    }
+  }
+
   function renderFreeTags(users) {
     const freeTagMap = {};
     users.forEach(u => {
