@@ -23,11 +23,6 @@
         "type": "video",
         "image": "",
         "url": "https://www.youtube.com/watch?v=HWDVVysH_oI"
-      },
-      {
-        "type": "image",
-        "image": "",
-        "url": "https://raw.githubusercontent.com/nr-works-dev/portfolio/main/assets/web1_image-1.jpg"
       }
     ],
     "portfolioUrl": "https://nr-works-dev.github.io/portfolio/",
@@ -41,6 +36,6 @@
     "contactInfo": "urukanero.works@gmail.com",
     "description": "よろしくお願いします！",
     "priceGuide": "Free",
-    "updatedAt": "2026-09-03T17:37:24.189Z"
+    "updatedAt": "2026-09-04T00:09:34.000Z"
   }
 ]
