@@ -1,7 +1,7 @@
 [
   {
     "userId": "usr_beebb209",
-    "role": "",
+    "role": "creator",
     "displayName": "潤華ねろ",
     "isContactWelcome": true,
     "category": "Web",
@@ -55,5 +55,23 @@
     "description": "よろしくお願いします。",
     "priceGuide": "",
     "updatedAt": "2026-09-04T00:17:19.000Z"
+  },
+  {
+    "userId": "usr_4e86b6f4",
+    "role": "streamer",
+    "displayName": "テスト2",
+    "isContactWelcome": true,
+    "category": "VLiveStreamer",
+    "tags": "Androgynous",
+    "freeTags": "",
+    "avatarUrl": "",
+    "works": [],
+    "portfolioUrl": "",
+    "xUrl": "",
+    "platforms": [],
+    "contactInfo": "",
+    "description": "よろしくお願いします。",
+    "priceGuide": "",
+    "updatedAt": "2026-09-04T00:28:03.000Z"
   }
 ]
