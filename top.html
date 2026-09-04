@@ -1554,34 +1554,30 @@
       window.open(url, '_blank', 'noopener,noreferrer');
     }
 
-    // お問い合わせメーラー起動処理
-    async function handleContactClick(e) {
+    // お問い合わせメーラー起動処理（Safariブロック回避のため完全同期的実行）
+    function handleContactClick(e) {
       if (e) e.preventDefault();
 
-      try {
-        const res = await fetch('./config/contact.json?t=' + Date.now());
-        if (!res.ok) throw new Error(`HTTPエラー: ${res.status}`);
-        const conf = await res.json();
+      // 設定ファイルが読み込めていればそれを使い、なければフォールバック
+      const conf = contactConfig || {
+        to: 'support@castelier.jp',
+        subject: '【Castelier】お問い合わせ',
+        body: 'Castelier 運営チーム 御中\r\n\r\nお名前（活動名）：\r\nユーザーID（任意）：\r\n\r\n【お問い合わせ種別】\r\n[ ] 規約・利用に関する質問\r\n[ ] アカウント関連\r\n[ ] その他\r\n\r\n【お問い合わせ内容】\r\n\r\n'
+      };
 
-        const to = conf.to || '';
-        const subject = conf.subject || '【Castelier】お問い合わせ';
-        let body = conf.body || '';
+      const to = conf.to || '';
+      const subject = conf.subject || '【Castelier】お問い合わせ';
+      let body = conf.body || '';
 
-        // ログイン中の場合はユーザーIDを置換
-        if (currentUserId) {
-          body = body.replace('ユーザーID（任意）：', `ユーザーID（任意）：${currentUserId}`);
-        }
-
-        // iOS/Safari対策: 改行コードを %0D%0A (\r\n) に統一してエンコード
-        const normalizedBody = body.replace(/\r?\n/g, '\r\n');
-        const mailtoUrl = `mailto:${to}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(normalizedBody)}`;
-
-        window.location.href = mailtoUrl;
-
-      } catch (err) {
-        console.error('お問い合わせ設定の読み込みに失敗:', err);
-        alert('設定ファイルの読み込みに失敗しました: ' + err.message + '\nconfig/contact.json の配置を確認してください。');
+      if (currentUserId) {
+        body = body.replace('ユーザーID（任意）：', `ユーザーID（任意）：${currentUserId}`);
       }
+
+      const normalizedBody = body.replace(/\r?\n/g, '\r\n');
+      const mailtoUrl = `mailto:${to}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(normalizedBody)}`;
+
+      // ユーザー操作のコンテキストを途切れさせずに即座に起動
+      window.location.href = mailtoUrl;
     }
   </script>
 </body>
