@@ -588,17 +588,20 @@
       color: #b45309;
     }
 
-    /* メディア埋め込みスタイル */
+    /* 代表作品：横スクロールギャラリー（PC・スマホ共通） */
     .modal-works-grid {
       display: flex !important;
       flex-wrap: nowrap !important;
       gap: 14px !important;
       overflow-x: auto !important;
+      overflow-y: hidden !important;
+      align-items: center !important; /* 上下ストレッチを防止して比率を固定 */
       padding: 6px 4px 14px !important;
       margin: 12px 0 !important;
       scroll-snap-type: x mandatory;
       -webkit-overflow-scrolling: touch;
     }
+
     /* スクロールバーのデザイン */
     .modal-works-grid::-webkit-scrollbar {
       height: 6px;
@@ -607,28 +610,50 @@
       background: #cbd5e1;
       border-radius: 4px;
     }
+
+    /* 各メディアカード：幅と高さを固定して縦長化を防止 */
     .media-box {
-      flex: 0 0 260px !important; /* 幅を固定して横に並べる */
+      flex: 0 0 280px !important;
+      width: 280px !important;
+      height: 165px !important; /* 16:9 前後の横長比率に統一 */
       max-width: 80vw;
       scroll-snap-align: start;
       border-radius: 8px;
       overflow: hidden;
-      background: #f8fafc;
+      background: #0f172a; /* 映像・音声用に引き締まる背景色 */
       border: 1px solid var(--border);
+      position: relative;
       display: flex;
       flex-direction: column;
+      justify-content: center;
     }
+
+    /* 画像作品 */
     .media-box img.modal-work-img {
       width: 100%;
-      height: 160px;
+      height: 100%;
       object-fit: cover;
       display: block;
     }
+
+    /* 音楽・音声枠 */
     .media-audio-box {
-      padding: 14px;
+      background: #f8fafc !important;
+      height: 100%;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
     }
+
+    /* Webサイト枠 */
     .media-link-box {
-      padding: 14px;
+      background: #f8fafc !important;
+      height: 100%;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
     }
     .external-work-link {
       display: flex;
@@ -1494,6 +1519,18 @@
       `;
 
       document.getElementById('userModal').classList.add('open');
+
+      // ★ 追加: PCで代表作品枠の上にカーソルがあるとき、マウスホイールで横スクロールさせる
+      const worksContainer = document.querySelector('.modal-works-grid');
+      if (worksContainer) {
+        worksContainer.addEventListener('wheel', (e) => {
+          // 縦方向のホイール回転がある場合
+          if (e.deltaY !== 0) {
+            e.preventDefault(); // 画面全体の縦スクロールを防止
+            worksContainer.scrollLeft += e.deltaY;
+          }
+        }, { passive: false });
+      }
     }
 
     function closeModal() {
