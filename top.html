@@ -678,6 +678,27 @@
       transform: translateX(-3px);
       color: var(--primary);
     }
+
+    /* 通報リンク */
+    .report-link-wrap {
+      margin-top: 24px;
+      padding-top: 14px;
+      border-top: 1px dashed var(--border);
+      text-align: right;
+    }
+    .report-link {
+      font-size: 0.75rem;
+      color: #94a3b8;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      transition: color 0.15s;
+    }
+    .report-link:hover {
+      color: #ef4444;
+      text-decoration: underline;
+    }
   </style>
 </head>
 <body oncontextmenu="return false;">
@@ -1345,6 +1366,23 @@
         favContainer.innerHTML = '';
       }
 
+      // 通報URLの生成
+      let reportHtml = '';
+      if (!isSelf) {
+        const reporterId = currentUserId ? encodeURIComponent(currentUserId) : 'guest';
+        const targetId = encodeURIComponent(u.userId);
+        const formUrl = `https://docs.google.com/forms/d/e/1FAIpQLSdb1s3o_0wx7q-qN-UWPdNYjeLD7tfeR0UPhX0194aYLmdeyQ/viewform?usp=pp_url&entry.377515000=${reporterId}&entry.676496849=${targetId}`;
+
+        reportHtml = `
+          <div class="report-link-wrap">
+            <a href="${formUrl}" target="_blank" rel="noopener noreferrer" class="report-link">
+              <span>⚠️</span>
+              <span>このユーザーを通報・違反報告する</span>
+            </a>
+          </div>
+        `;
+      }
+
       document.getElementById('modalBody').innerHTML = `
         <div style="display:flex; align-items:center; gap:16px; margin-bottom:16px;">
           ${avatarUrl ? `<img src="${avatarUrl}" style="width:64px; height:64px; border-radius:50%; object-fit:cover; border:1px solid #e2e8f0;" alt="">` : ''}
@@ -1380,6 +1418,8 @@
             <strong>連絡先窓口:</strong> ${escapeHtml(u.contactInfo)}
           </div>
         ` : ''}
+
+        ${reportHtml}
       `;
 
       document.getElementById('userModal').classList.add('open');
