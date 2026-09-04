@@ -250,7 +250,12 @@
       <h1>プロフィール編集</h1>
       <span class="user-badge" id="displayUserId"></span>
     </div>
-    <p class="lead">登録情報はスプレッドシートおよびプラットフォームに即時同期されます。</p>
+    <p class="lead" style="margin-bottom: 20px; line-height: 1.6;">
+      登録・更新内容はデータベースに保存され、一覧ページへは最大10分程度で反映されます。<br>
+      <span style="color: #ef4444; font-size: 0.8rem; font-weight: 600; display: inline-block; margin-top: 4px;">
+        ⚠️ 登録から3日以内に「アイコン画像」と「自己紹介文（初期値からの変更）」が設定されない場合、一覧への掲載が一時停止されます（再設定で復帰します）。
+      </span>
+    </p>
 
     <form id="profileForm" onsubmit="handleUpdate(event)">
       <div class="grid-2">
