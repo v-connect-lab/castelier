@@ -106,15 +106,15 @@
       right: -320px;
       width: 280px;
       height: 100vh;
-      height: 100dvh; /* iOS Safariの動的バー対応 */
+      height: 100dvh;
       background: #ffffff;
       box-shadow: -4px 0 15px rgba(0,0,0,0.1);
       z-index: 100;
       display: flex;
       flex-direction: column;
       padding: 20px 16px;
-      padding-bottom: calc(20px + env(safe-area-inset-bottom, 0px)); /* セーフエリア確保 */
-      overflow-y: auto; /* 画面が小さくても確実に一番下までスクロール可能に */
+      padding-bottom: calc(20px + env(safe-area-inset-bottom, 0px));
+      overflow-y: auto;
       -webkit-overflow-scrolling: touch;
       transition: right 0.25s ease-in-out;
     }
@@ -184,7 +184,7 @@
       margin: 12px 0;
     }
     .btn-drawer-logout {
-      margin-top: 16px; /* autoではなくマージンにして押し出しを防止 */
+      margin-top: 16px;
       margin-bottom: 8px;
       background: #fee2e2;
       color: #b91c1c;
@@ -195,7 +195,7 @@
       font-size: 0.85rem;
       cursor: pointer;
       width: 100%;
-      flex-shrink: 0; /* 縮小防止 */
+      flex-shrink: 0;
     }
 
     /* お気に入り / フォロワー リストドロワー */
@@ -526,7 +526,7 @@
       border-radius: 4px;
     }
 
-    /* --- 詳細モーダル：上下の確実な余白確保と見切れ防止 --- */
+    /* --- 詳細モーダル --- */
     .modal-overlay {
       position: fixed;
       inset: 0;
@@ -544,13 +544,13 @@
       background: #ffffff;
       width: 100%;
       max-width: 680px;
-      max-height: calc(100dvh - 40px); /* 画面上下に確実にマージンを残す */
+      max-height: calc(100dvh - 40px);
       border-radius: var(--radius);
       overflow-y: auto;
       -webkit-overflow-scrolling: touch;
       box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2);
       position: relative;
-      padding: 24px 20px 32px; /* 下部に十分なパディング */
+      padding: 24px 20px 32px;
     }
     .modal-close {
       position: absolute;
@@ -563,6 +563,7 @@
       border-radius: 50%;
       font-size: 1.1rem;
       cursor: pointer;
+      z-index: 10;
     }
 
     /* お気に入りボタン（インライン配置化） */
@@ -592,11 +593,11 @@
     .modal-works-grid {
       display: flex !important;
       flex-wrap: nowrap !important;
-      gap: 14px !important;
+      gap: 16px !important;
       overflow-x: auto !important;
       overflow-y: hidden !important;
-      align-items: center !important; /* 上下ストレッチを防止して比率を固定 */
-      padding: 6px 4px 14px !important;
+      align-items: center !important;
+      padding: 10px 4px 16px !important;
       margin: 12px 0 !important;
       scroll-snap-type: x mandatory;
       -webkit-overflow-scrolling: touch;
@@ -604,28 +605,34 @@
 
     /* スクロールバーのデザイン */
     .modal-works-grid::-webkit-scrollbar {
-      height: 6px;
+      height: 8px;
+    }
+    .modal-works-grid::-webkit-scrollbar-track {
+      background: #f1f5f9;
+      border-radius: 4px;
     }
     .modal-works-grid::-webkit-scrollbar-thumb {
       background: #cbd5e1;
       border-radius: 4px;
     }
+    .modal-works-grid::-webkit-scrollbar-thumb:hover {
+      background: #94a3b8;
+    }
 
-    /* 各メディアカード：幅と高さを固定して縦長化を防止 */
+    /* 各メディアカード：16:9比率（幅280px × 高さ158px）固定 */
     .media-box {
       flex: 0 0 280px !important;
       width: 280px !important;
-      height: 165px !important; /* 16:9 前後の横長比率に統一 */
+      height: 158px !important;
       max-width: 80vw;
       scroll-snap-align: start;
       border-radius: 8px;
       overflow: hidden;
-      background: #0f172a; /* 映像・音声用に引き締まる背景色 */
+      background: #0f172a;
       border: 1px solid var(--border);
       position: relative;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
+      display: block;
+      box-sizing: border-box;
     }
 
     /* 画像作品 */
@@ -639,22 +646,46 @@
     /* 音楽・音声枠 */
     .media-audio-box {
       background: #f8fafc !important;
-      height: 100%;
-      padding: 16px;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
+      height: 100% !important;
+      padding: 16px !important;
+      display: flex !important;
+      flex-direction: column !important;
+      justify-content: center !important;
+      box-sizing: border-box;
     }
 
     /* Webサイト枠 */
-    .media-link-box {
-      background: #f8fafc !important;
-      height: 100%;
-      padding: 16px;
+    .media-link-card {
       display: flex;
       flex-direction: column;
-      justify-content: center;
+      height: 100%;
+      width: 100%;
+      text-decoration: none;
+      background: #ffffff;
     }
+    .media-link-thumb {
+      width: 100%;
+      height: 105px;
+      background: #e2e8f0;
+      overflow: hidden;
+    }
+    .media-link-thumb img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+    .media-link-meta {
+      height: 53px;
+      padding: 6px 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: #ffffff;
+      border-top: 1px solid var(--border);
+      box-sizing: border-box;
+    }
+
     .external-work-link {
       display: flex;
       justify-content: space-between;
@@ -703,7 +734,6 @@
       font-size: 0.85rem;
       line-height: 1.6;
     }
-    /* ドロワー戻るボタン */
     .drawer-back-btn {
       background: none;
       border: none;
@@ -744,14 +774,14 @@
       text-decoration: underline;
     }
 
-    /* --- モーダル内ヘッダー・ボタン配置：絶対配置をやめて横並びで整理 --- */
+    /* モーダル内ヘッダーレイアウト */
     .modal-header-top {
       display: flex;
       align-items: flex-start;
       justify-content: space-between;
       gap: 12px;
       margin-bottom: 16px;
-      padding-right: 40px; /* 右上の×ボタン用の余白 */
+      padding-right: 40px;
     }
     .modal-user-profile {
       display: flex;
@@ -796,7 +826,6 @@
           <span class="drawer-badge" id="drawerFollowerCount">0</span>
         </div>
       </li>
-      <!-- ★ 修正: 独立した <li> と 正しい .drawer-nav-item クラスを適用 -->
       <li>
         <a href="./trends.html" class="drawer-nav-item">
           <span>📊 需要トレンド統計</span>
@@ -804,14 +833,12 @@
         </a>
       </li>
       <hr class="drawer-divider">
-      <!-- ★ 追加: ご意見・ご要望（Googleフォーム） -->
       <li>
         <a href="#" onclick="openFeedbackForm(event)" class="drawer-nav-item">
           <span>💡 ご意見・ご要望</span>
           <span style="font-size: 0.8rem; color: #94a3b8;">↗</span>
         </a>
       </li>
-      <!-- お問い合わせ -->
       <li>
         <a href="#" onclick="handleContactClick(event)" class="drawer-nav-item">
           <span>✉️ お問い合わせ</span>
@@ -823,7 +850,7 @@
     <button class="btn-drawer-logout" onclick="handleLogout()">ログアウト</button>
   </div>
 
-  <!-- リスト表示用ドロワー（お気に入り／フォロワー共用） -->
+  <!-- リスト表示用ドロワー -->
   <div class="list-drawer" id="listDrawer">
     <div class="list-drawer-header">
       <div style="display: flex; align-items: center; gap: 8px;">
@@ -854,6 +881,7 @@
     </div>
   </div>
 
+  <!-- 詳細モーダル -->
   <div class="modal-overlay" id="userModal" onclick="closeModal(event)">
     <div class="modal-content" onclick="event.stopPropagation()">
       <button class="modal-close" onclick="closeModal()">×</button>
@@ -873,7 +901,7 @@
     let interestedInMeList = [];
     let mutualSet = new Set();
     let currentUserId = null;
-    let contactConfig = null; // ★ 追加: お問い合わせ設定キャッシュ用
+    let contactConfig = null;
 
     let labelMaps = {
       role: { creator: 'クリエイター', streamer: '配信者' },
@@ -1003,12 +1031,11 @@
 
         if (customImg) {
           return `
-            <div class="media-box" style="display:flex; flex-direction:column; overflow:hidden;">
-              <div style="width:100%; height:160px; background:#1e293b; overflow:hidden;">
+            <div class="media-box" style="display:flex; flex-direction:column; background:#fff;">
+              <div style="width:100%; height:98px; background:#0f172a; overflow:hidden;">
                 <img src="${customImg}" style="width:100%; height:100%; object-fit:cover;" alt="ジャケット画像">
               </div>
-              <div class="media-audio-box" style="padding:10px 14px; background:#fff;">
-                <div style="font-size:0.75rem; font-weight:bold; margin-bottom:6px; color:var(--primary);">🎵 楽曲・音声サンプル</div>
+              <div style="height:60px; padding:6px 12px; display:flex; align-items:center; background:#fff; border-top:1px solid var(--border);">
                 ${playerHtml}
               </div>
             </div>
@@ -1016,7 +1043,7 @@
         }
 
         return `
-          <div class="media-box media-audio-box" style="padding:14px;">
+          <div class="media-box media-audio-box">
             <div style="font-size:0.8rem; font-weight:bold; margin-bottom:8px; color:var(--primary);">🎵 音声サンプル</div>
             ${playerHtml}
           </div>
@@ -1027,18 +1054,18 @@
         const ytMatch = url.match(/(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
         if (ytMatch) {
           return `
-            <div class="media-box" style="position:relative; padding-top:56.25%; background:#000;">
-              <iframe src="https://www.youtube.com/embed/${ytMatch[1]}" style="position:absolute; inset:0; width:100%; height:100%; border:0;" allowfullscreen></iframe>
+            <div class="media-box">
+              <iframe src="https://www.youtube.com/embed/${ytMatch[1]}" style="width:100%; height:100%; border:0;" allowfullscreen></iframe>
             </div>
           `;
         }
         const isDrive = url.includes('drive.google.com');
         const videoSrc = isDrive ? normalizeDriveUrl(url, 'preview') : url;
         return `
-          <div class="media-box" style="position:relative; padding-top:56.25%; background:#000;">
+          <div class="media-box">
             ${isDrive 
-              ? `<iframe src="${videoSrc}" style="position:absolute; inset:0; width:100%; height:100%; border:0;" allow="autoplay" allowfullscreen></iframe>`
-              : `<video controls src="${videoSrc}" style="position:absolute; inset:0; width:100%; height:100%;"></video>`}
+              ? `<iframe src="${videoSrc}" style="width:100%; height:100%; border:0;" allow="autoplay" allowfullscreen></iframe>`
+              : `<video controls src="${videoSrc}" style="width:100%; height:100%; object-fit:cover;"></video>`}
           </div>
         `;
       }
@@ -1049,26 +1076,25 @@
 
         if (customImg) {
           return `
-            <a href="${url}" target="_blank" rel="noopener" class="media-box" style="text-decoration:none; display:flex; flex-direction:column; overflow:hidden;">
-              <div style="width:100%; height:140px; background:#e2e8f0; overflow:hidden;">
-                <img src="${customImg}" style="width:100%; height:100%; object-fit:cover;" alt="Webサイトキャプチャ">
-              </div>
-              <div style="padding:10px 14px; background:#fff; display:flex; justify-content:space-between; align-items:center; border-top:1px solid var(--border);">
-                <div>
-                  <div style="font-size:0.75rem; color:#64748b;">🔗 Webサイト・制作物</div>
-                  <div style="font-size:0.85rem; font-weight:bold; color:var(--primary);">${escapeHtml(domain)}</div>
+            <div class="media-box">
+              <a href="${url}" target="_blank" rel="noopener" class="media-link-card">
+                <div class="media-link-thumb">
+                  <img src="${customImg}" alt="サイトキャプチャ">
                 </div>
-                <span style="font-size:1rem; color:var(--primary);">↗</span>
-              </div>
-            </a>
+                <div class="media-link-meta">
+                  <span style="font-size:0.8rem; font-weight:bold; color:var(--primary); overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${escapeHtml(domain)}</span>
+                  <span style="font-size:0.9rem; color:var(--primary);">↗</span>
+                </div>
+              </a>
+            </div>
           `;
         }
 
         return `
-          <div class="media-box media-link-box" style="padding:16px;">
-            <div style="font-size:0.75rem; color:#64748b;">🔗 Webサイト・リンク</div>
-            <a href="${url}" target="_blank" rel="noopener" class="external-work-link">
-              <span>${escapeHtml(domain)} で開く</span>
+          <div class="media-box media-audio-box">
+            <div style="font-size:0.75rem; color:#64748b; margin-bottom:4px;">🔗 Webサイト・リンク</div>
+            <a href="${url}" target="_blank" rel="noopener" class="external-work-link" style="margin:0;">
+              <span>${escapeHtml(domain)}</span>
               <span>↗</span>
             </a>
           </div>
@@ -1251,9 +1277,11 @@
           }
         })();
 
-        const [schemaYaml, baseUsers, selfUser, favResult] = await Promise.all([
-          fetchSchema, fetchJsonUsers, fetchSelfUser, fetchMyFavorites
+        const [schemaYaml, baseUsers, selfUser, favResult, loadedContact] = await Promise.all([
+          fetchSchema, fetchJsonUsers, fetchSelfUser, fetchMyFavorites, fetchContactConfig
         ]);
+
+        contactConfig = loadedContact;
 
         if (favResult && favResult.success) {
           myFavoritesSet = new Set(favResult.myFavorites || []);
@@ -1439,7 +1467,6 @@
       const isFav = myFavoritesSet.has(u.userId);
       const isSelf = currentUserId && (currentUserId === u.userId);
 
-      // お気に入りボタンHTML（インライン配置用）
       let favBtnHtml = '';
       if (!isSelf) {
         favBtnHtml = `
@@ -1454,7 +1481,6 @@
         `;
       }
 
-      // 通報URLの生成
       let reportHtml = '';
       if (!isSelf) {
         const reporterId = currentUserId ? encodeURIComponent(currentUserId) : 'guest';
@@ -1470,7 +1496,6 @@
         `;
       }
 
-      // 既存の modalFavContainer は空にし、ヘッダー行の中にボタンを統合
       document.getElementById('modalFavContainer').innerHTML = '';
 
       document.getElementById('modalBody').innerHTML = `
@@ -1520,16 +1545,18 @@
 
       document.getElementById('userModal').classList.add('open');
 
-      // ★ 追加: PCで代表作品枠の上にカーソルがあるとき、マウスホイールで横スクロールさせる
+      // PCでのマウスホイール横スクロール連携
       const worksContainer = document.querySelector('.modal-works-grid');
       if (worksContainer) {
-        worksContainer.addEventListener('wheel', (e) => {
-          // 縦方向のホイール回転がある場合
+        worksContainer.onwheel = function(e) {
           if (e.deltaY !== 0) {
-            e.preventDefault(); // 画面全体の縦スクロールを防止
-            worksContainer.scrollLeft += e.deltaY;
+            e.preventDefault();
+            worksContainer.scrollBy({
+              left: e.deltaY * 2.5,
+              behavior: 'auto'
+            });
           }
-        }, { passive: false });
+        };
       }
     }
 
@@ -1603,7 +1630,7 @@
       if (modalBtn && modalLabel) {
         modalBtn.classList.toggle('active', isFav);
         modalBtn.querySelector('span:first-child').textContent = isFav ? '★' : '☆';
-        modalLabel.textContent = isFav ? 'お気に入り登録中' : 'お気に入りに追加';
+        modalLabel.textContent = isFav ? '登録中' : 'キープ';
       }
 
       const badge = document.getElementById('drawerFavCount');
@@ -1620,13 +1647,11 @@
         .replace(/'/g, '&#039;');
     }
 
-    // リストからメニュー画面へ戻る
     function backToMenuDrawer() {
       document.getElementById('listDrawer').classList.remove('open');
       document.getElementById('menuDrawer').classList.add('open');
     }
 
-    // top.html の <script> 内
     function openFeedbackForm(e) {
       if (e) e.preventDefault();
       const uid = currentUserId ? encodeURIComponent(currentUserId) : '';
@@ -1634,11 +1659,9 @@
       window.open(url, '_blank', 'noopener,noreferrer');
     }
 
-    // お問い合わせメーラー起動処理（Safariブロック回避のため完全同期的実行）
     function handleContactClick(e) {
       if (e) e.preventDefault();
 
-      // 設定ファイルが読み込めていればそれを使い、なければフォールバック
       const conf = contactConfig || {
         to: 'project.creatorsplatform@gmail.com',
         subject: '【Castelier】お問い合わせ',
@@ -1656,7 +1679,6 @@
       const normalizedBody = body.replace(/\r?\n/g, '\r\n');
       const mailtoUrl = `mailto:${to}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(normalizedBody)}`;
 
-      // ユーザー操作のコンテキストを途切れさせずに即座に起動
       window.location.href = mailtoUrl;
     }
   </script>
