@@ -589,6 +589,51 @@
       color: #b45309;
     }
 
+    /* 代表作品コンテナ（左右ボタン配置用のラッパー） */
+    .modal-works-wrapper {
+      position: relative;
+      margin: 12px 0;
+    }
+
+    /* 左右スクロールボタン */
+    .works-scroll-btn {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.95);
+      border: 1px solid var(--border);
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+      color: #334155;
+      font-size: 1.2rem;
+      font-weight: bold;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      z-index: 10;
+      transition: all 0.2s ease;
+      user-select: none;
+    }
+    .works-scroll-btn:hover {
+      background: #ffffff;
+      transform: translateY(-50%) scale(1.1);
+      box-shadow: 0 6px 14px rgba(0, 0, 0, 0.2);
+      color: var(--primary);
+    }
+    .works-scroll-btn.btn-prev {
+      left: -12px;
+    }
+    .works-scroll-btn.btn-next {
+      right: -12px;
+    }
+    @media (max-width: 640px) {
+      .works-scroll-btn.btn-prev { left: 2px; }
+      .works-scroll-btn.btn-next { right: 2px; }
+    }
+
     /* 代表作品：横スクロールギャラリー（PC・スマホ共通） */
     .modal-works-grid {
       display: flex !important;
@@ -598,7 +643,7 @@
       overflow-y: hidden !important;
       align-items: center !important;
       padding: 10px 4px 16px !important;
-      margin: 12px 0 !important;
+      margin: 0 !important;
       scroll-snap-type: x mandatory;
       -webkit-overflow-scrolling: touch;
     }
@@ -1443,6 +1488,17 @@
       }
     }
 
+    // 代表作品の左右ボタンスクロール
+    function scrollWorks(direction) {
+      const container = document.getElementById('modalWorksGrid');
+      if (!container) return;
+      const scrollAmount = 296; // カード幅 280px + gap 16px
+      container.scrollBy({
+        left: direction * scrollAmount,
+        behavior: 'smooth'
+      });
+    }
+
     function openModal(index) {
       const u = allUsers[index];
       if (!u) return;
@@ -1518,8 +1574,12 @@
             <span>代表作品・メディア</span>
             <span style="font-size:0.75rem; color:#94a3b8; font-weight:normal;">横スクロール可 ➔</span>
           </div>
-          <div class="modal-works-grid">
-            ${userWorks.map(w => renderMediaItem(w)).join('')}
+          <div class="modal-works-wrapper">
+            <button class="works-scroll-btn btn-prev" onclick="scrollWorks(-1)" title="前へ">‹</button>
+            <div class="modal-works-grid" id="modalWorksGrid">
+              ${userWorks.map(w => renderMediaItem(w)).join('')}
+            </div>
+            <button class="works-scroll-btn btn-next" onclick="scrollWorks(1)" title="次へ">›</button>
           </div>
         ` : ''}
 
@@ -1546,7 +1606,7 @@
       document.getElementById('userModal').classList.add('open');
 
       // PCでのマウスホイール横スクロール連携
-      const worksContainer = document.querySelector('.modal-works-grid');
+      const worksContainer = document.getElementById('modalWorksGrid');
       if (worksContainer) {
         worksContainer.onwheel = function(e) {
           if (e.deltaY !== 0) {
