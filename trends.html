@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Castelier | 需要トレンド統計</title>
+  <title>Castelier | トレンド・活動統計</title>
   <style>
     :root {
       --bg: #f8fafc;
@@ -29,7 +29,7 @@
     }
 
     .container {
-      max-width: 860px;
+      max-width: 900px;
       margin: 0 auto;
     }
 
@@ -79,7 +79,7 @@
     .card-title {
       font-size: 1.05rem;
       font-weight: 700;
-      margin-bottom: 6px;
+      margin-bottom: 4px;
       display: flex;
       align-items: center;
       gap: 6px;
@@ -90,7 +90,7 @@
       margin-bottom: 18px;
     }
 
-    /* 全体サマリー比率 */
+    /* 比率バー */
     .ratio-summary-bar {
       height: 24px;
       border-radius: 12px;
@@ -126,81 +126,87 @@
       font-weight: 600;
     }
 
-    /* カテゴリ別バー */
-    .category-row {
-      margin-bottom: 16px;
-      padding-bottom: 14px;
-      border-bottom: 1px dashed var(--border);
+    /* 左右比較グリッド */
+    .compare-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
     }
-    .category-row:last-child {
-      margin-bottom: 0;
-      padding-bottom: 0;
-      border-bottom: none;
-    }
-    .category-meta {
-      display: flex;
-      justify-content: space-between;
-      font-size: 0.85rem;
-      font-weight: 700;
-      margin-bottom: 6px;
-    }
-    .balance-track {
-      height: 12px;
-      background: #e2e8f0;
-      border-radius: 6px;
-      overflow: hidden;
-      display: flex;
+    @media (max-width: 640px) {
+      .compare-grid { grid-template-columns: 1fr; }
     }
 
-    /* 需要タグランキング */
-    .tag-rank-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-      gap: 10px;
+    .col-header {
+      font-size: 0.9rem;
+      font-weight: 800;
+      padding-bottom: 8px;
+      margin-bottom: 12px;
+      border-bottom: 2px solid;
+      display: flex;
+      justify-content: space-between;
     }
-    .tag-rank-item {
+    .col-header.creator { color: var(--creator-color); border-color: var(--creator-color); }
+    .col-header.streamer { color: var(--streamer-color); border-color: var(--streamer-color); }
+
+    /* ランキングアイテム */
+    .rank-item {
       display: flex;
       align-items: center;
       justify-content: space-between;
+      padding: 7px 10px;
       background: #f8fafc;
-      border: 1px solid var(--border);
-      padding: 8px 12px;
-      border-radius: 8px;
+      border-radius: 6px;
+      margin-bottom: 6px;
+      font-size: 0.8rem;
     }
-    .tag-rank-num {
-      font-size: 0.75rem;
-      font-weight: 800;
-      color: var(--text-sub);
-      width: 20px;
-    }
-    .tag-rank-name {
-      font-size: 0.85rem;
+    .rank-name {
       font-weight: 600;
-      flex-grow: 1;
+      white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
+      margin-right: 8px;
+    }
+    .badge-count {
+      font-size: 0.7rem;
+      font-weight: 700;
+      padding: 2px 6px;
+      border-radius: 4px;
       white-space: nowrap;
     }
-    .tag-rank-count {
-      font-size: 0.75rem;
-      font-weight: 700;
-      color: var(--streamer-color);
-      background: var(--streamer-bg);
+    .badge-count.creator { background: var(--creator-bg); color: var(--creator-color); }
+    .badge-count.streamer { background: var(--streamer-bg); color: var(--streamer-color); }
+
+    /* フリータグクラウド・ランキング */
+    .freetag-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 8px;
+    }
+    .freetag-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 12px;
+      background: #f8fafc;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-size: 0.8rem;
+    }
+    .freetag-badge {
+      background: #f1f5f9;
+      color: var(--text-sub);
+      font-size: 0.7rem;
+      font-weight: bold;
       padding: 2px 6px;
       border-radius: 4px;
     }
 
-    /* ブルーオーシャン (ギャップ注記) */
-    .insight-box {
-      background: #fffbeb;
-      border: 1px solid #fde68a;
-      border-radius: 8px;
-      padding: 12px 16px;
-      margin-top: 14px;
-      font-size: 0.85rem;
-      color: #92400e;
+    .empty-text {
+      color: var(--text-sub);
+      font-size: 0.8rem;
+      padding: 10px 0;
+      text-align: center;
     }
-
     .loading-text {
       text-align: center;
       padding: 40px;
@@ -214,8 +220,8 @@
 <div class="container">
   <div class="trend-header">
     <div class="trend-title">
-      <h1>📊 需要トレンド統計</h1>
-      <p>個人を比較せず、プラットフォーム全体の分野・作風の需給バランスを集計したデータです。</p>
+      <h1>📊 トレンド・活動統計</h1>
+      <p>Castelierに登録されている活動分野や作風タグの全体集計です。</p>
     </div>
     <a href="./top.html" class="btn-back">← TOPへ戻る</a>
   </div>
@@ -225,8 +231,8 @@
   <div id="contentView" style="display: none;">
     <!-- 1. 全体比率サマリー -->
     <div class="trend-card">
-      <div class="card-title">👥 全体の活動者比率</div>
-      <div class="card-desc">公開中のアカウント構成比です。</div>
+      <div class="card-title">👥 活動者比率</div>
+      <div class="card-desc">公開されているアカウントのロール構成比です。</div>
       <div class="ratio-summary-bar">
         <div class="ratio-part-creator" id="barTotalCreator" style="width: 50%;">0%</div>
         <div class="ratio-part-streamer" id="barTotalStreamer" style="width: 50%;">0%</div>
@@ -237,38 +243,69 @@
       </div>
     </div>
 
-    <!-- 2. カテゴリ別 需給バランス -->
+    <!-- 2. メイン分野（category）の登録傾向 -->
     <div class="trend-card">
-      <div class="card-title">⚖️ 制作分野別の需給バランス</div>
-      <div class="card-desc">各分野における「制作受付（クリエイター）」と「依頼希望（配信者）」の対比です。</div>
-      <div id="categoryBalanceList"></div>
+      <div class="card-title">📁 メイン制作・活動分野の傾向</div>
+      <div class="card-desc">各ロールで多く選ばれている活動カテゴリです。</div>
+      <div class="compare-grid">
+        <div>
+          <div class="col-header creator">
+            <span>🎨 クリエイター（対応分野）</span>
+            <span id="creatorCatTotal" style="font-size:0.75rem; font-weight:normal;"></span>
+          </div>
+          <div id="creatorCatList"></div>
+        </div>
+        <div>
+          <div class="col-header streamer">
+            <span>🎙️ 配信者（希望分野）</span>
+            <span id="streamerCatTotal" style="font-size:0.75rem; font-weight:normal;"></span>
+          </div>
+          <div id="streamerCatList"></div>
+        </div>
+      </div>
     </div>
 
-    <!-- 3. 配信者が求めている作風ランキング -->
+    <!-- 3. 属性・作風タグ（tags）の登録傾向 -->
     <div class="trend-card">
-      <div class="card-title">🔥 配信者が求めている作風・テイスト</div>
-      <div class="card-desc">配信者アカウントがプロフィールで指定している希望タグの集計です。</div>
-      <div class="tag-rank-grid" id="streamerTagGrid"></div>
-
-      <div class="insight-box" id="insightBox">
-        💡 <strong>クリエイター向けヒント:</strong> <span id="insightText">データを分析中...</span>
+      <div class="card-title">🏷️ 属性・作風タグの傾向</div>
+      <div class="card-desc">プロフィールで設定されている基本タグの比較です。</div>
+      <div class="compare-grid">
+        <div>
+          <div class="col-header creator">
+            <span>🎨 得意としている作風</span>
+          </div>
+          <div id="creatorTagList"></div>
+        </div>
+        <div>
+          <div class="col-header streamer">
+            <span>🎙️ 該当・希望する作風</span>
+          </div>
+          <div id="streamerTagList"></div>
+        </div>
       </div>
+    </div>
+
+    <!-- 4. 設定されているフリータグ（freeTags）上位20件 -->
+    <div class="trend-card">
+      <div class="card-title">✨ よく使われているフリータグ（TOP 20）</div>
+      <div class="card-desc">自由入力タグで多く使われているキーワードです。検索されやすい言い回しの参考に活用できます。</div>
+      <div class="freetag-grid" id="freeTagGrid"></div>
     </div>
   </div>
 </div>
 
 <script>
-  // マスター定義（top.htmlの定義と整合）
-  const CATEGORY_NAMES = {
-    'ill': 'イラスト・キャラクターデザイン',
-    'live2d': 'Live2D・3Dモデリング',
-    'movie': '動画編集・アニメーション',
-    'music': '楽曲制作・BGM・SE',
-    'mix': '歌ってみたMIX・音響編集',
-    'design': 'ロゴ・サムネイル・UIデザイン',
-    'writing': '台本・シナリオ・作詞',
+  // マスター定義（コード・ラベルの双方に対応）
+  const CATEGORY_DICT = {
+    'ill': 'イラスト・キャラデザ',
+    'live2d': 'Live2D・3D',
+    'movie': '動画編集・映像',
+    'music': '楽曲制作・BGM',
+    'mix': '歌ってみたMIX・音響',
+    'design': 'デザイン・ロゴ・サムネ',
+    'writing': 'シナリオ・台本・作詞',
     'voice': '声優・ナレーション',
-    'support': '配信機材サポート・マネジメント',
+    'support': '配信サポート・管理',
     'other': 'その他'
   };
 
@@ -307,113 +344,78 @@
     document.getElementById('countTotalCreator').textContent = totalC;
     document.getElementById('countTotalStreamer').textContent = totalS;
 
-    // 2. カテゴリ別集計
-    const catStats = {};
-    Object.keys(CATEGORY_NAMES).forEach(k => {
-      catStats[k] = { creator: 0, streamer: 0 };
-    });
+    // 2. メインカテゴリ集計（コード/日本語の両表記を正規化）
+    renderRankList(creators, 'category', 'creatorCatList', 'creator', true);
+    renderRankList(streamers, 'category', 'streamerCatList', 'streamer', true);
 
-    creators.forEach(u => {
-      splitComma(u.category).forEach(cat => {
-        if (catStats[cat]) catStats[cat].creator++;
-      });
-    });
-    streamers.forEach(u => {
-      splitComma(u.category).forEach(cat => {
-        if (catStats[cat]) catStats[cat].streamer++;
-      });
-    });
+    // 3. 属性・作風タグ集計
+    renderRankList(creators, 'tags', 'creatorTagList', 'creator', false);
+    renderRankList(streamers, 'tags', 'streamerTagList', 'streamer', false);
 
-    const catListEl = document.getElementById('categoryBalanceList');
-    let catHtml = '';
-
-    Object.keys(catStats).forEach(key => {
-      const cCount = catStats[key].creator;
-      const sCount = catStats[key].streamer;
-      const catSum = cCount + sCount;
-      if (catSum === 0) return; // 誰も選んでいないカテゴリは省略
-
-      const catCRate = Math.round((cCount / catSum) * 100);
-      const catSRate = 100 - catCRate;
-      const label = CATEGORY_NAMES[key] || key;
-
-      catHtml += `
-        <div class="category-row">
-          <div class="category-meta">
-            <span>${escapeHtml(label)}</span>
-            <span style="font-size:0.75rem; color:var(--text-sub);">
-              <span style="color:var(--creator-color);">受付: ${cCount}件</span> / 
-              <span style="color:var(--streamer-color);">需要: ${sCount}件</span>
-            </span>
-          </div>
-          <div class="balance-track">
-            <div style="width: ${catCRate}%; background: var(--creator-color);" title="クリエイター: ${catCRate}%"></div>
-            <div style="width: ${catSRate}%; background: var(--streamer-color);" title="配信者: ${catSRate}%"></div>
-          </div>
-        </div>
-      `;
-    });
-    catListEl.innerHTML = catHtml || '<div style="color:var(--text-sub); font-size:0.85rem;">該当データがありません</div>';
-
-    // 3. 配信者が求めている作風タグランキング
-    const streamerTagCount = {};
-    streamers.forEach(u => {
-      splitComma(u.tags).forEach(tag => {
-        if (!tag) return;
-        streamerTagCount[tag] = (streamerTagCount[tag] || 0) + 1;
-      });
-    });
-
-    const sortedTags = Object.entries(streamerTagCount)
-      .sort((a, b) => b[1] - a[1])
-      .slice(0, 12); // 上位12件
-
-    const tagGridEl = document.getElementById('streamerTagGrid');
-    if (sortedTags.length > 0) {
-      tagGridEl.innerHTML = sortedTags.map(([tag, count], idx) => `
-        <div class="tag-rank-item">
-          <span class="tag-rank-num">#${idx + 1}</span>
-          <span class="tag-rank-name">${escapeHtml(tag)}</span>
-          <span class="tag-rank-count">${count}件</span>
-        </div>
-      `).join('');
-
-      // クリエイター供給タグとのギャップ（ブルーオーシャン分析）
-      const creatorTagCount = {};
-      creators.forEach(u => {
-        splitComma(u.tags).forEach(tag => {
-          if (!tag) return;
-          creatorTagCount[tag] = (creatorTagCount[tag] || 0) + 1;
-        });
-      });
-
-      // 配信者需要が高いが、クリエイター登録が少ないタグを探す
-      let bestGapTag = '';
-      let maxGap = -999;
-      sortedTags.forEach(([tag, sCount]) => {
-        const cCount = creatorTagCount[tag] || 0;
-        const gap = sCount - cCount;
-        if (gap > maxGap) {
-          maxGap = gap;
-          bestGapTag = tag;
-        }
-      });
-
-      if (bestGapTag && maxGap > 0) {
-        document.getElementById('insightText').innerHTML = 
-          `現在、作風「<strong>${escapeHtml(bestGapTag)}</strong>」は配信者からの需要に対して受付クリエイターが少なめです。対応可能なクリエイターはこのタグを設定するとマッチング率が上がる傾向にあります。`;
-      } else {
-        document.getElementById('insightText').textContent = 
-          `上位タグの「${sortedTags[0][0]}」を中心に需要が集まっています。`;
-      }
-
-    } else {
-      tagGridEl.innerHTML = '<div style="color:var(--text-sub); font-size:0.85rem;">集計可能なタグデータがまだありません</div>';
-      document.getElementById('insightBox').style.display = 'none';
-    }
+    // 4. フリータグ上位20件集計（全ユーザー横断）
+    renderFreeTags(users);
 
     document.getElementById('loadingView').style.display = 'none';
     document.getElementById('contentView').style.display = 'block';
+  }
+
+  // 汎用ランキングレンダラー
+  function renderRankList(userGroup, keyName, containerId, role, isCategory) {
+    const countMap = {};
+    userGroup.forEach(u => {
+      splitComma(u[keyName]).forEach(rawVal => {
+        if (!rawVal) return;
+        const normalized = isCategory ? (CATEGORY_DICT[rawVal] || rawVal) : rawVal;
+        countMap[normalized] = (countMap[normalized] || 0) + 1;
+      });
+    });
+
+    const sorted = Object.entries(countMap).sort((a, b) => b[1] - a[1]);
+    const el = document.getElementById(containerId);
+
+    if (sorted.length === 0) {
+      el.innerHTML = '<div class="empty-text">登録データがありません</div>';
+      return;
+    }
+
+    el.innerHTML = sorted.slice(0, 10).map(([name, count], idx) => `
+      <div class="rank-item">
+        <span class="rank-name"><strong style="color:var(--text-sub); margin-right:6px;">${idx + 1}.</strong>${escapeHtml(name)}</span>
+        <span class="badge-count ${role}">${count}件</span>
+      </div>
+    `).join('');
+  }
+
+  // フリータグTOP20レンダラー
+  function renderFreeTags(users) {
+    const freeTagMap = {};
+    users.forEach(u => {
+      splitComma(u.freeTags).forEach(tag => {
+        if (!tag) return;
+        // 先頭の # があれば除去して集計を統一
+        const cleanTag = tag.replace(/^#/, '');
+        freeTagMap[cleanTag] = (freeTagMap[cleanTag] || 0) + 1;
+      });
+    });
+
+    const sorted = Object.entries(freeTagMap)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 20);
+
+    const gridEl = document.getElementById('freeTagGrid');
+    if (sorted.length === 0) {
+      gridEl.innerHTML = '<div class="empty-text" style="grid-column: 1/-1;">フリータグの登録はまだありません</div>';
+      return;
+    }
+
+    gridEl.innerHTML = sorted.map(([tag, count], idx) => `
+      <div class="freetag-item">
+        <span style="font-weight:600; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; margin-right:6px;">
+          <span style="color:var(--text-sub); font-size:0.75rem; margin-right:4px;">#${idx + 1}</span>#${escapeHtml(tag)}
+        </span>
+        <span class="freetag-badge">${count}件</span>
+      </div>
+    `).join('');
   }
 
   function splitComma(str) {
