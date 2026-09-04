@@ -5,7 +5,7 @@
     "displayName": "潤華ねろ",
     "isContactWelcome": true,
     "category": "Web",
-    "tags": "JapaneseStyle,WesternStyle,Retro,Cute,Cool,Minimal",
+    "tags": "simple",
     "freeTags": "無償モニター",
     "avatarUrl": "https://lh3.googleusercontent.com/d/1ZcK-qteXRtnGYkZoP-1wqklgzvTkiUQd",
     "works": [
@@ -35,7 +35,7 @@
     ],
     "contactInfo": "urukanero.works@gmail.com",
     "description": "よろしくお願いします！",
-    "priceGuide": "Free",
+    "priceGuide": "free_monitor",
     "updatedAt": "2026-09-04T00:20:23.000Z"
   },
   {
@@ -44,7 +44,7 @@
     "displayName": "テスト",
     "isContactWelcome": true,
     "category": "VTuber",
-    "tags": "JapaneseStyle",
+    "tags": "Woman",
     "freeTags": "",
     "avatarUrl": "",
     "works": [],
@@ -71,7 +71,7 @@
     "platforms": [],
     "contactInfo": "",
     "description": "よろしくお願いします。",
-    "priceGuide": "~1000",
+    "priceGuide": "flexible",
     "updatedAt": "2026-09-04T12:44:04.000Z"
   }
 ]
