@@ -659,6 +659,25 @@
       font-size: 0.85rem;
       line-height: 1.6;
     }
+    /* ドロワー戻るボタン */
+    .drawer-back-btn {
+      background: none;
+      border: none;
+      font-size: 1.25rem;
+      cursor: pointer;
+      color: var(--text-main);
+      padding: 4px 8px 4px 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      line-height: 1;
+      border-radius: 4px;
+      transition: transform 0.15s;
+    }
+    .drawer-back-btn:hover {
+      transform: translateX(-3px);
+      color: var(--primary);
+    }
   </style>
 </head>
 <body oncontextmenu="return false;">
@@ -702,8 +721,10 @@
   <!-- リスト表示用ドロワー（お気に入り／フォロワー共用） -->
   <div class="list-drawer" id="listDrawer">
     <div class="list-drawer-header">
-      <h3 id="listDrawerTitle">リスト</h3>
-      <button class="drawer-close" onclick="closeListDrawer()">×</button>
+      <div style="display: flex; align-items: center; gap: 8px;">
+        <button class="drawer-back-btn" onclick="backToMenuDrawer()" title="メニューに戻る">←</button>
+        <h3 id="listDrawerTitle" style="margin: 0;">リスト</h3>
+      </div>
     </div>
     <div class="list-drawer-body" id="listDrawerBody"></div>
   </div>
@@ -1449,6 +1470,12 @@
         .replace(/>/g, '&gt;')
         .replace(/"/g, '&quot;')
         .replace(/'/g, '&#039;');
+    }
+
+    // リストからメニュー画面へ戻る
+    function backToMenuDrawer() {
+      document.getElementById('listDrawer').classList.remove('open');
+      document.getElementById('menuDrawer').classList.add('open');
     }
   </script>
 </body>
