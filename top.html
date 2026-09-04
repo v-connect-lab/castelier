@@ -21,6 +21,7 @@
       --radius: 12px;
       --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
       --shadow-hover: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+      --star-color: #f59e0b;
     }
 
     * { box-sizing: border-box; }
@@ -163,6 +164,7 @@
       cursor: pointer;
       display: flex;
       flex-direction: column;
+      position: relative;
       transition: transform 0.2s, box-shadow 0.2s;
     }
     .user-card:hover {
@@ -206,6 +208,35 @@
     }
     .role-badge.creator { background: var(--creator-color); }
     .role-badge.streamer { background: var(--streamer-color); }
+
+    /* お気に入りボタン（カード用） */
+    .btn-fav-card {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.9);
+      border: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+      color: #94a3b8;
+      cursor: pointer;
+      z-index: 5;
+      transition: all 0.2s;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .btn-fav-card:hover {
+      transform: scale(1.1);
+      background: #ffffff;
+    }
+    .btn-fav-card.active {
+      color: var(--star-color);
+      background: #ffffff;
+    }
 
     .card-body {
       padding: 16px;
@@ -301,6 +332,30 @@
       border-radius: 50%;
       font-size: 1.1rem;
       cursor: pointer;
+    }
+
+    /* モーダル用お気に入りボタン */
+    .modal-fav-btn {
+      position: absolute;
+      top: 16px;
+      right: 56px;
+      background: #f8fafc;
+      border: 1px solid var(--border);
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--text-sub);
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s;
+    }
+    .modal-fav-btn.active {
+      background: #fef3c7;
+      border-color: #fde68a;
+      color: #b45309;
     }
 
     /* メディア埋め込みスタイル */
@@ -406,6 +461,7 @@
   <div class="modal-overlay" id="userModal" onclick="closeModal(event)">
     <div class="modal-content" onclick="event.stopPropagation()">
       <button class="modal-close" onclick="closeModal()">×</button>
+      <div id="modalFavContainer"></div>
       <div id="modalBody"></div>
     </div>
   </div>
@@ -416,6 +472,9 @@
     let allUsers = [];
     let currentRole = 'all';
     let schemaData = null;
+    let myFavoritesSet = new Set();
+    let currentUserId = null;
+
     let labelMaps = {
       role: { creator: 'クリエイター', streamer: '配信者' },
       category: {},
@@ -434,7 +493,6 @@
       return url;
     }
 
-    // ★ works データを配列オブジェクトに正規化（フラット列・JSON両対応）
     function normalizeUserWorks(u) {
       if (Array.isArray(u.works)) {
         return u.works.filter(w => w && w.url);
@@ -446,7 +504,6 @@
         } catch(e) {}
       }
 
-      // フラット形式（works_url-1 ...）からの抽出
       const list = [];
       for (let i = 1; i <= 4; i++) {
         const url = u[`works_url-${i}`] || u[`workUrls-${i}`];
@@ -461,7 +518,6 @@
       return list;
     }
 
-    // ★ platforms データを配列オブジェクトに正規化（フラット列・JSON両対応）
     function normalizeUserPlatforms(u) {
       if (Array.isArray(u.platforms)) {
         return u.platforms.filter(p => p && p.url);
@@ -473,7 +529,6 @@
         } catch(e) {}
       }
 
-      // フラット形式（platforms_url-1 ...）からの抽出
       const list = [];
       for (let i = 1; i <= 3; i++) {
         const url = u[`platforms_url-${i}`] || u[`platformUrls-${i}`];
@@ -524,14 +579,12 @@
         .map(v => getLabel(group, v));
     }
 
-    // 種別・画像有無に応じたモーダル用メディア生成
     function renderMediaItem(item) {
       if (!item || !item.url) return '';
       const type = item.type || 'image';
       const url = item.url.trim();
       const customImg = item.image ? normalizeDriveUrl(item.image, 'image') : null;
 
-      // 1. 画像
       if (type === 'image') {
         const imgUrl = normalizeDriveUrl(url, 'image');
         return `
@@ -541,7 +594,6 @@
         `;
       }
 
-      // 2. 音楽・音声
       if (type === 'music') {
         const isDrive = url.includes('drive.google.com');
         const audioSrc = isDrive ? normalizeDriveUrl(url, 'preview') : url;
@@ -571,7 +623,6 @@
         `;
       }
 
-      // 3. 動画
       if (type === 'video') {
         const ytMatch = url.match(/(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
         if (ytMatch) {
@@ -592,7 +643,6 @@
         `;
       }
 
-      // 4. Webサイト・リンク
       if (type === 'web') {
         let domain = url;
         try { domain = new URL(url).hostname; } catch(e){}
@@ -661,17 +711,17 @@
 
       // セッションから自分のIDを取得
       const session = sessionStorage.getItem('castelier_session');
-      const currentUserId = session ? JSON.parse(session).userId : null;
+      currentUserId = session ? JSON.parse(session).userId : null;
 
       try {
         const fetchSchema = fetch('./schema/accounts.yaml').then(r => r.text());
 
-        // 1. 基本は常に静的 json を取得（高速・キャッシュ対応）
+        // 1. 静的 json の取得
         const fetchJsonUsers = fetch(`./data/users.json?t=${now}`)
           .then(r => r.ok ? r.json() : [])
           .catch(() => []);
 
-        // 2. 登録15分以内で自分IDがあれば、GASから自分1人分だけ取得
+        // 2. 登録15分以内なら自分1人分の最新データを取得
         const fetchSelfUser = (async () => {
           if (isRecentlyRegistered && currentUserId) {
             try {
@@ -685,17 +735,38 @@
           return null;
         })();
 
-        const [schemaYaml, baseUsers, selfUser] = await Promise.all([fetchSchema, fetchJsonUsers, fetchSelfUser]);
+        // 3. ログイン中の場合、自分のお気に入り一覧（myFavorites）を取得
+        const fetchMyFavorites = (async () => {
+          if (!currentUserId) return [];
+          try {
+            const res = await fetch(GAS_API_URL, {
+              method: 'POST',
+              headers: { 'Content-Type': 'text/plain' },
+              body: JSON.stringify({
+                action: 'getFavoriteRelations',
+                data: { userId: currentUserId }
+              })
+            });
+            const data = await res.json();
+            return data.success ? (data.myFavorites || []) : [];
+          } catch (e) {
+            console.warn('お気に入りデータの取得失敗:', e);
+            return [];
+          }
+        })();
+
+        const [schemaYaml, baseUsers, selfUser, favList] = await Promise.all([
+          fetchSchema, fetchJsonUsers, fetchSelfUser, fetchMyFavorites
+        ]);
+
+        myFavoritesSet = new Set(favList);
 
         const loadedYaml = jsyaml.load(schemaYaml);
         schemaData = loadedYaml.accounts.columns;
         buildLabelMaps(schemaData);
 
-        // 3. データを合成
         let mergedList = [...baseUsers];
-
         if (selfUser) {
-          // json内にすでに自分が存在する場合は除去し、最新の自分を先頭に追加
           mergedList = mergedList.filter(u => u.userId !== selfUser.userId);
           mergedList.unshift(selfUser);
         }
@@ -757,7 +828,6 @@
         const avatarUrl = normalizeDriveUrl(u.avatarUrl, 'image');
         const roleLabel = getLabel('role', u.role);
 
-        // ★ 正規化ヘルパーを通して代表作品を取得
         const userWorks = normalizeUserWorks(u);
         const firstWork = userWorks.length > 0 ? userWorks[0] : null;
         let thumbHtml = '<div class="card-thumb-empty">No Work Preview</div>';
@@ -791,8 +861,23 @@
         const freeTags = (u.freeTags ? String(u.freeTags).split(',') : []).map(t => t.trim()).filter(Boolean);
         const allCardTags = standardTags.concat(freeTags);
 
+        // お気に入り状態の判定
+        const isFav = myFavoritesSet.has(u.userId);
+        const isSelf = currentUserId && (currentUserId === u.userId);
+
         return `
           <div class="user-card" onclick="openModal(${idx})">
+            ${!isSelf ? `
+              <button 
+                class="btn-fav-card ${isFav ? 'active' : ''}" 
+                title="${isFav ? 'お気に入り解除' : 'お気に入りに追加'}"
+                onclick="handleToggleFavorite(event, '${escapeHtml(u.userId)}')"
+                id="fav-card-${escapeHtml(u.userId)}"
+              >
+                ${isFav ? '★' : '☆'}
+              </button>
+            ` : ''}
+
             <div class="card-thumb">
               ${thumbHtml}
               <span class="role-badge ${u.role}">${roleLabel}</span>
@@ -824,7 +909,6 @@
       const categoryDisplay = parseCommaLabels('category', u.category).join(' / ') || '未設定';
       const priceLabel = getLabel('priceGuide', u.priceGuide);
       
-      // ★ 正規化ヘルパーを通して取得
       const userWorks = normalizeUserWorks(u);
       const userPlatforms = normalizeUserPlatforms(u);
 
@@ -837,10 +921,30 @@
         }
       });
 
+      // モーダル用お気に入りボタンの生成
+      const isFav = myFavoritesSet.has(u.userId);
+      const isSelf = currentUserId && (currentUserId === u.userId);
+      const favContainer = document.getElementById('modalFavContainer');
+
+      if (!isSelf) {
+        favContainer.innerHTML = `
+          <button 
+            class="modal-fav-btn ${isFav ? 'active' : ''}" 
+            id="modal-fav-btn"
+            onclick="handleToggleFavorite(event, '${escapeHtml(u.userId)}', true)"
+          >
+            <span>${isFav ? '★' : '☆'}</span>
+            <span id="modal-fav-label">${isFav ? '気になるリスト登録中' : '気になるに追加'}</span>
+          </button>
+        `;
+      } else {
+        favContainer.innerHTML = '';
+      }
+
       document.getElementById('modalBody').innerHTML = `
         <div style="display:flex; align-items:center; gap:16px; margin-bottom:16px;">
           ${avatarUrl ? `<img src="${avatarUrl}" style="width:64px; height:64px; border-radius:50%; object-fit:cover; border:1px solid #e2e8f0;" alt="">` : ''}
-          <div>
+          <div style="padding-right: 120px;">
             <span class="role-badge ${u.role}" style="position:static; margin-bottom:4px; display:inline-block;">${roleLabel}</span>
             <h2 style="margin:4px 0 0 0; font-size:1.3rem;">${escapeHtml(u.displayName || '')}</h2>
             <div style="font-size:0.85rem; color:#64748b;">${escapeHtml(categoryDisplay)}</div>
@@ -879,6 +983,78 @@
 
     function closeModal() {
       document.getElementById('userModal').classList.remove('open');
+    }
+
+    // ★ お気に入りトグル処理
+    async function handleToggleFavorite(event, targetUserId, isModal = false) {
+      if (event) event.stopPropagation();
+
+      if (!currentUserId) {
+        if (confirm('お気に入り機能を利用するにはログインが必要です。ログイン画面へ移動しますか？')) {
+          window.location.href = './index.html';
+        }
+        return;
+      }
+
+      const isAdding = !myFavoritesSet.has(targetUserId);
+
+      // UIを即座に楽観的更新
+      if (isAdding) {
+        myFavoritesSet.add(targetUserId);
+      } else {
+        myFavoritesSet.delete(targetUserId);
+      }
+      updateFavUI(targetUserId);
+
+      try {
+        const res = await fetch(GAS_API_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain' },
+          body: JSON.stringify({
+            action: 'toggleFavorite',
+            data: {
+              fromUserId: currentUserId,
+              toUserId: targetUserId
+            }
+          })
+        });
+        const result = await res.json();
+
+        if (!result.success) {
+          // 失敗した場合は元の状態にロールバック
+          if (isAdding) myFavoritesSet.delete(targetUserId);
+          else myFavoritesSet.add(targetUserId);
+          updateFavUI(targetUserId);
+          alert(result.message || '操作に失敗しました。');
+        }
+      } catch (err) {
+        // 通信失敗時のロールバック
+        if (isAdding) myFavoritesSet.delete(targetUserId);
+        else myFavoritesSet.add(targetUserId);
+        updateFavUI(targetUserId);
+        alert('通信に失敗しました。ネットワーク状況を確認してください。');
+      }
+    }
+
+    function updateFavUI(targetUserId) {
+      const isFav = myFavoritesSet.has(targetUserId);
+
+      // カード側のボタン更新
+      const cardBtn = document.getElementById(`fav-card-${targetUserId}`);
+      if (cardBtn) {
+        cardBtn.classList.toggle('active', isFav);
+        cardBtn.textContent = isFav ? '★' : '☆';
+        cardBtn.title = isFav ? 'お気に入り解除' : 'お気に入りに追加';
+      }
+
+      // モーダル側のボタン更新
+      const modalBtn = document.getElementById('modal-fav-btn');
+      const modalLabel = document.getElementById('modal-fav-label');
+      if (modalBtn && modalLabel) {
+        modalBtn.classList.toggle('active', isFav);
+        modalBtn.querySelector('span:first-child').textContent = isFav ? '★' : '☆';
+        modalLabel.textContent = isFav ? '気になるリスト登録中' : '気になるに追加';
+      }
     }
 
     function escapeHtml(str) {
