@@ -104,67 +104,73 @@ accounts:
             exportJson: true
             infoTip: "世界観やテイストで絞り込むための公式タグです（最低1つ選択）。"
             options:
-                - Woman
-                - Man
-                - Genderless
-                - Androgynous
-                - JapaneseStyle
-                - WesternStyle
-                - Cyberpunk
-                - MiddleAges
-                - Fantasy
-                - ScienceFiction
-                - Humanoid
-                - DemiHuman
-                - Beastman
-                - MythicalBeast
-                - Gothic
-                - Pop
-                - Horror
-                - Retro
-                - Chibi
-                - Cute
-                - Cool
-                - Bishojo
-                - Ikemen
-                - Macho
-                - Acoustic
-                - EDM
-                - Chill
-                - Rock
-                - Minimal
-                - Modern
+                - japanese
+                - western
+                - retro
+                - cute
+                - cool
+                - simple
+                - cyber
+                - gothic
+                - fantasy
+                - dark
+                - pop
+                - elegant
+                - comic
+                - anime
+                - real
+                - chibi
+                - male
+                - female
+                - monster
+                - mecha
+                - bg_nature
+                - bg_city
+                - item
+                - logo
+                - typo
+                - vocal
+                - instrumental
+                - bbg
+                - sound_effect
+                - narration
+                - circle_member
+                - stream_collab
+                - project_team
             optionLabels:
-                - "女性モデル"
-                - "男性モデル"
-                - "中性・無性モデル"
-                - "両性・中性的モデル"
                 - "和風"
                 - "洋風"
-                - "サイバーパンク"
-                - "中世"
-                - "幻想（ファンタジー）"
-                - "SF"
-                - "人間"
-                - "亜人"
-                - "獣人"
-                - "幻獣"
-                - "ゴシック・ダーク"
-                - "ポップ・カラフル"
-                - "ホラー・アンダーグラウンド"
                 - "レトロ・平成/昭和"
-                - "ミニキャラ・SD"
                 - "かわいい・萌え"
                 - "かっこいい・スタイリッシュ"
-                - "美少女"
-                - "イケメン・青年"
-                - "おじ・人外マッスル"
-                - "生音・アコースティック"
-                - "クラブ・EDM"
-                - "Lo-Fi・Chill"
-                - "ロック・バンドサウンド"
                 - "シンプル・ミニマル"
-                - "モダン・グラフィカル"
+                - "近未来・サイバーパンク"
+                - "ゴシック・アンティーク"
+                - "ファンタジー・幻想"
+                - "ダーク・ホラー"
+                - "ポップ・ビビッド"
+                - "エレガント・上品"
+                - "アメコミ・カートゥーン"
+                - "アニメ塗り・厚塗り"
+                - "リアル・写実"
+                - "デフォルメ・SD"
+                - "男性モデル"
+                - "女性モデル"
+                - "人外・モンスター"
+                - "ロボ・メカ"
+                - "背景（自然・風景）"
+                - "背景（都市・室内）"
+                - "アイテム・小物"
+                - "ロゴ・デザイン"
+                - "タイポグラフィ"
+                - "歌唱・ボーカル"
+                - "インスト・BGM"
+                - "効果音・ジングル"
+                - "ナレーション・CV"
+                - "その他・フリースタイル"
+                - "🤝 サークル・共同制作 募集中"
+                - "🎙️ 配信コラボ 募集中"
+                - "✨ 企画・自主制作仲間 募集中"
         freeTags:
             label: "フリータグ"
             type: array
@@ -259,24 +265,14 @@ accounts:
             exportJson: true
             infoTip: "依頼検討者向けの目安金額です。"
             options:
-                - "~1000"
-                - "~2000"
-                - "~3000"
-                - "~5000"
-                - "~10000"
-                - "~30000"
-                - "~50000"
-                - "50000~"
-                - consultation
-                - Free
+                - flexible
+                - free_monitor
+                - collab
+                - paid_only
+                - view_only
             optionLabels:
-                - "~1,000円"
-                - "~2,000円"
-                - "~3,000円"
-                - "~5,000円"
-                - "~10,000円"
-                - "~30,000円"
-                - "~50,000円"
-                - "50,000円~"
-                - "要相談"
-                - "無償（モニター）"
+                - "条件・内容に応じて相談"
+                - "無償モニター・実績作り歓迎"
+                - "企画・コラボ・共同制作"
+                - "有償依頼のみ（外部窓口へ案内）"
+                - "現在は受付停止（鑑賞・交流のみ）"
