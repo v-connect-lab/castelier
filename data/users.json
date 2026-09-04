@@ -73,5 +73,23 @@
     "description": "よろしくお願いします。",
     "priceGuide": "",
     "updatedAt": "2026-09-04T00:55:42.000Z"
+  },
+  {
+    "userId": "usr_f67bd4e7",
+    "role": "creator",
+    "displayName": "作成テスト",
+    "isContactWelcome": true,
+    "category": "illust",
+    "tags": "Woman",
+    "freeTags": "",
+    "avatarUrl": "",
+    "works": [],
+    "portfolioUrl": "",
+    "xUrl": "",
+    "platforms": [],
+    "contactInfo": "",
+    "description": "よろしくお願いします。",
+    "priceGuide": "~1000",
+    "updatedAt": "2026-09-04T12:44:04.000Z"
   }
 ]
