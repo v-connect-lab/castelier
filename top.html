@@ -106,12 +106,16 @@
       right: -320px;
       width: 280px;
       height: 100vh;
+      height: 100dvh; /* iOS Safariの動的バー対応 */
       background: #ffffff;
       box-shadow: -4px 0 15px rgba(0,0,0,0.1);
       z-index: 100;
       display: flex;
       flex-direction: column;
-      padding: 24px 20px;
+      padding: 20px 16px;
+      padding-bottom: calc(20px + env(safe-area-inset-bottom, 0px)); /* セーフエリア確保 */
+      overflow-y: auto; /* 画面が小さくても確実に一番下までスクロール可能に */
+      -webkit-overflow-scrolling: touch;
       transition: right 0.25s ease-in-out;
     }
     .menu-drawer.open { right: 0; }
@@ -180,7 +184,8 @@
       margin: 12px 0;
     }
     .btn-drawer-logout {
-      margin-top: auto;
+      margin-top: 16px; /* autoではなくマージンにして押し出しを防止 */
+      margin-bottom: 8px;
       background: #fee2e2;
       color: #b91c1c;
       border: 1px solid #fca5a5;
@@ -190,6 +195,7 @@
       font-size: 0.85rem;
       cursor: pointer;
       width: 100%;
+      flex-shrink: 0; /* 縮小防止 */
     }
 
     /* お気に入り / フォロワー リストドロワー */
@@ -520,7 +526,7 @@
       border-radius: 4px;
     }
 
-    /* モーダル */
+    /* --- 詳細モーダル：上下の確実な余白確保と見切れ防止 --- */
     .modal-overlay {
       position: fixed;
       inset: 0;
@@ -529,20 +535,22 @@
       display: none;
       align-items: center;
       justify-content: center;
-      padding: 16px;
+      padding: calc(16px + env(safe-area-inset-top, 0px)) 16px calc(24px + env(safe-area-inset-bottom, 0px));
       z-index: 120;
     }
     .modal-overlay.open { display: flex; }
+
     .modal-content {
       background: #ffffff;
       width: 100%;
       max-width: 680px;
-      max-height: 90vh;
+      max-height: calc(100dvh - 40px); /* 画面上下に確実にマージンを残す */
       border-radius: var(--radius);
       overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
       box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2);
       position: relative;
-      padding: 24px;
+      padding: 24px 20px 32px; /* 下部に十分なパディング */
     }
     .modal-close {
       position: absolute;
@@ -557,22 +565,21 @@
       cursor: pointer;
     }
 
-    /* モーダル用お気に入りボタン */
+    /* お気に入りボタン（インライン配置化） */
     .modal-fav-btn {
-      position: absolute;
-      top: 16px;
-      right: 56px;
       background: #f8fafc;
       border: 1px solid var(--border);
       padding: 6px 12px;
       border-radius: 20px;
-      font-size: 0.85rem;
+      font-size: 0.8rem;
       font-weight: 600;
       color: var(--text-sub);
       cursor: pointer;
       display: inline-flex;
       align-items: center;
-      gap: 6px;
+      gap: 4px;
+      flex-shrink: 0;
+      white-space: nowrap;
       transition: all 0.2s;
     }
     .modal-fav-btn.active {
@@ -583,26 +590,38 @@
 
     /* メディア埋め込みスタイル */
     .modal-works-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-      gap: 12px;
-      margin: 16px 0;
+      display: flex !important;
+      flex-wrap: nowrap !important;
+      gap: 14px !important;
+      overflow-x: auto !important;
+      padding: 6px 4px 14px !important;
+      margin: 12px 0 !important;
+      scroll-snap-type: x mandatory;
+      -webkit-overflow-scrolling: touch;
+    }
+    /* スクロールバーのデザイン */
+    .modal-works-grid::-webkit-scrollbar {
+      height: 6px;
+    }
+    .modal-works-grid::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 4px;
     }
     .media-box {
+      flex: 0 0 260px !important; /* 幅を固定して横に並べる */
+      max-width: 80vw;
+      scroll-snap-align: start;
       border-radius: 8px;
       overflow: hidden;
       background: #f8fafc;
       border: 1px solid var(--border);
       display: flex;
       flex-direction: column;
-      justify-content: center;
     }
     .media-box img.modal-work-img {
       width: 100%;
-      height: 180px;
+      height: 160px;
       object-fit: cover;
-      pointer-events: none;
-      user-select: none;
       display: block;
     }
     .media-audio-box {
@@ -698,6 +717,23 @@
     .report-link:hover {
       color: #ef4444;
       text-decoration: underline;
+    }
+
+    /* --- モーダル内ヘッダー・ボタン配置：絶対配置をやめて横並びで整理 --- */
+    .modal-header-top {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 16px;
+      padding-right: 40px; /* 右上の×ボタン用の余白 */
+    }
+    .modal-user-profile {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex: 1;
+      min-width: 0;
     }
   </style>
 </head>
@@ -1377,21 +1413,20 @@
 
       const isFav = myFavoritesSet.has(u.userId);
       const isSelf = currentUserId && (currentUserId === u.userId);
-      const favContainer = document.getElementById('modalFavContainer');
 
+      // お気に入りボタンHTML（インライン配置用）
+      let favBtnHtml = '';
       if (!isSelf) {
-        favContainer.innerHTML = `
+        favBtnHtml = `
           <button 
             class="modal-fav-btn ${isFav ? 'active' : ''}" 
             id="modal-fav-btn"
             onclick="handleToggleFavorite(event, '${escapeHtml(u.userId)}', true)"
           >
             <span>${isFav ? '★' : '☆'}</span>
-            <span id="modal-fav-label">${isFav ? 'お気に入り登録中' : 'お気に入りに追加'}</span>
+            <span id="modal-fav-label">${isFav ? '登録中' : 'キープ'}</span>
           </button>
         `;
-      } else {
-        favContainer.innerHTML = '';
       }
 
       // 通報URLの生成
@@ -1404,27 +1439,35 @@
         reportHtml = `
           <div class="report-link-wrap">
             <a href="${formUrl}" target="_blank" rel="noopener noreferrer" class="report-link">
-              <span>⚠️</span>
-              <span>このユーザーを通報・違反報告する</span>
+              <span>⚠️ このユーザーを通報・違反報告する</span>
             </a>
           </div>
         `;
       }
 
+      // 既存の modalFavContainer は空にし、ヘッダー行の中にボタンを統合
+      document.getElementById('modalFavContainer').innerHTML = '';
+
       document.getElementById('modalBody').innerHTML = `
-        <div style="display:flex; align-items:center; gap:16px; margin-bottom:16px;">
-          ${avatarUrl ? `<img src="${avatarUrl}" style="width:64px; height:64px; border-radius:50%; object-fit:cover; border:1px solid #e2e8f0;" alt="">` : ''}
-          <div style="padding-right: 120px;">
-            <span class="role-badge ${u.role}" style="position:static; margin-bottom:4px; display:inline-block;">${roleLabel}</span>
-            <h2 style="margin:4px 0 0 0; font-size:1.3rem;">${escapeHtml(u.displayName || '')}</h2>
-            <div style="font-size:0.85rem; color:#64748b;">${escapeHtml(categoryDisplay)}</div>
+        <div class="modal-header-top">
+          <div class="modal-user-profile">
+            ${avatarUrl ? `<img src="${avatarUrl}" style="width:54px; height:54px; border-radius:50%; object-fit:cover; border:1px solid #e2e8f0; flex-shrink:0;" alt="">` : ''}
+            <div style="min-width: 0;">
+              <span class="role-badge ${u.role}" style="position:static; margin-bottom:4px; display:inline-block;">${roleLabel}</span>
+              <h2 style="margin:2px 0 0; font-size:1.15rem; word-break:break-word;">${escapeHtml(u.displayName || '')}</h2>
+              <div style="font-size:0.8rem; color:#64748b;">${escapeHtml(categoryDisplay)}</div>
+            </div>
           </div>
+          ${favBtnHtml}
         </div>
 
-        <div style="margin-bottom:16px; white-space:pre-wrap; font-size:0.9rem; line-height:1.6; color:#334155;">${escapeHtml(u.description || '自己紹介文はありません。')}</div>
+        <div style="margin-bottom:16px; white-space:pre-wrap; font-size:0.85rem; line-height:1.6; color:#334155;">${escapeHtml(u.description || '自己紹介文はありません。')}</div>
 
         ${userWorks.length > 0 ? `
-          <div style="font-weight:bold; font-size:0.85rem; margin-bottom:8px;">代表作品・メディア</div>
+          <div style="font-weight:bold; font-size:0.85rem; margin-bottom:4px; display:flex; justify-content:space-between; align-items:center;">
+            <span>代表作品・メディア</span>
+            <span style="font-size:0.75rem; color:#94a3b8; font-weight:normal;">横スクロール可 ➔</span>
+          </div>
           <div class="modal-works-grid">
             ${userWorks.map(w => renderMediaItem(w)).join('')}
           </div>
@@ -1432,7 +1475,7 @@
 
         ${priceLabel ? `
           <div style="margin:12px 0; font-size:0.85rem;">
-            <strong>料金・予算目安:</strong> ${escapeHtml(priceLabel)}
+            <strong>活動・依頼スタンス:</strong> ${escapeHtml(priceLabel)}
           </div>
         ` : ''}
 
