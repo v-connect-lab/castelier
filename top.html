@@ -812,6 +812,7 @@
     let interestedInMeList = [];
     let mutualSet = new Set();
     let currentUserId = null;
+    let contactConfig = null; // ★ 追加: お問い合わせ設定キャッシュ用
 
     let labelMaps = {
       role: { creator: 'クリエイター', streamer: '配信者' },
@@ -1153,6 +1154,10 @@
         const fetchJsonUsers = fetch(`./data/users.json?t=${now}`)
           .then(r => r.ok ? r.json() : [])
           .catch(() => []);
+
+        const fetchContactConfig = fetch(`./config/contact.json?t=${now}`)
+          .then(r => r.ok ? r.json() : null)
+          .catch(() => null);
 
         const fetchSelfUser = (async () => {
           if (isRecentlyRegistered && currentUserId) {
