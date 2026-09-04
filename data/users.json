@@ -1,28 +1,23 @@
 [
   {
     "userId": "usr_beebb209",
-    "role": "creator",
+    "role": "",
     "displayName": "潤華ねろ",
     "isContactWelcome": true,
     "category": "Web",
-    "tags": "simple",
+    "tags": "simple,narration",
     "freeTags": "無償モニター",
     "avatarUrl": "https://lh3.googleusercontent.com/d/1ZcK-qteXRtnGYkZoP-1wqklgzvTkiUQd",
     "works": [
       {
-        "type": "video",
-        "image": "",
-        "url": "https://drive.google.com/file/d/1eqFX8I9hQA38DGl8YioSHGeUTwJMzhW3/preview"
+        "type": "web",
+        "image": "https://raw.githubusercontent.com/nr-works-dev/portfolio/main/assets/web2_image-1.jpg",
+        "url": "https://websample2000-ops.github.io/websample/"
       },
       {
-        "type": "music",
-        "image": "",
-        "url": "https://drive.google.com/file/d/1ChdICRCISo8HyT-HoseoW45bKuqdeVw4/preview"
-      },
-      {
-        "type": "video",
-        "image": "",
-        "url": "https://www.youtube.com/watch?v=HWDVVysH_oI"
+        "type": "web",
+        "image": "https://raw.githubusercontent.com/nr-works-dev/portfolio/main/assets/web1_image-1.jpg",
+        "url": "https://holodrea-wiki.github.io/holodreams-member/index.html"
       }
     ],
     "portfolioUrl": "https://nr-works-dev.github.io/portfolio/",
@@ -36,7 +31,7 @@
     "contactInfo": "urukanero.works@gmail.com",
     "description": "よろしくお願いします！",
     "priceGuide": "free_monitor",
-    "updatedAt": "2026-09-04T00:20:23.000Z"
+    "updatedAt": "2026-09-04T17:30:36.000Z"
   },
   {
     "userId": "usr_8456be69",
