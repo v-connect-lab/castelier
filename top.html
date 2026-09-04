@@ -745,7 +745,7 @@
       <hr class="drawer-divider">
       <!-- ★ 追加: ご意見・ご要望（Googleフォーム） -->
       <li>
-        <a href="https://docs.google.com/forms/d/e/あなたのフォームID/viewform" target="_blank" rel="noopener noreferrer" class="drawer-nav-item">
+        <a href="#" onclick="openFeedbackForm(event)" class="drawer-nav-item">
           <span>💡 ご意見・ご要望</span>
           <span style="font-size: 0.8rem; color: #94a3b8;">↗</span>
         </a>
@@ -1539,6 +1539,14 @@
     function backToMenuDrawer() {
       document.getElementById('listDrawer').classList.remove('open');
       document.getElementById('menuDrawer').classList.add('open');
+    }
+
+    // top.html の <script> 内
+    function openFeedbackForm(e) {
+      if (e) e.preventDefault();
+      const uid = currentUserId ? encodeURIComponent(currentUserId) : '';
+      const url = `https://docs.google.com/forms/d/e/1FAIpQLSep1VRHITjUqvQ1aE31fhGs7EsHfuiC9FSPeqMJBxGaklqt2g/viewform?usp=pp_url&entry.267937224=${uid}`;
+      window.open(url, '_blank', 'noopener,noreferrer');
     }
   </script>
 </body>
