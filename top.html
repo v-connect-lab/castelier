@@ -887,6 +887,81 @@
       flex: 1;
       min-width: 0;
     }
+
+    /* 表示切り替えスイッチ */
+    .view-mode-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+    .view-toggle-group {
+      display: inline-flex;
+      background: #f1f5f9;
+      padding: 3px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+    }
+    .view-toggle-btn {
+      padding: 5px 12px;
+      border: none;
+      background: transparent;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--text-sub);
+      cursor: pointer;
+      border-radius: 6px;
+      transition: all 0.15s ease;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .view-toggle-btn.active {
+      background: #ffffff;
+      color: var(--primary);
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+
+    /* 簡易表示（compact）用のカードスタイル */
+    .user-card.compact .card-thumb,
+    .user-card.compact .card-desc {
+      display: none !important;
+    }
+    .user-card.compact .btn-fav-card {
+      top: 10px;
+      right: 10px;
+      width: 30px;
+      height: 30px;
+      font-size: 1.05rem;
+    }
+    .user-card.compact .card-body {
+      padding: 14px;
+    }
+    .user-card.compact .card-header {
+      margin-bottom: 8px;
+      padding-right: 32px; /* お気に入りボタンと被らない余白 */
+    }
+    .user-card.compact .card-avatar {
+      width: 42px;
+      height: 42px;
+    }
+    .user-card.compact .card-name {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.95rem;
+    }
+    .user-card.compact .role-badge-inline {
+      font-size: 0.65rem;
+      font-weight: bold;
+      padding: 1px 6px;
+      border-radius: 4px;
+      color: #fff;
+      display: inline-block;
+      white-space: nowrap;
+    }
+    .user-card.compact .role-badge-inline.creator { background: var(--creator-color); }
+    .user-card.compact .role-badge-inline.streamer { background: var(--streamer-color); }
   </style>
 </head>
 <body oncontextmenu="return false;">
@@ -971,7 +1046,18 @@
       </div>
     </div>
 
-    <div class="results-count" id="resultsCount">読み込み中...</div>
+    <!-- 件数表示 ＆ 表示切り替えスイッチ -->
+    <div class="view-mode-bar">
+      <div class="results-count" id="resultsCount" style="margin-bottom: 0;">読み込み中...</div>
+      <div class="view-toggle-group">
+        <button class="view-toggle-btn active" id="btnViewDetailed" onclick="setViewMode('detailed')">
+          <span>🗂 詳細表示</span>
+        </button>
+        <button class="view-toggle-btn" id="btnViewCompact" onclick="setViewMode('compact')">
+          <span>📄 簡易表示</span>
+        </button>
+      </div>
+    </div>
 
     <div class="user-grid" id="userGrid">
       <div class="loading-state">ユーザー一覧を読み込んでいます...</div>
@@ -999,6 +1085,7 @@
     let mutualSet = new Set();
     let currentUserId = null;
     let contactConfig = null;
+    let currentViewMode = localStorage.getItem('castelier_view_mode') || 'detailed';
 
     let labelMaps = {
       role: { creator: 'クリエイター', streamer: '配信者' },
@@ -1420,6 +1507,11 @@
       });
       renderFilteredUsers();
     }
+    
+    if (document.getElementById('btnViewDetailed')) {
+      document.getElementById('btnViewDetailed').classList.toggle('active', currentViewMode === 'detailed');
+      document.getElementById('btnViewCompact').classList.toggle('active', currentViewMode === 'compact');
+    }
 
     function renderFilteredUsers() {
       const keyword = document.getElementById('keywordSearch').value.toLowerCase().trim();
@@ -1498,8 +1590,10 @@
         const isFav = myFavoritesSet.has(u.userId);
         const isSelf = currentUserId && (currentUserId === u.userId);
 
+        const isCompact = currentViewMode === 'compact';
+
         return `
-          <div class="user-card" onclick="openModal(${idx})">
+          <div class="user-card ${isCompact ? 'compact' : ''}" onclick="openModal(${idx})">
             ${!isSelf ? `
               <button 
                 class="btn-fav-card ${isFav ? 'active' : ''}" 
@@ -1511,20 +1605,28 @@
               </button>
             ` : ''}
 
+            <!-- 詳細表示時のみ表示されるサムネイル -->
             <div class="card-thumb">
               ${thumbHtml}
               <span class="role-badge ${u.role}">${roleLabel}</span>
             </div>
+
             <div class="card-body">
               <div class="card-header">
                 ${avatarUrl ? `<img src="${avatarUrl}" class="card-avatar" alt="">` : '<div class="card-avatar"></div>'}
-                <div style="overflow: hidden;">
-                  <div class="card-name">${escapeHtml(u.displayName || '名無し')}</div>
+                <div style="overflow: hidden; flex-grow: 1;">
+                  <div class="card-name">
+                    ${isCompact ? `<span class="role-badge-inline ${u.role}">${roleLabel}</span>` : ''}
+                    <span style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${escapeHtml(u.displayName || '名無し')}</span>
+                  </div>
                   <div class="card-category">${escapeHtml(categoryDisplay)}</div>
                 </div>
               </div>
+
+              <!-- 詳細表示時のみ表示される自己紹介 -->
               <div class="card-desc">${escapeHtml(u.description || '自己紹介文はありません。')}</div>
-              <!-- ★ 制限を撤廃して全タグを表示（CSS側で2段固定＋スクロール制御） -->
+
+              <!-- タグ（詳細・簡易どちらでも共通で表示） -->
               <div class="card-tags">
                 ${allCardTags.map(t => `<span class="tag-badge">#${escapeHtml(t)}</span>`).join('')}
               </div>
@@ -1804,6 +1906,15 @@
       const mailtoUrl = `mailto:${to}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(normalizedBody)}`;
 
       window.location.href = mailtoUrl;
+    }
+    function setViewMode(mode) {
+      currentViewMode = mode;
+      localStorage.setItem('castelier_view_mode', mode);
+      
+      document.getElementById('btnViewDetailed').classList.toggle('active', mode === 'detailed');
+      document.getElementById('btnViewCompact').classList.toggle('active', mode === 'compact');
+      
+      renderFilteredUsers();
     }
   </script>
 </body>
