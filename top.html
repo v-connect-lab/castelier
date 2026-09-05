@@ -512,18 +512,41 @@
       min-height: 2.6em;
     }
 
+    /* ★ カード内タグ：2段分固定（52px）、3段以上スクロール対応 */
     .card-tags {
       display: flex;
       flex-wrap: wrap;
-      gap: 4px;
+      align-content: flex-start;
+      gap: 6px;
+      height: 52px;
+      overflow-y: auto;
       margin-top: auto;
+      padding-right: 2px;
     }
+    .card-tags::-webkit-scrollbar {
+      width: 4px;
+    }
+    .card-tags::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 4px;
+    }
+
     .tag-badge {
       font-size: 0.7rem;
       background: #f1f5f9;
       color: #475569;
       padding: 2px 8px;
       border-radius: 4px;
+      white-space: nowrap;
+      display: inline-block;
+    }
+
+    /* モーダル内タグ一覧用 */
+    .modal-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin: 12px 0 16px;
     }
 
     /* --- 詳細モーダル --- */
@@ -648,7 +671,6 @@
       -webkit-overflow-scrolling: touch;
     }
 
-    /* スクロールバーのデザイン */
     .modal-works-grid::-webkit-scrollbar {
       height: 8px;
     }
@@ -664,7 +686,7 @@
       background: #94a3b8;
     }
 
-    /* 各メディアカード：16:9比率（幅280px × 高さ158px）固定 */
+    /* 各メディアカード：16:9比率固定 */
     .media-box {
       flex: 0 0 280px !important;
       width: 280px !important;
@@ -680,7 +702,6 @@
       box-sizing: border-box;
     }
 
-    /* 画像作品 */
     .media-box img.modal-work-img {
       width: 100%;
       height: 100%;
@@ -688,7 +709,6 @@
       display: block;
     }
 
-    /* 音楽・音声枠 */
     .media-audio-box {
       background: #f8fafc !important;
       height: 100% !important;
@@ -699,7 +719,6 @@
       box-sizing: border-box;
     }
 
-    /* Webサイト枠 */
     .media-link-card {
       display: flex;
       flex-direction: column;
@@ -1438,6 +1457,7 @@
         const catLabels = parseCommaLabels('category', u.category);
         const categoryDisplay = catLabels.join(' / ') || '未設定';
 
+        // ★ 属性・作風タグ ＋ フリータグを結合
         const standardTags = parseCommaLabels('tags', u.tags);
         const freeTags = (u.freeTags ? String(u.freeTags).split(',') : []).map(t => t.trim()).filter(Boolean);
         const allCardTags = standardTags.concat(freeTags);
@@ -1471,8 +1491,9 @@
                 </div>
               </div>
               <div class="card-desc">${escapeHtml(u.description || '自己紹介文はありません。')}</div>
+              <!-- ★ 制限を撤廃して全タグを表示（CSS側で2段固定＋スクロール制御） -->
               <div class="card-tags">
-                ${allCardTags.slice(0, 4).map(t => `<span class="tag-badge">#${escapeHtml(t)}</span>`).join('')}
+                ${allCardTags.map(t => `<span class="tag-badge">#${escapeHtml(t)}</span>`).join('')}
               </div>
             </div>
           </div>
@@ -1488,11 +1509,10 @@
       }
     }
 
-    // 代表作品の左右ボタンスクロール
     function scrollWorks(direction) {
       const container = document.getElementById('modalWorksGrid');
       if (!container) return;
-      const scrollAmount = 296; // カード幅 280px + gap 16px
+      const scrollAmount = 296;
       container.scrollBy({
         left: direction * scrollAmount,
         behavior: 'smooth'
@@ -1510,6 +1530,11 @@
       
       const userWorks = normalizeUserWorks(u);
       const userPlatforms = normalizeUserPlatforms(u);
+
+      // ★ 詳細ウィンドウ用のタグ（作風タグ ＋ フリータグ）
+      const standardTags = parseCommaLabels('tags', u.tags);
+      const freeTags = (u.freeTags ? String(u.freeTags).split(',') : []).map(t => t.trim()).filter(Boolean);
+      const allModalTags = standardTags.concat(freeTags);
 
       const links = [];
       if (u.xUrl) links.push(`<a href="${u.xUrl}" target="_blank" rel="noopener">X (Twitter)</a>`);
@@ -1567,7 +1592,14 @@
           ${favBtnHtml}
         </div>
 
-        <div style="margin-bottom:16px; white-space:pre-wrap; font-size:0.85rem; line-height:1.6; color:#334155;">${escapeHtml(u.description || '自己紹介文はありません。')}</div>
+        <div style="margin-bottom:12px; white-space:pre-wrap; font-size:0.85rem; line-height:1.6; color:#334155;">${escapeHtml(u.description || '自己紹介文はありません。')}</div>
+
+        <!-- ★ 詳細ウィンドウへのタグ表示追加 -->
+        ${allModalTags.length > 0 ? `
+          <div class="modal-tags">
+            ${allModalTags.map(t => `<span class="tag-badge">#${escapeHtml(t)}</span>`).join('')}
+          </div>
+        ` : ''}
 
         ${userWorks.length > 0 ? `
           <div style="font-weight:bold; font-size:0.85rem; margin-bottom:4px; display:flex; justify-content:space-between; align-items:center;">
@@ -1605,7 +1637,6 @@
 
       document.getElementById('userModal').classList.add('open');
 
-      // PCでのマウスホイール横スクロール連携
       const worksContainer = document.getElementById('modalWorksGrid');
       if (worksContainer) {
         worksContainer.onwheel = function(e) {
