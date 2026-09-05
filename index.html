@@ -69,7 +69,6 @@
       display: block;
     }
     
-    /* ヘッダー内ナビ・ログイン登録ボタン */
     #headerAuthNav {
       display: flex;
       align-items: center;
@@ -233,7 +232,6 @@
       background: #fecaca;
     }
 
-    /* ログアウト下の規約リンク */
     .drawer-terms-link-wrap {
       text-align: center;
       margin-top: 8px;
@@ -668,7 +666,6 @@
     .role-badge.creator { background: var(--creator-color); }
     .role-badge.streamer { background: var(--streamer-color); }
 
-    /* ★ お声がけ歓迎バッジ（グリーン系） */
     .welcome-badge {
       background: linear-gradient(135deg, #10b981 0%, #059669 100%);
       color: #ffffff;
@@ -1370,6 +1367,7 @@
       <div class="news-icon">📢</div>
       <div class="news-list" id="newsList"></div>
     </div>
+
     <!-- 検索・絞り込みパネル -->
     <div class="filter-panel">
       <div class="filter-panel-top">
@@ -1666,7 +1664,6 @@
         `;
         document.getElementById('drawerUserIdBadge').textContent = `ID: ${currentUserId}`;
       } else {
-        // ★ テキストリンクからボタン（.btn-login）に統一
         nav.innerHTML = `
           <a href="./login.html" class="btn-login">ログイン / 登録</a>
         `;
@@ -1798,6 +1795,11 @@
           .then(r => r.ok ? r.json() : null)
           .catch(() => null);
 
+        // ★ 追加: news.json のフェッチ
+        const fetchNews = fetch(`./data/news.json?t=${now}`)
+          .then(r => r.ok ? r.json() : [])
+          .catch(() => []);
+
         const fetchSelfUser = (async () => {
           if (isRecentlyRegistered && currentUserId) {
             try {
@@ -1829,8 +1831,9 @@
           }
         })();
 
-        const [schemaYaml, baseUsers, selfUser, favResult, loadedContact] = await Promise.all([
-          fetchSchema, fetchJsonUsers, fetchSelfUser, fetchMyFavorites, fetchContactConfig
+        // ★ 修正: fetchNews を追加し、loadedNews を確実に受け取る
+        const [schemaYaml, baseUsers, selfUser, favResult, loadedContact, loadedNews] = await Promise.all([
+          fetchSchema, fetchJsonUsers, fetchSelfUser, fetchMyFavorites, fetchContactConfig, fetchNews
         ]);
 
         contactConfig = loadedContact;
@@ -2057,10 +2060,8 @@
         const isFav = myFavoritesSet.has(u.userId);
         const isSelf = currentUserId && (currentUserId === u.userId);
 
-        // ★ 声掛け歓迎判定（配信者かつisContactWelcomeがtrue）
         const isWelcome = u.role === 'streamer' && String(u.isContactWelcome) === 'true';
 
-        // 区分別クラス名
         const roleClass = u.role === 'streamer' ? 'role-streamer' : 'role-creator';
 
         return `
@@ -2415,7 +2416,6 @@
       const list = document.getElementById('newsList');
       if (!banner || !list) return;
 
-      // 最新2件まで表示
       const displayItems = newsItems.slice(0, 2);
 
       list.innerHTML = displayItems.map(item => {
