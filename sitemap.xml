@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.3"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.3
+        http://www.sitemaps.org/schemas/sitemap/0.3/sitemap.xsd">
+  
+  <!-- トップページ（最重要） -->
+  <url>
+    <loc>https://v-connect-lab.github.io/castelier/</loc>
+    <changefreq>daily</changefreq>
+    <priority>1.0</priority>
+  </url>
+
+  <!-- 需要トレンド統計 -->
+  <url>
+    <loc>https://v-connect-lab.github.io/castelier/trends.html</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <!-- ログイン画面 -->
+  <url>
+    <loc>https://v-connect-lab.github.io/castelier/login.html</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+
+  <!-- 利用規約 -->
+  <url>
+    <loc>https://v-connect-lab.github.io/castelier/terms.html</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.3</priority>
+  </url>
+
+</urlset>
