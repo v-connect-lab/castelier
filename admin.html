@@ -4,21 +4,23 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <!-- AI学習抑止メタタグ -->
   <meta name="robots" content="noai, noimageai">
-  
   <title>Castelier | マイページ・管理</title>
+
+  <!-- ファビコン -->
+  <link rel="icon" type="image/png" href="assets/logo.png">
+
   <script src="https://cdnjs.cloudflare.com/ajax/libs/js-yaml/4.1.0/js-yaml.min.js"></script>
   <style>
     :root {
       --primary: #4f46e5;
       --primary-hover: #4338ca;
-      --bg: #f8fafc;
+      --bg: #0b0f19;
       --card-bg: #ffffff;
       --text: #1e293b;
       --text-sub: #64748b;
       --border: #e2e8f0;
-      --radius: 8px;
+      --radius: 12px;
       --creator-color: #ec4899;
       --streamer-color: #3b82f6;
     }
@@ -26,7 +28,7 @@
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      background-color: var(--bg);
+      background: url('assets/background_black.jpg') center center / cover no-repeat fixed var(--bg);
       color: var(--text);
       line-height: 1.5;
       padding: 24px 16px 60px;
@@ -38,8 +40,19 @@
       background: var(--card-bg);
       padding: 28px 24px;
       border-radius: var(--radius);
-      box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
       border: 1px solid var(--border);
+    }
+
+    /* 最上部バナー */
+    .top-banner-wrap {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    .top-banner-wrap img {
+      max-width: 240px;
+      height: auto;
+      display: inline-block;
     }
 
     .header-nav {
@@ -75,7 +88,6 @@
       font-weight: bold;
     }
 
-    /* 管理タブ切り替え */
     .admin-tabs {
       display: flex;
       gap: 8px;
@@ -127,7 +139,6 @@
       margin-bottom: 6px;
     }
 
-    /* ツールチップ */
     .info-icon {
       display: inline-flex;
       align-items: center;
@@ -250,7 +261,6 @@
     .hidden { display: none !important; }
     .section-divider { border: 0; border-top: 1px dashed var(--border); margin: 20px 0; }
 
-    /* アイコンプレビュー */
     .img-preview-box {
       margin-top: 8px;
       display: none;
@@ -274,7 +284,6 @@
       color: var(--text-sub);
     }
 
-    /* お気に入り・気になるリスト用カードスタイル */
     .fav-list-container {
       display: flex;
       flex-direction: column;
@@ -342,9 +351,7 @@
       color: var(--text);
       cursor: pointer;
     }
-    .fav-name:hover {
-      color: var(--primary);
-    }
+    .fav-name:hover { color: var(--primary); }
     .fav-desc {
       font-size: 0.8rem;
       color: var(--text-sub);
@@ -368,9 +375,7 @@
       color: var(--text);
       cursor: pointer;
     }
-    .btn-sm-view:hover {
-      background: #e2e8f0;
-    }
+    .btn-sm-view:hover { background: #e2e8f0; }
     .btn-sm-remove {
       padding: 6px 10px;
       background: #fee2e2;
@@ -380,11 +385,8 @@
       color: #b91c1c;
       cursor: pointer;
     }
-    .btn-sm-remove:hover {
-      background: #fecaca;
-    }
+    .btn-sm-remove:hover { background: #fecaca; }
 
-    /* 簡易モーダル */
     .modal-overlay {
       position: fixed;
       inset: 0;
@@ -434,6 +436,11 @@
 <body>
 
 <div class="container">
+  <!-- 画面最上部バナー -->
+  <div class="top-banner-wrap">
+    <a href="./top.html"><img src="assets/banner_beside.png" alt="Castelier"></a>
+  </div>
+
   <div class="header-nav">
     <a href="./top.html">← TOPページに戻る</a>
     <span style="font-size: 0.85rem; color: var(--text-sub);">アカウント管理</span>
@@ -560,7 +567,7 @@
           <p class="lead" style="margin-bottom: 20px; line-height: 1.6;">
             Googleドライブの共有URLにも対応しています。<br>
             <span style="color: #ef4444; font-size: 0.8rem; font-weight: 600; display: inline-block; margin-top: 4px;">
-              ※動画・音楽はYouTubeなどの配信プラットフォームのURLを推奨します。（Googleドライブも可能ですが表示が崩れる場合があります）
+              ※動画・音楽はYouTubeなどの配信プラットフォームのURLを推奨します。
             </span>
           </p>
           <div id="profWorksContainer">
@@ -697,7 +704,6 @@
     }
     sessionUser = JSON.parse(stored);
 
-    // uidが存在しない旧セッションの場合はindex.htmlへ誘導
     if (!sessionUser.uid) {
       alert('セッション情報が更新されています。再度ログインしてください。');
       logout();
@@ -708,7 +714,6 @@
       const now = Date.now();
       const [schemaRes, userRes, usersJsonRes, favRes] = await Promise.all([
         fetch('./schema/accounts.yaml').then(r => r.text()),
-        // ★ uid を送信して照合・取得
         fetch(GAS_API_URL, {
           method: 'POST',
           headers: { 'Content-Type': 'text/plain' },
@@ -1045,7 +1050,6 @@
     document.getElementById('statusMsg').style.display = 'none';
   }
 
-  // ★ プロフィール更新処理（uid認証版）
   async function handleUpdate(e) {
     e.preventDefault();
     hideStatus();
@@ -1089,7 +1093,6 @@
     const isPublic = isStreamer ? (document.getElementById('profIsPublic').value === 'true') : true;
     const isContactWelcome = (isStreamer && isPublic) ? (document.getElementById('profIsContactWelcome').value === 'true') : (!isStreamer ? true : false);
 
-    // ★ password を撤廃し uid をセット
     const payloadData = {
       userId: sessionUser.userId,
       uid: sessionUser.uid,
