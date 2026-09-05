@@ -253,6 +253,59 @@
       background: rgba(255, 255, 255, 0.9);
       border-radius: var(--radius);
     }
+
+    /* オリジナル画像ローディングスピナー */
+    .custom-spinner-wrapper {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 40px 16px;
+      gap: 14px;
+    }
+
+    .custom-spinner {
+      width: 56px;
+      height: 56px;
+      position: relative;
+      /* 画像の透過部分を活かすマスク指定 */
+      -webkit-mask: url('assets/spinner.png') no-repeat center / contain;
+      mask: url('assets/spinner.png') no-repeat center / contain;
+      background-color: #cbd5e1; /* 未充填時のベース下地色 */
+      overflow: hidden;
+    }
+
+    /* 下から上へ色が満ちていくアニメーションレイヤー */
+    .custom-spinner::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to top, var(--primary, #4f46e5), #818cf8);
+      transform-origin: bottom;
+      animation: spinner-fill-up 1.4s ease-in-out infinite;
+    }
+
+    @keyframes spinner-fill-up {
+      0% {
+        transform: scaleY(0);
+        opacity: 0.3;
+      }
+      50% {
+        transform: scaleY(1);
+        opacity: 1;
+      }
+      100% {
+        transform: scaleY(1);
+        opacity: 0; /* 満ちきったあとにフェードアウトしてループ */
+      }
+    }
+
+    .custom-spinnerText {
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--text-sub, #64748b);
+      letter-spacing: 0.05em;
+    }
   </style>
 </head>
 <body>
@@ -271,7 +324,12 @@
     <a href="./top.html" class="btn-back">← TOPへ戻る</a>
   </div>
 
-  <div id="loadingView" class="loading-text">統計データを集計中...</div>
+  <div id="loadingView" class="loading-text">
+    <div class="custom-spinner-wrapper">
+      <div class="custom-spinner"></div>
+      <div class="custom-spinnerText">統計データを集計中...</div>
+    </div>
+  </div>
 
   <div id="contentView" style="display: none;">
     <!-- 1. 全体比率サマリー -->
