@@ -1203,6 +1203,89 @@
       color: #334155;
       letter-spacing: 0.05em;
     }
+
+    /* お知らせインフォメーションバー */
+    .news-banner {
+      background: var(--card-gradient);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: var(--card-border);
+      border-radius: var(--radius);
+      box-shadow: var(--card-shadow);
+      padding: 12px 18px;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 0.85rem;
+    }
+
+    .news-icon {
+      font-size: 1.1rem;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+    }
+
+    .news-list {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      flex-grow: 1;
+      overflow: hidden;
+    }
+
+    .news-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .news-date {
+      font-size: 0.75rem;
+      color: var(--text-sub);
+      font-weight: 700;
+      font-feature-settings: "tnum";
+    }
+
+    .news-badge {
+      font-size: 0.65rem;
+      font-weight: 800;
+      padding: 1px 6px;
+      border-radius: 4px;
+      color: #fff;
+      background: var(--primary);
+      letter-spacing: 0.05em;
+    }
+    .news-badge.update {
+      background: #0ea5e9;
+    }
+
+    .news-text {
+      color: var(--text-main);
+      text-decoration: none;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    a.news-text:hover {
+      color: var(--primary);
+      text-decoration: underline;
+    }
+
+    @media (max-width: 640px) {
+      .news-banner {
+        padding: 10px 14px;
+        align-items: flex-start;
+      }
+      .news-item {
+        flex-wrap: wrap;
+        white-space: normal;
+        gap: 6px;
+      }
+    }
   </style>
 </head>
 <body oncontextmenu="return false;">
@@ -1282,6 +1365,11 @@
   </div>
 
   <div class="container">
+    <!-- ★ お知らせバー（データがある場合のみJSで表示） -->
+    <div class="news-banner hidden" id="newsBanner">
+      <div class="news-icon">📢</div>
+      <div class="news-list" id="newsList"></div>
+    </div>
     <!-- 検索・絞り込みパネル -->
     <div class="filter-panel">
       <div class="filter-panel-top">
@@ -1746,6 +1834,7 @@
         ]);
 
         contactConfig = loadedContact;
+        renderNewsBanner(loadedNews);
 
         if (favResult && favResult.success) {
           myFavoritesSet = new Set(favResult.myFavorites || []);
@@ -2318,6 +2407,35 @@
           badge.classList.add('hidden');
         }
       }
+    }
+
+    function renderNewsBanner(newsItems) {
+      if (!Array.isArray(newsItems) || newsItems.length === 0) return;
+      const banner = document.getElementById('newsBanner');
+      const list = document.getElementById('newsList');
+      if (!banner || !list) return;
+
+      // 最新2件まで表示
+      const displayItems = newsItems.slice(0, 2);
+
+      list.innerHTML = displayItems.map(item => {
+        const badgeClass = item.badge === 'UPDATE' ? 'update' : '';
+        const badgeHtml = item.badge ? `<span class="news-badge ${badgeClass}">${escapeHtml(item.badge)}</span>` : '';
+        const textContent = escapeHtml(item.text || '');
+        const contentHtml = item.url
+          ? `<a href="${escapeHtml(item.url)}" target="_blank" rel="noopener" class="news-text">${textContent} ↗</a>`
+          : `<span class="news-text">${textContent}</span>`;
+
+        return `
+          <div class="news-item">
+            <span class="news-date">${escapeHtml(item.date || '')}</span>
+            ${badgeHtml}
+            ${contentHtml}
+          </div>
+        `;
+      }).join('');
+
+      banner.classList.remove('hidden');
     }
   </script>
 </body>
