@@ -5,6 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="robots" content="noai, noimageai">
   <title>利用規約・交流ガイドライン | Castelier</title>
+
+  <!-- ファビコン -->
+  <link rel="icon" type="image/png" href="assets/logo.png">
+
   <style>
     :root {
       --bg: #f8fafc;
@@ -13,13 +17,13 @@
       --text-sub: #64748b;
       --primary: #4f46e5;
       --border: #e2e8f0;
-      --radius: 8px;
+      --radius: 12px;
     }
     body {
       margin: 0;
       padding: 24px 16px;
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      background: var(--bg);
+      background: url('assets/background_white.jpg') center center / cover no-repeat fixed var(--bg);
       color: var(--text-main);
       line-height: 1.6;
     }
@@ -27,31 +31,52 @@
       max-width: 680px;
       margin: 0 auto;
       background: var(--card-bg);
-      padding: 32px 24px;
+      padding: 32px 28px;
       border-radius: var(--radius);
-      box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.08);
       border: 1px solid var(--border);
     }
-    h1 { font-size: 1.4rem; margin-top: 0; padding-bottom: 12px; border-bottom: 2px solid var(--border); }
-    h2 { font-size: 1.1rem; margin-top: 24px; color: var(--primary); }
-    ul { padding-left: 20px; color: var(--text-sub); }
+    .top-banner-wrap {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    .top-banner-wrap img {
+      max-width: 140px;
+      height: auto;
+      display: inline-block;
+      border-radius: 8px;
+    }
+    h1 { font-size: 1.35rem; margin-top: 0; padding-bottom: 12px; border-bottom: 2px solid var(--border); text-align: center; }
+    h2 { font-size: 1.05rem; margin-top: 24px; color: var(--primary); }
+    ul { padding-left: 20px; color: var(--text-sub); font-size: 0.9rem; }
     li { margin-bottom: 8px; }
+    .close-btn-wrap {
+      text-align: center;
+      margin-top: 28px;
+    }
     .close-btn {
       display: inline-block;
-      margin-top: 24px;
       background: var(--primary);
       color: #fff;
-      padding: 10px 20px;
+      padding: 10px 24px;
       border-radius: var(--radius);
       text-decoration: none;
       font-size: 0.9rem;
+      font-weight: bold;
       cursor: pointer;
       border: none;
+      transition: opacity 0.2s;
     }
+    .close-btn:hover { opacity: 0.9; }
   </style>
 </head>
 <body>
   <div class="container">
+    <!-- 画面最上部縦型バナー -->
+    <div class="top-banner-wrap">
+      <img src="assets/banner_vertical.png" alt="Castelier">
+    </div>
+
     <h1>Castelier 利用規約・交流ガイドライン</h1>
     
     <h2>1. 作品の保護・権利尊重</h2>
@@ -72,7 +97,9 @@
       <li>上記に違反したアカウントは、運営判断により事前警告なくプロフィールの非公開・利用停止処分を実施します。</li>
     </ul>
 
-    <button class="close-btn" onclick="window.close()">このページを閉じる</button>
+    <div class="close-btn-wrap">
+      <button class="close-btn" onclick="window.close()">このページを閉じる</button>
+    </div>
   </div>
 </body>
 </html>
