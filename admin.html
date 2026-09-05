@@ -96,6 +96,50 @@
       font-weight: bold;
     }
 
+    /* 共有URL発行ボックス（タブの上部） */
+    .share-url-box {
+      background: rgba(99, 102, 241, 0.12);
+      border: 1px solid rgba(147, 197, 253, 0.35);
+      padding: 12px 16px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+    }
+    .share-url-label {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.8rem;
+      font-weight: bold;
+      color: #c7d2fe;
+      margin-bottom: 6px;
+    }
+    .share-url-row {
+      display: flex;
+      gap: 8px;
+    }
+    .share-url-input {
+      flex-grow: 1;
+      padding: 8px 10px;
+      border: 1px solid rgba(147, 197, 253, 0.3);
+      border-radius: 6px;
+      font-size: 0.85rem;
+      background: rgba(15, 23, 42, 0.9);
+      color: #93c5fd;
+    }
+    .share-url-btn {
+      padding: 0 16px;
+      background-color: var(--primary);
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-size: 0.85rem;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background 0.2s;
+      white-space: nowrap;
+    }
+    .share-url-btn:hover { background-color: var(--primary-hover); }
+
     .admin-tabs {
       display: flex;
       gap: 8px;
@@ -532,6 +576,18 @@
     <div class="title-row">
       <h1 id="viewTitle">プロフィール編集</h1>
       <span class="user-badge" id="displayUserId"></span>
+    </div>
+
+    <!-- 💡 タブのすぐ上に配置したマイページ共有URL発行ボックス -->
+    <div class="share-url-box">
+      <div class="share-url-label">
+        🔗 あなたのマイページ共有URL
+        <span class="info-icon" data-tooltip="X（Twitter）等であなたの詳細ページを直接開いた状態でシェアできるリンクです。本人だけが発行できます。">ℹ</span>
+      </div>
+      <div class="share-url-row">
+        <input type="text" id="myShareUrlInput" readonly class="share-url-input" placeholder="URL生成中...">
+        <button type="button" class="share-url-btn" onclick="copyMyShareUrl()">コピー</button>
+      </div>
     </div>
 
     <!-- 管理ナビタブ -->
@@ -998,6 +1054,10 @@
     document.getElementById('mainContentView').classList.remove('hidden');
     document.getElementById('displayUserId').textContent = `ID: ${userData.userId}`;
 
+    // 自分の共有URLをセット
+    const myShareUrl = `${window.location.origin}${window.location.pathname.replace('admin.html', '')}index.html?id=${userData.userId}`;
+    document.getElementById('myShareUrlInput').value = myShareUrl;
+
     applyInfoTips('prof');
 
     currentUserRole = userData.role || 'creator';
@@ -1071,6 +1131,18 @@
     });
 
     updateImagePreview('profAvatarUrl', 'profAvatarPreview');
+  }
+
+  // 共有URLコピー処理
+  function copyMyShareUrl() {
+    const input = document.getElementById('myShareUrlInput');
+    if (!input.value) return;
+    
+    navigator.clipboard.writeText(input.value).then(() => {
+      showStatus('共有用URLをクリップボードにコピーしました！', true);
+    }).catch(err => {
+      showStatus('コピーに失敗しました', false);
+    });
   }
 
   function toggleWorkImageInput(selectEl) {
