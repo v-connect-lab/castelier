@@ -8,13 +8,13 @@ accounts:
             type: string
             required: true
             exportJson: false
-            infoTip: "ログイン時に使用するあなた固有のアカウントIDです。外部には公開されません。"
-        password:
-            label: "パスワード"
+            infoTip: "あなた固有のアカウントIDです。お気に入り登録やお問い合わせの識別に使用されます"
+        uid:
+            label: "Firebase UID"
             type: string
             required: true
             exportJson: false
-            infoTip: "プロフィールの編集・ログイン時にのみ使用します。外部には絶対に公開されません。"
+            infoTip: "認証・ログイン照合専用の固有識別子です。外部には絶対に公開されません。"
         createdAt:
             label: "登録日時"
             type: datetime
