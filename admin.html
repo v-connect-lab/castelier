@@ -513,11 +513,11 @@
 <div class="container">
   <!-- 画面最上部バナー -->
   <div class="top-banner-wrap">
-    <a href="./top.html"><img src="assets/banner_beside.png" alt="Castelier"></a>
+    <a href="./index.html"><img src="assets/banner_beside.png" alt="Castelier"></a>
   </div>
 
   <div class="header-nav">
-    <a href="./top.html">← TOPページに戻る</a>
+    <a href="./index.html">← TOPページに戻る</a>
     <span style="font-size: 0.85rem; color: var(--text-sub);">アカウント管理</span>
   </div>
 
@@ -777,7 +777,7 @@
   window.addEventListener('DOMContentLoaded', async () => {
     const stored = sessionStorage.getItem('castelier_session');
     if (!stored) {
-      window.location.href = './index.html';
+      window.location.href = './login.html';
       return;
     }
     sessionUser = JSON.parse(stored);
@@ -1237,7 +1237,7 @@
   function logout() {
     sessionStorage.removeItem('castelier_session');
     localStorage.removeItem('castelier_registered_at');
-    window.location.href = './index.html';
+    window.location.href = './login.html';
   }
 
   function normalizeDriveUrl(url, type = 'image') {
