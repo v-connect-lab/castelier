@@ -1030,28 +1030,38 @@
       min-width: 0;
     }
 
-    /* オリジナル画像ローディングスピナー */
+    /* オリジナル画像ローディングスピナー（中央配置＆フロートパネル化） */
     .custom-spinner-wrapper {
+      grid-column: 1 / -1; /* グリッドの全幅を使って完全に画面中央へ配置 */
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      padding: 40px 16px;
-      gap: 14px;
+      margin: 40px auto;
+      padding: 36px 48px;
+      gap: 16px;
+      width: fit-content;
+      max-width: 90%;
+  
+      /* すりガラス風の浮き上がりパネル */
+      background: rgba(255, 255, 255, 0.92);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.8);
+      border-radius: 16px;
+      box-shadow: 0 12px 30px -4px rgba(15, 23, 42, 0.15), 0 4px 10px rgba(0, 0, 0, 0.05);
     }
 
     .custom-spinner {
-      width: 56px;
-      height: 56px;
+      width: 64px;
+      height: 64px;
       position: relative;
-      /* 画像の透過部分を活かすマスク指定 */
       -webkit-mask: url('assets/spinner.png') no-repeat center / contain;
       mask: url('assets/spinner.png') no-repeat center / contain;
-      background-color: #cbd5e1; /* 未充填時のベース下地色 */
+      background-color: #e2e8f0;
       overflow: hidden;
     }
 
-    /* 下から上へ色が満ちていくアニメーションレイヤー */
     .custom-spinner::after {
       content: '';
       position: absolute;
@@ -1072,14 +1082,14 @@
       }
       100% {
         transform: scaleY(1);
-        opacity: 0; /* 満ちきったあとにフェードアウトしてループ */
+        opacity: 0;
       }
     }
 
     .custom-spinnerText {
-      font-size: 0.85rem;
+      font-size: 0.9rem;
       font-weight: 700;
-      color: var(--text-sub, #64748b);
+      color: #334155;
       letter-spacing: 0.05em;
     }
   </style>
