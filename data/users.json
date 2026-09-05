@@ -32,29 +32,5 @@
     "description": "活動者・配信者さん向けの「維持費がかからず、自分で簡単に更新できるHP」をコツコツ作っています💻✨\n（動画制作も勉強中…！ゆくゆくは動画制作なども展開していく予定です🎬）\nご相談や「こういうの作れる？」といった質問はDMまたはメールまでお気軽にどうぞ📮",
     "priceGuide": "free_monitor",
     "updatedAt": "2026-09-05T06:01:32.000Z"
-  },
-  {
-    "userId": "usr_a199b977",
-    "role": "streamer",
-    "displayName": "潤華ねろ",
-    "isContactWelcome": true,
-    "category": "VTuber",
-    "tags": "japanese,retro",
-    "freeTags": "",
-    "avatarUrl": "https://raw.githubusercontent.com/v-connect-lab/castelier/main/assets/logo.png",
-    "works": [
-      {
-        "type": "image",
-        "image": "",
-        "url": "https://drive.google.com/thumbnail?id=1HUATh3VynJ4KpvT_yIFRsx7jyfoDF250&sz=w800"
-      }
-    ],
-    "portfolioUrl": "",
-    "xUrl": "",
-    "platforms": [],
-    "contactInfo": "",
-    "description": "よろしくお願いします。",
-    "priceGuide": "",
-    "updatedAt": "2026-09-05T10:21:00.000Z"
   }
 ]
