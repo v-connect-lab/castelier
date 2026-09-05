@@ -3,297 +3,1082 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
   <meta name="robots" content="noai, noimageai">
-  <title>Castelier | ログイン・新規登録</title>
-
+  <title>Castelier (キャストリエ)</title>
+  
   <!-- ファビコン -->
   <link rel="icon" type="image/png" href="assets/logo.png">
-
+  
+  <!-- YAMLパーサー -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/js-yaml/4.1.0/js-yaml.min.js"></script>
-
-  <!-- Firebase App & Auth SDK (v10 Compat) -->
-  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
-
   <style>
     :root {
-      --primary: #4f46e5;
-      --primary-hover: #4338ca;
       --bg: #f8fafc;
       --card-bg: #ffffff;
-      --text: #1e293b;
+      --text-main: #1e293b;
       --text-sub: #64748b;
-      --border: rgba(191, 219, 254, 0.8);
+      --primary: #4f46e5;
+      --primary-hover: #4338ca;
+      --creator-color: #ec4899;
+      --streamer-color: #3b82f6;
+      --border: #e2e8f0;
       --radius: 12px;
+      --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
+      --shadow-hover: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+      --star-color: #f59e0b;
 
-      /* ★ 蒼白グラデーション */
-      --card-gradient: linear-gradient(135deg, rgba(255, 255, 255, 0.96) 0%, rgba(240, 246, 255, 0.93) 50%, rgba(224, 238, 255, 0.90) 100%);
-      --card-border: 1px solid rgba(191, 219, 254, 0.85);
-      --card-shadow: 0 15px 35px -5px rgba(30, 58, 138, 0.1), 0 4px 12px rgba(0, 0, 0, 0.04);
+      /* ★ 蒼白い光沢グラデーションの定義 */
+      --card-gradient: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(240, 246, 255, 0.92) 50%, rgba(224, 238, 255, 0.90) 100%);
+      --card-border: 1px solid rgba(191, 219, 254, 0.8);
+      --card-shadow: 0 10px 25px -5px rgba(30, 58, 138, 0.08), 0 4px 10px -2px rgba(30, 58, 138, 0.04);
+      --card-shadow-hover: 0 16px 32px -4px rgba(37, 99, 235, 0.16), 0 6px 14px -2px rgba(37, 99, 235, 0.08);
     }
 
-    * { box-sizing: border-box; margin: 0; padding: 0; }
+    * { box-sizing: border-box; }
     body {
+      margin: 0;
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
       background: url('assets/background_white.jpg') center center / cover no-repeat fixed var(--bg);
-      color: var(--text);
+      color: var(--text-main);
       line-height: 1.5;
+    }
+
+    /* ヘッダー */
+    header {
+      background: rgba(255, 255, 255, 0.92);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border-bottom: 1px solid rgba(191, 219, 254, 0.7);
+      padding: 10px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 40;
+    }
+    .header-logo {
+      display: flex;
+      align-items: center;
+      text-decoration: none;
+    }
+    .header-logo img {
+      height: 38px;
+      width: auto;
+      object-fit: contain;
+      display: block;
+    }
+    .header-links a, .header-links button {
+      font-size: 0.85rem;
+      padding: 8px 16px;
+      border-radius: 6px;
+      text-decoration: none;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .btn-login {
+      background: var(--primary);
+      color: #fff;
+      border: none;
+    }
+
+    /* ハンバーガーアイコンボタン */
+    .btn-hamburger {
+      background: transparent;
+      border: 1px solid rgba(191, 219, 254, 0.8);
+      border-radius: 8px;
+      width: 40px;
+      height: 40px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      gap: 5px;
+      cursor: pointer;
+      padding: 0;
+      transition: background 0.2s;
+    }
+    .btn-hamburger:hover { background: #f1f5f9; }
+    .btn-hamburger span {
+      display: block;
+      width: 20px;
+      height: 2px;
+      background: var(--text-main);
+      border-radius: 2px;
+    }
+
+    /* ハンバーガーサイドメニュー */
+    .menu-drawer-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.4);
+      backdrop-filter: blur(2px);
+      z-index: 90;
+      display: none;
+    }
+    .menu-drawer-overlay.open { display: block; }
+    .menu-drawer {
+      position: fixed;
+      top: 0;
+      right: -320px;
+      width: 280px;
+      height: 100vh;
+      height: 100dvh;
+      background: #ffffff;
+      box-shadow: -4px 0 15px rgba(0,0,0,0.1);
+      z-index: 100;
+      display: flex;
+      flex-direction: column;
+      padding: 20px 16px;
+      padding-bottom: calc(20px + env(safe-area-inset-bottom, 0px));
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      transition: right 0.25s ease-in-out;
+    }
+    .menu-drawer.open { right: 0; }
+
+    .drawer-user-info {
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .drawer-user-badge {
+      background: #e0e7ff;
+      color: var(--primary);
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-size: 0.8rem;
+      font-weight: 700;
+    }
+    .drawer-close {
+      background: none;
+      border: none;
+      font-size: 1.4rem;
+      cursor: pointer;
+      color: var(--text-sub);
+      line-height: 1;
+    }
+
+    .drawer-nav-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .drawer-nav-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 14px;
+      border-radius: 8px;
+      text-decoration: none;
+      color: var(--text-main);
+      font-weight: 600;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    .drawer-nav-item:hover {
+      background: #f8fafc;
+      color: var(--primary);
+    }
+    .drawer-badge {
+      background: #f1f5f9;
+      color: var(--text-sub);
+      font-size: 0.75rem;
+      padding: 2px 8px;
+      border-radius: 12px;
+      font-weight: bold;
+    }
+    .drawer-divider {
+      border: 0;
+      border-top: 1px solid var(--border);
+      margin: 12px 0;
+    }
+    .btn-drawer-logout {
+      margin-top: 16px;
+      margin-bottom: 8px;
+      background: #fee2e2;
+      color: #b91c1c;
+      border: 1px solid #fca5a5;
+      padding: 10px;
+      border-radius: 8px;
+      font-weight: 700;
+      font-size: 0.85rem;
+      cursor: pointer;
+      width: 100%;
+      flex-shrink: 0;
+    }
+
+    /* リストドロワー */
+    .list-drawer {
+      position: fixed;
+      top: 0;
+      right: -420px;
+      width: 380px;
+      max-width: 90vw;
+      height: 100vh;
+      background: #ffffff;
+      box-shadow: -4px 0 20px rgba(0,0,0,0.15);
+      z-index: 110;
+      display: flex;
+      flex-direction: column;
+      transition: right 0.25s ease-in-out;
+    }
+    .list-drawer.open { right: 0; }
+    .list-drawer-header {
+      padding: 18px 20px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: #fafafa;
+    }
+    .list-drawer-header h3 {
+      font-size: 1.05rem;
+      margin: 0;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .list-drawer-body {
+      flex-grow: 1;
+      overflow-y: auto;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .drawer-user-card {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: #fff;
+      transition: background 0.15s;
+    }
+    .drawer-user-card:hover { background: #f8fafc; }
+    .drawer-user-avatar {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 1px solid var(--border);
+      background: #e2e8f0;
+      flex-shrink: 0;
+    }
+    .drawer-user-info-text {
+      flex-grow: 1;
+      overflow: hidden;
+      cursor: pointer;
+    }
+    .drawer-user-name {
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: var(--text-main);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .drawer-user-sub {
+      font-size: 0.75rem;
+      color: var(--text-sub);
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      margin-top: 2px;
+    }
+    .badge-mutual {
+      background: #fef3c7;
+      color: #92400e;
+      border: 1px solid #fde68a;
+      font-size: 0.65rem;
+      padding: 1px 5px;
+      border-radius: 10px;
+      font-weight: 700;
+    }
+    .btn-drawer-unfav {
+      background: none;
+      border: none;
+      color: #94a3b8;
+      font-size: 1.1rem;
+      cursor: pointer;
+      padding: 6px;
+      border-radius: 4px;
+    }
+    .btn-drawer-unfav:hover {
+      color: #ef4444;
+      background: #fee2e2;
+    }
+
+    /* メインコンテナ */
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
       padding: 24px 16px 60px;
     }
 
-    .container {
-      max-width: 720px;
-      margin: 0 auto;
+    /* ★ 検索・絞り込みパネル（蒼白グラデーション） */
+    .filter-panel {
       background: var(--card-gradient) !important;
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
-      padding: 32px 28px;
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      padding: 20px;
       border-radius: var(--radius);
-      box-shadow: var(--card-shadow) !important;
       border: var(--card-border) !important;
+      box-shadow: var(--card-shadow) !important;
+      margin-bottom: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
     }
-
-    /* 最上部縦型バナー */
-    .top-banner-wrap {
-      text-align: center;
-      margin-bottom: 16px;
+    .role-tabs {
+      display: flex;
+      gap: 8px;
     }
-    .top-banner-wrap img {
-      max-width: 140px;
-      height: auto;
-      display: inline-block;
-      border-radius: 8px;
-    }
-
-    h1 { font-size: 1.45rem; margin-bottom: 6px; text-align: center; }
-    .lead { font-size: 0.85rem; color: var(--text-sub); margin-bottom: 24px; text-align: center; }
-    .sublead { font-size: 0.85rem; color: var(--text-sub); margin-bottom: 24px; }
-    
-    .tabs { display: flex; gap: 8px; margin-bottom: 24px; border-bottom: 1px solid var(--border); }
-    .tab-btn {
-      flex: 1;
-      padding: 10px;
-      border: none;
-      background: none;
-      font-size: 0.95rem;
-      cursor: pointer;
-      color: var(--text-sub);
-      border-bottom: 2px solid transparent;
-      text-align: center;
-    }
-    .tab-btn.active { color: var(--primary); font-weight: bold; border-bottom-color: var(--primary); }
-
-    .btn-google-auth {
-      width: 100%;
-      padding: 12px 16px;
-      background-color: #ffffff;
-      color: #374151;
-      border: 1px solid rgba(191, 219, 254, 0.9);
-      border-radius: var(--radius);
-      font-size: 0.95rem;
+    .role-btn {
+      padding: 8px 18px;
+      border-radius: 20px;
+      font-size: 0.9rem;
       font-weight: 600;
       cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 12px;
-      transition: background-color 0.2s, box-shadow 0.2s;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.04);
+      border: 1px solid rgba(191, 219, 254, 0.8);
+      background: rgba(255, 255, 255, 0.8);
+      color: var(--text-sub);
+      transition: all 0.2s;
     }
-    .btn-google-auth:hover {
-      background-color: #f0f7ff;
-      box-shadow: 0 4px 8px rgba(37, 99, 235, 0.1);
-    }
-    .btn-google-auth svg {
-      width: 20px;
-      height: 20px;
-    }
-
-    .form-group { margin-bottom: 16px; }
-    label {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      font-size: 0.85rem;
-      font-weight: bold;
-      margin-bottom: 6px;
-    }
-
-    .info-icon {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      width: 18px;
-      height: 18px;
-      border-radius: 50%;
-      background: rgba(191, 219, 254, 0.5);
-      color: #3b82f6;
-      font-size: 0.7rem;
-      font-weight: bold;
-      cursor: pointer;
-      position: relative;
-      user-select: none;
-      -webkit-tap-highlight-color: transparent;
-    }
-
-    .info-icon:hover::after,
-    .info-icon.active::after {
-      content: attr(data-tooltip);
-      position: absolute;
-      bottom: 125%;
-      left: 50%;
-      transform: translateX(-50%);
-      background: #1e293b;
+    .role-btn.active {
+      background: var(--primary);
       color: #fff;
-      padding: 6px 10px;
-      border-radius: 4px;
-      font-size: 0.75rem;
-      font-weight: normal;
-      white-space: normal;
-      width: 240px;
-      z-index: 50;
-      box-shadow: 0 4px 6px rgba(0,0,0,0.15);
-      line-height: 1.4;
-      pointer-events: none;
+      border-color: var(--primary);
     }
-    
-    input[type="text"], textarea, select {
+    .role-btn[data-role="creator"].active {
+      background: var(--creator-color);
+      border-color: var(--creator-color);
+    }
+    .role-btn[data-role="streamer"].active {
+      background: var(--streamer-color);
+      border-color: var(--streamer-color);
+    }
+
+    .search-input-wrap {
+      position: relative;
+    }
+    .search-input {
       width: 100%;
-      padding: 10px;
+      padding: 11px 16px;
       border: 1px solid rgba(191, 219, 254, 0.8);
       border-radius: 8px;
       font-size: 0.9rem;
       background: rgba(255, 255, 255, 0.9);
     }
-    input:disabled, select:disabled {
-      background-color: rgba(241, 245, 249, 0.7);
-      color: #94a3b8;
-      cursor: not-allowed;
-    }
-    textarea { resize: vertical; min-height: 80px; }
 
-    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-
-    .checkbox-group {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
-      gap: 8px;
-      max-height: 180px;
-      overflow-y: auto;
-      padding: 10px;
-      border: 1px solid rgba(191, 219, 254, 0.8);
-      border-radius: 8px;
-      background: rgba(255, 255, 255, 0.7);
-    }
-    .checkbox-label {
-      font-size: 0.8rem;
-      font-weight: normal;
+    .filter-section {
       display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .filter-section-header {
+      display: flex;
+      justify-content: space-between;
       align-items: center;
-      gap: 6px;
-      cursor: pointer;
-      margin-bottom: 0;
     }
-
-    button.btn-primary {
-      width: 100%;
-      padding: 12px;
-      background-color: var(--primary);
-      color: white;
+    .filter-label {
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: var(--text-sub);
+    }
+    .filter-clear-btn {
+      font-size: 0.75rem;
+      color: var(--primary);
+      background: none;
       border: none;
-      border-radius: var(--radius);
-      font-size: 0.95rem;
-      font-weight: bold;
       cursor: pointer;
-      transition: background 0.2s;
+      text-decoration: underline;
+      padding: 0;
     }
-    button.btn-primary:hover { background-color: var(--primary-hover); }
-    button:disabled { opacity: 0.6; cursor: not-allowed; }
 
-    .status-box {
-      padding: 12px;
-      margin-top: 16px;
-      border-radius: var(--radius);
-      font-size: 0.85rem;
-      display: none;
+    .filter-chips-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      max-height: 120px;
+      overflow-y: auto;
+      padding: 4px 2px;
     }
-    .status-box.success { background-color: #ecfdf5; color: #065f46; border: 1px solid #a7f3d0; }
-    .status-box.error { background-color: #fef2f2; color: #991b1b; border: 1px solid #fecaca; }
+    .filter-chips-container::-webkit-scrollbar {
+      width: 4px;
+    }
+    .filter-chips-container::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 4px;
+    }
 
-    .hidden { display: none !important; }
-    .section-divider { border: 0; border-top: 1px dashed rgba(191, 219, 254, 0.8); margin: 20px 0; }
+    .filter-chip {
+      padding: 5px 12px;
+      border-radius: 16px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      background: rgba(255, 255, 255, 0.85);
+      color: var(--text-main);
+      border: 1px solid rgba(191, 219, 254, 0.8);
+      cursor: pointer;
+      user-select: none;
+      transition: all 0.15s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .filter-chip:hover {
+      background: #e0f2fe;
+    }
+    .filter-chip.active {
+      background: var(--primary);
+      color: #ffffff;
+      border-color: var(--primary);
+      box-shadow: 0 1px 3px rgba(79, 70, 229, 0.3);
+    }
 
-    .img-preview-box {
-      margin-top: 8px;
-      display: none;
+    .filter-panel-top {
+      display: flex;
+      justify-content: space-between;
       align-items: center;
       gap: 12px;
-      background: rgba(240, 246, 255, 0.7);
-      padding: 8px 12px;
-      border-radius: var(--radius);
-      border: 1px solid rgba(191, 219, 254, 0.8);
+      flex-wrap: wrap;
     }
-    .img-preview-box img {
-      width: 48px;
-      height: 48px;
+    .btn-toggle-filter {
+      padding: 7px 14px;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      cursor: pointer;
+      border: 1px solid rgba(191, 219, 254, 0.8);
+      background: rgba(255, 255, 255, 0.8);
+      color: var(--text-main);
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s ease;
+    }
+    .btn-toggle-filter:hover {
+      background: #e0f2fe;
+      border-color: #93c5fd;
+    }
+    .btn-toggle-filter .arrow-icon {
+      font-size: 0.7rem;
+      transition: transform 0.2s ease;
+    }
+    .btn-toggle-filter.open .arrow-icon {
+      transform: rotate(180deg);
+    }
+    .filter-active-count {
+      background: var(--primary);
+      color: #fff;
+      font-size: 0.7rem;
+      padding: 1px 6px;
+      border-radius: 10px;
+    }
+
+    .filter-accordion-body {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      padding-top: 14px;
+      border-top: 1px solid rgba(191, 219, 254, 0.6);
+      transition: all 0.25s ease;
+    }
+    .filter-accordion-body.collapsed {
+      display: none;
+    }
+
+    /* ★ 表示切替バー（蒼白フロストガラス） */
+    .view-mode-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+      background: rgba(255, 255, 255, 0.85) !important;
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      padding: 6px 12px;
+      border-radius: 8px;
+      border: 1px solid rgba(191, 219, 254, 0.7);
+    }
+    .results-count {
+      font-size: 0.85rem;
+      color: var(--text-sub);
+      font-weight: 600;
+    }
+    .view-toggle-group {
+      display: inline-flex;
+      background: rgba(241, 245, 249, 0.8);
+      padding: 3px;
+      border-radius: 8px;
+      border: 1px solid rgba(191, 219, 254, 0.6);
+    }
+    .view-toggle-btn {
+      padding: 5px 12px;
+      border: none;
+      background: transparent;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--text-sub);
+      cursor: pointer;
+      border-radius: 6px;
+      transition: all 0.15s ease;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .view-toggle-btn.active {
+      background: #ffffff;
+      color: var(--primary);
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+
+    .user-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 20px;
+    }
+
+    /* ★ ユーザーカード（蒼白グラデーション＆フロストガラス） */
+    .user-card {
+      background: var(--card-gradient) !important;
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      border-radius: var(--radius);
+      border: var(--card-border) !important;
+      overflow: hidden;
+      box-shadow: var(--card-shadow) !important;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+    }
+    .user-card:hover {
+      transform: translateY(-4px);
+      box-shadow: var(--card-shadow-hover) !important;
+      border-color: rgba(147, 197, 253, 0.95) !important;
+    }
+
+    .card-thumb {
+      width: 100%;
+      height: 160px;
+      background: #e2e8f0;
+      position: relative;
+      overflow: hidden;
+    }
+    .card-thumb img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      pointer-events: none;
+      user-select: none;
+    }
+    .card-thumb-empty {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+      color: #94a3b8;
+      font-size: 0.85rem;
+    }
+
+    .role-badge {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      padding: 4px 10px;
+      font-size: 0.75rem;
+      font-weight: bold;
+      border-radius: 12px;
+      color: #fff;
+      z-index: 2;
+    }
+    .role-badge.creator { background: var(--creator-color); }
+    .role-badge.streamer { background: var(--streamer-color); }
+
+    .btn-fav-card {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.9);
+      border: 1px solid rgba(191, 219, 254, 0.8);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+      color: #94a3b8;
+      cursor: pointer;
+      z-index: 5;
+      transition: all 0.2s;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .btn-fav-card:hover {
+      transform: scale(1.1);
+      background: #ffffff;
+    }
+    .btn-fav-card.active {
+      color: var(--star-color);
+      background: #ffffff;
+    }
+
+    .card-body {
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      flex-grow: 1;
+    }
+    .card-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 10px;
+    }
+    .card-avatar {
+      width: 44px;
+      height: 44px;
       border-radius: 50%;
       object-fit: cover;
-      background: #fff;
+      background: #cbd5e1;
+      flex-shrink: 0;
       border: 1px solid rgba(191, 219, 254, 0.8);
     }
-    .img-preview-box span {
+    .card-name {
+      font-size: 1rem;
+      font-weight: 700;
+      line-height: 1.3;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .card-category {
       font-size: 0.8rem;
       color: var(--text-sub);
     }
 
-    .terms-box {
-      margin: 20px 0 16px;
-      padding: 12px;
+    .card-desc {
+      font-size: 0.85rem;
+      color: var(--text-sub);
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      margin-bottom: 12px;
+      min-height: 2.6em;
+    }
+
+    .card-tags {
+      display: flex;
+      flex-wrap: wrap;
+      align-content: flex-start;
+      gap: 6px;
+      height: 68px;
+      overflow-y: auto;
+      margin-top: auto;
+      padding: 6px 8px;
       background: rgba(255, 255, 255, 0.75);
-      border: 1px solid rgba(191, 219, 254, 0.8);
-      border-radius: var(--radius);
-      font-size: 0.85rem;
+      border: 1px solid rgba(191, 219, 254, 0.6);
+      border-radius: 8px;
+      box-sizing: border-box;
     }
-    .terms-box label {
+    .card-tags::-webkit-scrollbar { width: 4px; }
+    .card-tags::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 4px;
+    }
+
+    .tag-badge {
+      font-size: 0.7rem;
+      background: #ffffff;
+      color: #475569;
+      border: 1px solid rgba(191, 219, 254, 0.7);
+      padding: 2px 8px;
+      border-radius: 4px;
+      white-space: nowrap;
+      display: inline-block;
+    }
+
+    .user-card.compact .card-thumb,
+    .user-card.compact .card-desc {
+      display: none !important;
+    }
+    .user-card.compact .btn-fav-card {
+      top: 10px;
+      right: 10px;
+      width: 30px;
+      height: 30px;
+      font-size: 1.05rem;
+    }
+    .user-card.compact .card-body {
+      padding: 14px;
+    }
+    .user-card.compact .card-header {
+      margin-bottom: 8px;
+      padding-right: 32px;
+    }
+    .user-card.compact .card-avatar {
+      width: 42px;
+      height: 42px;
+    }
+    .user-card.compact .card-name {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.95rem;
+    }
+    .user-card.compact .role-badge-inline {
+      font-size: 0.65rem;
+      font-weight: bold;
+      padding: 1px 6px;
+      border-radius: 4px;
+      color: #fff;
+      display: inline-block;
+      white-space: nowrap;
+    }
+    .user-card.compact .role-badge-inline.creator { background: var(--creator-color); }
+    .user-card.compact .role-badge-inline.streamer { background: var(--streamer-color); }
+
+    .modal-tags {
+      display: flex;
+      flex-wrap: wrap;
+      align-content: flex-start;
+      gap: 6px;
+      height: 98px;
+      overflow-y: auto;
+      margin: 12px 0 16px;
+      padding: 8px 10px;
+      background: rgba(240, 246, 255, 0.6);
+      border: 1px solid rgba(191, 219, 254, 0.7);
+      border-radius: 8px;
+      box-sizing: border-box;
+    }
+    .modal-tags::-webkit-scrollbar { width: 5px; }
+    .modal-tags::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 4px;
+    }
+
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.6);
+      backdrop-filter: blur(4px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: calc(16px + env(safe-area-inset-top, 0px)) 16px calc(24px + env(safe-area-inset-bottom, 0px));
+      z-index: 120;
+    }
+    .modal-overlay.open { display: flex; }
+
+    /* ★ 詳細モーダル（蒼白グラデーション） */
+    .modal-content {
+      background: linear-gradient(145deg, rgba(255, 255, 255, 0.98) 0%, rgba(239, 246, 255, 0.96) 100%) !important;
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      width: 100%;
+      max-width: 680px;
+      max-height: calc(100dvh - 40px);
+      border-radius: var(--radius);
+      border: 1px solid rgba(191, 219, 254, 0.8) !important;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      box-shadow: 0 25px 40px -10px rgba(15, 23, 42, 0.25) !important;
+      position: relative;
+      padding: 24px 20px 32px;
+    }
+    .modal-close {
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      background: #f1f5f9;
+      border: 1px solid rgba(191, 219, 254, 0.6);
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      font-size: 1.1rem;
       cursor: pointer;
-      display: flex;
+      z-index: 10;
+    }
+    .modal-fav-btn {
+      background: #f8fafc;
+      border: 1px solid rgba(191, 219, 254, 0.8);
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--text-sub);
+      cursor: pointer;
+      display: inline-flex;
       align-items: center;
-      gap: 8px;
-      margin-bottom: 0;
-      font-weight: normal;
+      gap: 4px;
+      flex-shrink: 0;
+      white-space: nowrap;
+      transition: all 0.2s;
+    }
+    .modal-fav-btn.active {
+      background: #fef3c7;
+      border-color: #fde68a;
+      color: #b45309;
     }
 
-    .auth-badge {
-      background: rgba(224, 238, 255, 0.85);
-      color: #3730a3;
-      border: 1px solid rgba(191, 219, 254, 0.9);
-      padding: 10px 14px;
-      border-radius: var(--radius);
-      font-size: 0.85rem;
-      margin-bottom: 20px;
+    .modal-works-wrapper {
+      position: relative;
+      margin: 12px 0;
+    }
+    .works-scroll-btn {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.95);
+      border: 1px solid rgba(191, 219, 254, 0.8);
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+      color: #334155;
+      font-size: 1.2rem;
+      font-weight: bold;
       display: flex;
       align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      z-index: 10;
+      transition: all 0.2s ease;
+      user-select: none;
+    }
+    .works-scroll-btn:hover {
+      background: #ffffff;
+      transform: translateY(-50%) scale(1.1);
+      color: var(--primary);
+    }
+    .works-scroll-btn.btn-prev { left: -12px; }
+    .works-scroll-btn.btn-next { right: -12px; }
+    @media (max-width: 640px) {
+      .works-scroll-btn.btn-prev { left: 2px; }
+      .works-scroll-btn.btn-next { right: 2px; }
+    }
+
+    .modal-works-grid {
+      display: flex !important;
+      flex-wrap: nowrap !important;
+      gap: 16px !important;
+      overflow-x: auto !important;
+      overflow-y: hidden !important;
+      align-items: center !important;
+      padding: 10px 4px 16px !important;
+      margin: 0 !important;
+      scroll-snap-type: x mandatory;
+      -webkit-overflow-scrolling: touch;
+    }
+    .modal-works-grid::-webkit-scrollbar { height: 8px; }
+    .modal-works-grid::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 4px;
+    }
+
+    .media-box {
+      flex: 0 0 280px !important;
+      width: 280px !important;
+      height: 158px !important;
+      max-width: 80vw;
+      scroll-snap-align: start;
+      border-radius: 8px;
+      overflow: hidden;
+      background: #0f172a;
+      border: 1px solid var(--border);
+      position: relative;
+      display: block;
+      box-sizing: border-box;
+    }
+    .media-box img.modal-work-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+    .media-audio-box {
+      background: #f8fafc !important;
+      height: 100% !important;
+      padding: 16px !important;
+      display: flex !important;
+      flex-direction: column !important;
+      justify-content: center !important;
+      box-sizing: border-box;
+    }
+    .media-link-card {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      width: 100%;
+      text-decoration: none;
+      background: #ffffff;
+    }
+    .media-link-thumb {
+      width: 100%;
+      height: 105px;
+      background: #e2e8f0;
+      overflow: hidden;
+    }
+    .media-link-thumb img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+    .media-link-meta {
+      height: 53px;
+      padding: 6px 12px;
+      display: flex;
       justify-content: space-between;
+      align-items: center;
+      background: #ffffff;
+      border-top: 1px solid var(--border);
+      box-sizing: border-box;
+    }
+    .external-work-link {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 6px;
+      padding: 8px 12px;
+      background: #ffffff;
+      color: var(--primary);
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 0.85rem;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+    }
+    .external-work-link:hover { background: #e0e7ff; }
+
+    .modal-links a {
+      display: inline-block;
+      margin-right: 8px;
+      margin-bottom: 8px;
+      padding: 6px 12px;
+      background: rgba(255, 255, 255, 0.8);
+      color: var(--text-main);
+      text-decoration: none;
+      border-radius: 6px;
+      font-size: 0.8rem;
+      border: 1px solid rgba(191, 219, 254, 0.8);
+    }
+    .modal-links a:hover {
+      background: var(--primary);
+      color: #fff;
     }
 
-    /* オリジナル画像ローディングスピナー */
+    .loading-state {
+      text-align: center;
+      padding: 48px 0;
+      color: var(--text-sub);
+      font-size: 0.95rem;
+    }
+    .empty-drawer-notice {
+      text-align: center;
+      padding: 40px 10px;
+      color: var(--text-sub);
+      font-size: 0.85rem;
+      line-height: 1.6;
+    }
+    .drawer-back-btn {
+      background: none;
+      border: none;
+      font-size: 1.25rem;
+      cursor: pointer;
+      color: var(--text-main);
+      padding: 4px 8px 4px 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      line-height: 1;
+      border-radius: 4px;
+      transition: transform 0.15s;
+    }
+    .drawer-back-btn:hover {
+      transform: translateX(-3px);
+      color: var(--primary);
+    }
+
+    .report-link-wrap {
+      margin-top: 24px;
+      padding-top: 14px;
+      border-top: 1px dashed var(--border);
+      text-align: right;
+    }
+    .report-link {
+      font-size: 0.75rem;
+      color: #94a3b8;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      transition: color 0.15s;
+    }
+    .report-link:hover {
+      color: #ef4444;
+      text-decoration: underline;
+    }
+
+    .modal-header-top {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 16px;
+      padding-right: 40px;
+    }
+    .modal-user-profile {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex: 1;
+      min-width: 0;
+    }
+
+    /* オリジナル画像ローディングスピナー（中央配置＆フロートパネル化） */
     .custom-spinner-wrapper {
+      grid-column: 1 / -1;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      padding: 20px 16px;
-      gap: 14px;
+      margin: 40px auto;
+      padding: 36px 48px;
+      gap: 16px;
+      width: fit-content;
+      max-width: 90%;
+  
+      background: var(--card-gradient) !important;
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: var(--card-border) !important;
+      border-radius: 16px;
+      box-shadow: var(--card-shadow) !important;
     }
 
     .custom-spinner {
-      width: 56px;
-      height: 56px;
+      width: 64px;
+      height: 64px;
       position: relative;
       -webkit-mask: url('assets/spinner.png') no-repeat center / contain;
       mask: url('assets/spinner.png') no-repeat center / contain;
-      background-color: #cbd5e1;
+      background-color: #e2e8f0;
       overflow: hidden;
     }
 
@@ -322,653 +1107,1105 @@
     }
 
     .custom-spinnerText {
-      font-size: 0.85rem;
+      font-size: 0.9rem;
       font-weight: 700;
-      color: var(--text-sub, #64748b);
+      color: #334155;
       letter-spacing: 0.05em;
     }
   </style>
 </head>
-<body>
+<body oncontextmenu="return false;">
 
-<div class="container">
-  <!-- 画面最上部縦型バナー -->
-  <div class="top-banner-wrap">
-    <img src="assets/banner_vertical.png" alt="Castelier">
+  <header>
+    <a href="./top.html" class="header-logo">
+      <img src="assets/banner_beside.png" alt="Castelier">
+    </a>
+    <div id="headerAuthNav"></div>
+  </header>
+
+  <!-- サイドメニュー ドロワー -->
+  <div class="menu-drawer-overlay" id="menuDrawerOverlay" onclick="closeAllDrawers()"></div>
+  <div class="menu-drawer" id="menuDrawer">
+    <div class="drawer-user-info">
+      <span class="drawer-user-badge" id="drawerUserIdBadge">ID: ------</span>
+      <button class="drawer-close" onclick="closeAllDrawers()">×</button>
+    </div>
+    <ul class="drawer-nav-list">
+      <li>
+        <a href="./admin.html" class="drawer-nav-item">
+          <span>⚙️ アカウント管理</span>
+          <span>›</span>
+        </a>
+      </li>
+      <hr class="drawer-divider">
+      <li>
+        <div class="drawer-nav-item" onclick="openFavoritesListDrawer()">
+          <span>⭐ お気に入り</span>
+          <span class="drawer-badge" id="drawerFavCount">0</span>
+        </div>
+      </li>
+      <li>
+        <div class="drawer-nav-item" onclick="openFollowersListDrawer()">
+          <span>👥 フォロワー</span>
+          <span class="drawer-badge" id="drawerFollowerCount">0</span>
+        </div>
+      </li>
+      <li>
+        <a href="./trends.html" class="drawer-nav-item">
+          <span>📊 需要トレンド統計</span>
+          <span>›</span>
+        </a>
+      </li>
+      <hr class="drawer-divider">
+      <li>
+        <a href="#" onclick="openFeedbackForm(event)" class="drawer-nav-item">
+          <span>💡 ご意見・ご要望</span>
+          <span style="font-size: 0.8rem; color: #94a3b8;">↗</span>
+        </a>
+      </li>
+      <li>
+        <a href="#" onclick="handleContactClick(event)" class="drawer-nav-item">
+          <span>✉️ お問い合わせ</span>
+          <span>›</span>
+        </a>
+      </li>
+    </ul>
+    <hr class="drawer-divider">
+    <button class="btn-drawer-logout" onclick="handleLogout()">ログアウト</button>
   </div>
 
-  <h1>Castelier（キャストリエ）</h1>
-  <p class="lead">Googleアカウントで安全にログイン・登録を行えます。</p>
-
-  <div class="tabs">
-    <button type="button" class="tab-btn active" onclick="switchAuthTab('login')">ログイン</button>
-    <button type="button" class="tab-btn" onclick="switchAuthTab('register')">新規登録</button>
+  <!-- リスト表示用ドロワー -->
+  <div class="list-drawer" id="listDrawer">
+    <div class="list-drawer-header">
+      <div style="display: flex; align-items: center; gap: 8px;">
+        <button class="drawer-back-btn" onclick="backToMenuDrawer()" title="メニューに戻る">←</button>
+        <h3 id="listDrawerTitle" style="margin: 0;">リスト</h3>
+      </div>
+    </div>
+    <div class="list-drawer-body" id="listDrawerBody"></div>
   </div>
 
-  <!-- ログイン画面 -->
-  <div id="loginSection">
-    <button type="button" class="btn-google-auth" onclick="handleGoogleAuth('login')">
-      <svg viewBox="0 0 24 24">
-        <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-        <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-        <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
-        <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
-      </svg>
-      Googleでログイン
-    </button>
-  </div>
+  <div class="container">
+    <!-- 検索・絞り込みパネル -->
+    <div class="filter-panel">
+      <div class="filter-panel-top">
+        <div class="role-tabs">
+          <button class="role-btn active" data-role="all" onclick="setRoleFilter('all')">すべて</button>
+          <button class="role-btn" data-role="creator" onclick="setRoleFilter('creator')">クリエイター</button>
+          <button class="role-btn" data-role="streamer" onclick="setRoleFilter('streamer')">配信者</button>
+        </div>
 
-  <!-- 新規登録画面 -->
-  <div id="registerSection" class="hidden">
-    <div id="regAuthGate">
-      <button type="button" class="btn-google-auth" onclick="handleGoogleAuth('register')">
-        <svg viewBox="0 0 24 24">
-          <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-          <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-          <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
-          <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
-        </svg>
-        Googleアカウントで登録を開始
-      </button>
+        <button class="btn-toggle-filter" id="btnToggleFilter" onclick="toggleFilterAccordion()">
+          <span>🔍 絞り込み条件</span>
+          <span class="filter-active-count hidden" id="filterActiveBadge">0</span>
+          <span class="arrow-icon">▼</span>
+        </button>
+      </div>
+
+      <div class="filter-accordion-body collapsed" id="filterAccordionBody">
+        <div class="search-input-wrap">
+          <input type="text" id="keywordSearch" class="search-input" placeholder="活動名・カテゴリ・タグで検索..." oninput="renderFilteredUsers()">
+        </div>
+
+        <div class="filter-section">
+          <div class="filter-section-header">
+            <span class="filter-label">📁 メインカテゴリ（複数選択可）</span>
+            <button class="filter-clear-btn" onclick="clearSelectedCategories()">クリア</button>
+          </div>
+          <div class="filter-chips-container" id="categoryChipsContainer"></div>
+        </div>
+
+        <div class="filter-section">
+          <div class="filter-section-header">
+            <span class="filter-label">🏷️ 属性・作風タグ（複数選択可）</span>
+            <button class="filter-clear-btn" onclick="clearSelectedTags()">クリア</button>
+          </div>
+          <div class="filter-chips-container" id="tagChipsContainer"></div>
+        </div>
+      </div>
     </div>
 
-    <!-- 認証完了後に表示されるプロフィール設定フォーム -->
-    <form id="registerForm" class="hidden" onsubmit="handleRegister(event)">
-      <div class="auth-badge">
-        <span>Google認証完了: <strong id="authEmailLabel"></strong></span>
-        <span style="font-size: 0.75rem; color: #4338ca;">連携済み</span>
+    <!-- 件数表示 ＆ 表示切り替えスイッチ -->
+    <div class="view-mode-bar">
+      <div class="results-count" id="resultsCount">読み込み中...</div>
+      <div class="view-toggle-group">
+        <button class="view-toggle-btn active" id="btnViewDetailed" onclick="setViewMode('detailed')">
+          <span>🗂 詳細表示</span>
+        </button>
+        <button class="view-toggle-btn" id="btnViewCompact" onclick="setViewMode('compact')">
+          <span>📄 簡易表示</span>
+        </button>
       </div>
+    </div>
 
-      <div class="form-group">
-        <label>ユーザー区分 * <span class="info-icon" id="tip-reg-role">ℹ</span></label>
-        <select id="regRole" required onchange="handleRoleChange()">
-          <option value="creator">クリエイター</option>
-          <option value="streamer">配信者</option>
-        </select>
+    <div class="user-grid" id="userGrid">
+      <div class="custom-spinner-wrapper">
+        <div class="custom-spinner"></div>
+        <div class="custom-spinnerText">ユーザー一覧を読み込み中...</div>
       </div>
-
-      <div class="form-group">
-        <label>活動名（表示名） * <span class="info-icon" id="tip-reg-displayName">ℹ</span></label>
-        <input type="text" id="regDisplayName" placeholder="ニックネーム" required>
-      </div>
-
-      <div class="grid-2 hidden" id="regStreamerSettingsGroup">
-        <div class="form-group">
-          <label>公開設定 <span class="info-icon" id="tip-reg-isPublic">ℹ</span></label>
-          <select id="regIsPublic" onchange="handlePublicChange('reg')">
-            <option value="true">公開</option>
-            <option value="false">非公開</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label id="lbl-regIsContactWelcome">お声がけ歓迎設定 <span class="info-icon" id="tip-reg-isContactWelcome">ℹ</span></label>
-          <select id="regIsContactWelcome">
-            <option value="true">声掛け歓迎</option>
-            <option value="false">閲覧のみ</option>
-          </select>
-        </div>
-      </div>
-
-      <div class="form-group">
-        <label>メインカテゴリ（複数選択可・最低1つ） * <span class="info-icon" id="tip-reg-category">ℹ</span></label>
-        <div id="regCategoryContainer" class="checkbox-group"></div>
-      </div>
-
-      <div class="form-group">
-        <label>属性・作風タグ（複数選択可・最低1つ） * <span class="info-icon" id="tip-reg-tags">ℹ</span></label>
-        <div id="regTagsContainer" class="checkbox-group"></div>
-      </div>
-
-      <div class="form-group">
-        <label>フリータグ（カンマ区切り） <span class="info-icon" id="tip-reg-freeTags">ℹ</span></label>
-        <input type="text" id="regFreeTags" placeholder="例: 青年声, SF好き, 短納期相談可">
-      </div>
-
-      <div class="form-group" id="regPriceGuideGroup">
-        <label>料金目安（クリエイター） * <span class="info-icon" id="tip-reg-priceGuide">ℹ</span></label>
-        <select id="regPriceGuide"></select>
-      </div>
-
-      <hr class="section-divider">
-
-      <div class="form-group">
-        <label>アイコン画像URL <span class="info-icon" id="tip-reg-avatarUrl">ℹ</span></label>
-        <input type="text" id="regAvatarUrl" placeholder="https://...（Googleドライブリンク可）" oninput="updateImagePreview('regAvatarUrl', 'avatarPreview')">
-        <div id="avatarPreview" class="img-preview-box">
-          <img src="" alt="アイコンプレビュー">
-          <span>アイコン表示プレビュー</span>
-        </div>
-      </div>
-
-      <div class="form-group">
-        <label>自己紹介・アピール文 <span class="info-icon" id="tip-reg-description">ℹ</span></label>
-        <textarea id="regDescription" placeholder="活動内容や希望など">よろしくお願いします。</textarea>
-      </div>
-
-      <div class="form-group">
-        <label>連絡先窓口 <span class="info-icon" id="tip-reg-contactInfo">ℹ</span></label>
-        <input type="text" id="regContactInfo" placeholder="例: XのDM / contact@example.com">
-      </div>
-
-      <div class="form-group">
-        <label>X (Twitter) URL</label>
-        <input type="text" id="regXUrl" placeholder="https://x.com/ユーザー名">
-      </div>
-
-      <div class="form-group">
-        <label>ポートフォリオ・個人HP <span class="info-icon" id="tip-reg-portfolioUrl">ℹ</span></label>
-        <input type="text" id="regPortfolioUrl" placeholder="https://...">
-      </div>
-
-      <!-- 代表作品URL（最大4枠） -->
-      <div class="form-group">
-        <label>代表作品（最大4枠） <span class="info-icon" id="tip-reg-works" data-tooltip="画像、音楽、動画、Webサイトの作品を最大4枠まで登録できます。">ℹ</span></label>
-        <p class="sublead" style="margin-bottom: 20px; line-height: 1.6;">
-          Googleドライブの共有URLにも対応しています。<br>
-          <span style="color: #ef4444; font-size: 0.8rem; font-weight: 600; display: inline-block; margin-top: 4px;">
-            ※動画・音楽はYouTubeなどの配信プラットフォームのURLを推奨します。
-          </span>
-        </p>
-        <div id="regWorksContainer">
-          <div class="reg-work-block" style="border: 1px solid rgba(191, 219, 254, 0.8); border-radius: var(--radius); padding: 10px; margin-bottom: 8px; background: rgba(255, 255, 255, 0.7);">
-            <div class="grid-2" style="grid-template-columns: 140px 1fr; margin-bottom: 6px;">
-              <select class="reg-work-type" onchange="toggleWorkImageInput(this)">
-                <option value="image">画像</option>
-                <option value="music">音楽・音声</option>
-                <option value="video">動画</option>
-                <option value="web">Webサイト</option>
-              </select>
-              <input type="text" class="reg-work-url" placeholder="作品URL 1（Googleドライブ可）">
-            </div>
-            <div class="reg-work-image-wrap hidden">
-              <input type="text" class="reg-work-image" placeholder="サムネイル・ジャケット画像URL（任意）">
-            </div>
-          </div>
-
-          <div class="reg-work-block" style="border: 1px solid rgba(191, 219, 254, 0.8); border-radius: var(--radius); padding: 10px; margin-bottom: 8px; background: rgba(255, 255, 255, 0.7);">
-            <div class="grid-2" style="grid-template-columns: 140px 1fr; margin-bottom: 6px;">
-              <select class="reg-work-type" onchange="toggleWorkImageInput(this)">
-                <option value="image">画像</option>
-                <option value="music">音楽・音声</option>
-                <option value="video">動画</option>
-                <option value="web">Webサイト</option>
-              </select>
-              <input type="text" class="reg-work-url" placeholder="作品URL 2">
-            </div>
-            <div class="reg-work-image-wrap hidden">
-              <input type="text" class="reg-work-image" placeholder="サムネイル・ジャケット画像URL（任意）">
-            </div>
-          </div>
-
-          <div class="reg-work-block" style="border: 1px solid rgba(191, 219, 254, 0.8); border-radius: var(--radius); padding: 10px; margin-bottom: 8px; background: rgba(255, 255, 255, 0.7);">
-            <div class="grid-2" style="grid-template-columns: 140px 1fr; margin-bottom: 6px;">
-              <select class="reg-work-type" onchange="toggleWorkImageInput(this)">
-                <option value="image">画像</option>
-                <option value="music">音楽・音声</option>
-                <option value="video">動画</option>
-                <option value="web">Webサイト</option>
-              </select>
-              <input type="text" class="reg-work-url" placeholder="作品URL 3">
-            </div>
-            <div class="reg-work-image-wrap hidden">
-              <input type="text" class="reg-work-image" placeholder="サムネイル・ジャケット画像URL（任意）">
-            </div>
-          </div>
-
-          <div class="reg-work-block" style="border: 1px solid rgba(191, 219, 254, 0.8); border-radius: var(--radius); padding: 10px; margin-bottom: 8px; background: rgba(255, 255, 255, 0.7);">
-            <div class="grid-2" style="grid-template-columns: 140px 1fr; margin-bottom: 6px;">
-              <select class="reg-work-type" onchange="toggleWorkImageInput(this)">
-                <option value="image">画像</option>
-                <option value="music">音楽・音声</option>
-                <option value="video">動画</option>
-                <option value="web">Webサイト</option>
-              </select>
-              <input type="text" class="reg-work-url" placeholder="作品URL 4">
-            </div>
-            <div class="reg-work-image-wrap hidden">
-              <input type="text" class="reg-work-image" placeholder="サムネイル・ジャケット画像URL（任意）">
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- 活動プラットフォーム（最大3枠） -->
-      <div class="form-group">
-        <label>活動プラットフォーム（最大3枠） <span class="info-icon" id="tip-reg-platforms" data-tooltip="YouTube、Twitch、BOOTHなどのリンク先と表示名を入力できます。">ℹ</span></label>
-        <div id="regPlatformsContainer">
-          <div class="grid-2 reg-platform-row" style="grid-template-columns: 140px 1fr; margin-bottom: 6px;">
-            <input type="text" class="reg-platform-label" placeholder="例: YouTube">
-            <input type="text" class="reg-platform-url" placeholder="https://...">
-          </div>
-          <div class="grid-2 reg-platform-row" style="grid-template-columns: 140px 1fr; margin-bottom: 6px;">
-            <input type="text" class="reg-platform-label" placeholder="例: Twitch">
-            <input type="text" class="reg-platform-url" placeholder="https://...">
-          </div>
-          <div class="grid-2 reg-platform-row" style="grid-template-columns: 140px 1fr; margin-bottom: 6px;">
-            <input type="text" class="reg-platform-label" placeholder="例: BOOTH">
-            <input type="text" class="reg-platform-url" placeholder="https://...">
-          </div>
-        </div>
-      </div>
-
-      <div class="terms-box">
-        <label style="cursor: pointer;">
-          <input type="checkbox" id="regAgreeTerms" disabled required>
-          <span>
-            <a href="./terms.html" target="_blank" id="termsLink" style="color: var(--primary); text-decoration: underline; font-weight: 600;">無断転載・自作発言の禁止、健全な交流ガイドライン</a>
-            を確認し、同意する *
-          </span>
-        </label>
-        <div id="termsNotice" style="font-size: 0.75rem; color: #ef4444; margin-top: 6px; padding-left: 24px;">
-          ※リンク先を開いて規約内容を確認するとチェック可能になります。
-        </div>
-      </div>
-
-      <p class="sublead" style="margin-bottom: 20px; line-height: 1.6;">
-        <span style="color: #ef4444; font-size: 0.8rem; font-weight: 600; display: inline-block; margin-top: 4px;">
-          ⚠️ 登録から3日以内に「アイコン画像」と「自己紹介文（初期値からの変更）」が設定されない場合、一覧への掲載が一時停止されます（再設定で復帰します）。
-        </span>
-      </p>
-
-      <button type="submit" class="btn-primary" id="regBtn">登録してTOPへ進む</button>
-    </form>
+    </div>
   </div>
 
-  <div id="statusMsg" class="status-box"></div>
-</div>
+  <!-- 詳細モーダル -->
+  <div class="modal-overlay" id="userModal" onclick="closeModal(event)">
+    <div class="modal-content" onclick="event.stopPropagation()">
+      <button class="modal-close" onclick="closeModal()">×</button>
+      <div id="modalFavContainer"></div>
+      <div id="modalBody"></div>
+    </div>
+  </div>
 
-<script>
-  const firebaseConfig = {
-    apiKey: "AIzaSyB9g5XzuCJp2VeuWXYo75DsLXUoqjbvRYQ",
-    authDomain: "castelier-app.firebaseapp.com",
-    projectId: "castelier-app",
-    storageBucket: "castelier-app.firebasestorage.app",
-    messagingSenderId: "113030475352",
-    appId: "1:113030475352:web:15050820c2022eee4fa42d"
-  };
+  <script>
+    const GAS_API_URL = 'https://script.google.com/macros/s/AKfycbyk1gWVq5JmKoz73D6zGB_k0WmpWgs4BGsH00J7WyewnW-iWAFzM6ORGOC4aR_ePRry4Q/exec';
 
-  if (!firebase.apps.length) {
-    firebase.initializeApp(firebaseConfig);
-  }
-  const auth = firebase.auth();
-  const googleProvider = new firebase.auth.GoogleAuthProvider();
+    let allUsers = [];
+    let allUsersMap = new Map();
+    let currentRole = 'all';
+    let schemaData = null;
+    let myFavoritesSet = new Set();
+    let interestedInMeList = [];
+    let mutualSet = new Set();
+    let currentUserId = null;
+    let contactConfig = null;
 
-  const GAS_API_URL = "https://script.google.com/macros/s/AKfycbyk1gWVq5JmKoz73D6zGB_k0WmpWgs4BGsH00J7WyewnW-iWAFzM6ORGOC4aR_ePRry4Q/exec";
+    let currentViewMode = localStorage.getItem('castelier_view_mode') || 'detailed';
 
-  let schemaData = null;
-  let authenticatedUser = null;
+    let selectedCategoriesSet = new Set();
+    let selectedTagsSet = new Set();
 
-  window.addEventListener('DOMContentLoaded', async () => {
-    try {
-      const res = await fetch('./schema/accounts.yaml');
-      const yamlText = await res.text();
-      const loaded = jsyaml.load(yamlText);
-      schemaData = loaded.accounts.columns;
-      initUiFromSchema();
-      setupTooltipToggle();
-      setupTermsUnlock();
-    } catch (e) {
-      console.error('YAMLスキーマ読み込み失敗:', e);
-      showStatus('スキーマファイルの読み込みに失敗しました。', false);
-    }
-  });
-
-  function initUiFromSchema() {
-    if (!schemaData) return;
-    applyInfoTips('reg');
-    renderCheckboxes('regTagsContainer', 'regTag', schemaData.tags.options, schemaData.tags.optionLabels);
-    renderSelect('regPriceGuide', schemaData.priceGuide.options, schemaData.priceGuide.optionLabels);
-    handleRoleChange();
-  }
-
-  function applyInfoTips(prefix) {
-    Object.keys(schemaData).forEach(key => {
-      const el = document.getElementById(`tip-${prefix}-${key}`);
-      if (el && schemaData[key].infoTip) {
-        el.setAttribute('data-tooltip', schemaData[key].infoTip);
-      }
-    });
-  }
-
-  function renderCheckboxes(containerId, namePrefix, values, labels) {
-    const el = document.getElementById(containerId);
-    el.innerHTML = values.map((val, i) => `
-      <label class="checkbox-label">
-        <input type="checkbox" name="${namePrefix}" value="${val}">
-        <span>${labels[i] || val}</span>
-      </label>
-    `).join('');
-  }
-
-  function renderSelect(selectId, values, labels) {
-    const el = document.getElementById(selectId);
-    el.innerHTML = values.map((val, i) => `
-      <option value="${val}">${labels[i] || val}</option>
-    `).join('');
-  }
-
-  function handleRoleChange() {
-    if (!schemaData) return;
-    const role = document.getElementById('regRole').value;
-    const container = document.getElementById('regCategoryContainer');
-    const priceGroup = document.getElementById('regPriceGuideGroup');
-    const streamerGroup = document.getElementById('regStreamerSettingsGroup');
-
-    const categories = schemaData.category.options[role] || [];
-    const labels = schemaData.category.optionLabels[role] || [];
-    container.innerHTML = categories.map((val, i) => `
-      <label class="checkbox-label">
-        <input type="checkbox" name="regCategory" value="${val}">
-        <span>${labels[i] || val}</span>
-      </label>
-    `).join('');
-
-    if (role === 'creator') {
-      priceGroup.classList.remove('hidden');
-      streamerGroup.classList.add('hidden');
-    } else {
-      priceGroup.classList.add('hidden');
-      streamerGroup.classList.remove('hidden');
-      handlePublicChange('reg');
-    }
-  }
-
-  function handlePublicChange(prefix) {
-    const isPublic = document.getElementById(`${prefix}IsPublic`).value === 'true';
-    const contactSelect = document.getElementById(`${prefix}IsContactWelcome`);
-    if (!isPublic) {
-      contactSelect.disabled = true;
-      contactSelect.value = 'false';
-    } else {
-      contactSelect.disabled = false;
-    }
-  }
-
-  function toggleWorkImageInput(selectEl) {
-    const block = selectEl.closest('.reg-work-block');
-    const imageWrap = block.querySelector('.reg-work-image-wrap');
-    const val = selectEl.value;
-
-    if (val === 'music' || val === 'web') {
-      imageWrap.classList.remove('hidden');
-    } else {
-      imageWrap.classList.add('hidden');
-      block.querySelector('.reg-work-image').value = '';
-    }
-  }
-
-  function getCheckedValues(name) {
-    return Array.from(document.querySelectorAll(`input[name="${name}"]:checked`)).map(cb => cb.value);
-  }
-
-  function switchAuthTab(type) {
-    const isLogin = type === 'login';
-    document.querySelectorAll('.tab-btn')[0].classList.toggle('active', isLogin);
-    document.querySelectorAll('.tab-btn')[1].classList.toggle('active', !isLogin);
-    document.getElementById('loginSection').classList.toggle('hidden', !isLogin);
-    document.getElementById('registerSection').classList.toggle('hidden', isLogin);
-    hideStatus();
-  }
-
-  function showStatus(msg, isSuccess, isHtml = false) {
-    const el = document.getElementById('statusMsg');
-    if (isHtml) {
-      el.innerHTML = msg;
-    } else {
-      el.textContent = msg;
-    }
-    el.className = `status-box ${isSuccess ? 'success' : 'error'}`;
-    el.style.display = 'block';
-  }
-
-  function hideStatus() {
-    document.getElementById('statusMsg').style.display = 'none';
-  }
-
-  async function handleGoogleAuth(mode) {
-    hideStatus();
-    try {
-      const result = await auth.signInWithPopup(googleProvider);
-      const user = result.user;
-      authenticatedUser = user;
-
-      showStatus(`
-        <div class="custom-spinner-wrapper" style="padding: 10px 0;">
-          <div class="custom-spinner"></div>
-          <div class="custom-spinnerText">認証照合中...</div>
-        </div>
-      `, true, true);
-      const res = await fetch(GAS_API_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'text/plain' },
-        body: JSON.stringify({
-          action: 'login',
-          data: { uid: user.uid }
-        }),
-        redirect: 'follow'
-      });
-      const data = await res.json();
-
-      if (data.success) {
-        sessionStorage.setItem('castelier_session', JSON.stringify({
-          userId: data.userId,
-          uid: user.uid
-        }));
-        window.location.href = './top.html';
-      } else if (data.notRegistered) {
-        switchAuthTab('register');
-        document.getElementById('regAuthGate').classList.add('hidden');
-        document.getElementById('registerForm').classList.remove('hidden');
-        document.getElementById('authEmailLabel').textContent = user.email;
-        
-        if (user.displayName && !document.getElementById('regDisplayName').value) {
-          document.getElementById('regDisplayName').value = user.displayName;
-        }
-        showStatus('Google認証が完了しました。プロフィールを設定してください。', true);
-      } else {
-        showStatus(data.message || '認証に失敗しました。', false);
-      }
-    } catch (err) {
-      console.error(err);
-      if (err.code !== 'auth/popup-closed-by-user') {
-        showStatus('ログインエラー: ' + err.message, false);
-      }
-    }
-  }
-
-  async function handleRegister(e) {
-    e.preventDefault();
-    hideStatus();
-
-    if (!authenticatedUser || !authenticatedUser.uid) {
-      showStatus('Google認証が確認できません。再度認証を行ってください。', false);
-      return;
-    }
-
-    if (!document.getElementById('regAgreeTerms').checked) {
-      showStatus('ガイドラインへの同意が必要です。', false);
-      return;
-    }
-
-    const displayName = document.getElementById('regDisplayName').value.trim();
-    if (displayName.length > 30) {
-      showStatus('活動名は30文字以内で入力してください。', false);
-      return;
-    }
-
-    const xUrl = document.getElementById('regXUrl').value.trim();
-    if (xUrl && !/^https:\/\/(twitter\.com|x\.com)\/[a-zA-Z0-9_]+$/i.test(xUrl)) {
-      showStatus('X (Twitter) URLは「https://x.com/ユーザー名」の形式で入力してください。', false);
-      return;
-    }
-
-    const selectedCategories = getCheckedValues('regCategory');
-    const selectedTags = getCheckedValues('regTag');
-
-    if (selectedCategories.length === 0) {
-      showStatus('メインカテゴリを最低1つ選択してください。', false);
-      return;
-    }
-    if (selectedTags.length === 0) {
-      showStatus('属性・作風タグを最低1つ選択してください。', false);
-      return;
-    }
-
-    const rawAvatar = document.getElementById('regAvatarUrl').value;
-    if (rawAvatar && !isValidImageUrl(rawAvatar)) {
-      showStatus('アイコンURLには画像直リンク（.jpg/.png等）またはGoogleドライブの共有リンクを入力してください。', false);
-      return;
-    }
-    const cleanedAvatarUrl = normalizeDriveUrl(rawAvatar, 'image');
-
-    const btn = document.getElementById('regBtn');
-    btn.disabled = true;
-    btn.textContent = '登録中...';
-
-    const role = document.getElementById('regRole').value;
-    const isStreamer = role === 'streamer';
-    const isPublic = isStreamer ? (document.getElementById('regIsPublic').value === 'true') : true;
-    const isContactWelcome = (isStreamer && isPublic) ? (document.getElementById('regIsContactWelcome').value === 'true') : (!isStreamer ? true : false);
-
-    const payloadData = {
-      uid: authenticatedUser.uid,
-      role: role,
-      displayName: displayName,
-      isPublic: isPublic,
-      isContactWelcome: isContactWelcome,
-      category: selectedCategories.join(','),
-      tags: selectedTags.join(','),
-      freeTags: document.getElementById('regFreeTags').value.trim(),
-      priceGuide: role === 'creator' ? document.getElementById('regPriceGuide').value : '',
-      avatarUrl: cleanedAvatarUrl,
-      description: document.getElementById('regDescription').value,
-      contactInfo: document.getElementById('regContactInfo').value.trim(),
-      xUrl: xUrl,
-      portfolioUrl: document.getElementById('regPortfolioUrl').value.trim()
+    let labelMaps = {
+      role: { creator: 'クリエイター', streamer: '配信者' },
+      category: {},
+      tags: {},
+      priceGuide: {}
     };
 
-    const workBlocks = document.querySelectorAll('.reg-work-block');
-    workBlocks.forEach((block, idx) => {
-      const i = idx + 1;
-      const type = block.querySelector('.reg-work-type').value;
-      const rawUrl = block.querySelector('.reg-work-url').value.trim();
-      const rawImg = block.querySelector('.reg-work-image').value.trim();
+    function normalizeDriveUrl(url, type = 'image') {
+      if (!url || typeof url !== 'string') return '';
+      const match = url.match(/\/file\/d\/([a-zA-Z0-9_-]+)/) || url.match(/id=([a-zA-Z0-9_-]+)/);
+      if (match && match[1]) {
+        return type === 'image' 
+          ? `https://drive.google.com/thumbnail?id=${match[1]}&sz=w800`
+          : `https://drive.google.com/file/d/${match[1]}/preview`;
+      }
+      return url;
+    }
 
-      payloadData[`works_type-${i}`] = type;
-      payloadData[`works_url-${i}`] = rawUrl ? normalizeDriveUrl(rawUrl, type === 'image' ? 'image' : 'preview') : '';
-      payloadData[`works_image-${i}`] = rawImg ? normalizeDriveUrl(rawImg, 'image') : '';
-    });
+    function normalizeUserWorks(u) {
+      if (Array.isArray(u.works)) return u.works.filter(w => w && w.url);
+      if (typeof u.works === 'string' && u.works.trim().startsWith('[')) {
+        try {
+          const parsed = JSON.parse(u.works);
+          if (Array.isArray(parsed)) return parsed.filter(w => w && w.url);
+        } catch(e) {}
+      }
 
-    const platformRows = document.querySelectorAll('.reg-platform-row');
-    platformRows.forEach((row, idx) => {
-      const i = idx + 1;
-      payloadData[`platforms_name-${i}`] = row.querySelector('.reg-platform-label').value.trim();
-      payloadData[`platforms_url-${i}`] = row.querySelector('.reg-platform-url').value.trim();
-    });
+      const list = [];
+      for (let i = 1; i <= 4; i++) {
+        const url = u[`works_url-${i}`] || u[`workUrls-${i}`];
+        if (url) {
+          list.push({
+            type: u[`works_type-${i}`] || 'image',
+            image: u[`works_image-${i}`] || '',
+            url: url
+          });
+        }
+      }
+      return list;
+    }
 
-    try {
-      const res = await fetch(GAS_API_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'text/plain' },
-        body: JSON.stringify({
-          action: 'register',
-          data: payloadData
-        }),
-        redirect: 'follow'
-      });
-      const data = await res.json();
+    function normalizeUserPlatforms(u) {
+      if (Array.isArray(u.platforms)) return u.platforms.filter(p => p && p.url);
+      if (typeof u.platforms === 'string' && u.platforms.trim().startsWith('[')) {
+        try {
+          const parsed = JSON.parse(u.platforms);
+          if (Array.isArray(parsed)) return parsed.filter(p => p && p.url);
+        } catch(e) {}
+      }
 
-      if (data.success) {
-        localStorage.setItem('castelier_registered_at', Date.now().toString());
-        alert(`登録が完了しました！\nあなたのアカウントIDは【 ${data.userId} 】です。`);
-        sessionStorage.setItem('castelier_session', JSON.stringify({
-          userId: data.userId,
-          uid: authenticatedUser.uid
-        }));
-        window.location.href = './top.html';
+      const list = [];
+      for (let i = 1; i <= 3; i++) {
+        const url = u[`platforms_url-${i}`] || u[`platformUrls-${i}`];
+        if (url) {
+          list.push({
+            label: u[`platforms_name-${i}`] || `活動先 ${i}`,
+            url: url
+          });
+        }
+      }
+      return list;
+    }
+
+    function buildLabelMaps(cols) {
+      if (cols.tags && cols.tags.options && cols.tags.optionLabels) {
+        cols.tags.options.forEach((val, i) => {
+          labelMaps.tags[val] = cols.tags.optionLabels[i] || val;
+        });
+      }
+      if (cols.priceGuide && cols.priceGuide.options && cols.priceGuide.optionLabels) {
+        cols.priceGuide.options.forEach((val, i) => {
+          labelMaps.priceGuide[val] = cols.priceGuide.optionLabels[i] || val;
+        });
+      }
+      if (cols.category && cols.category.options && cols.category.optionLabels) {
+        ['creator', 'streamer'].forEach(r => {
+          const opts = cols.category.options[r] || [];
+          const lbls = cols.category.optionLabels[r] || [];
+          opts.forEach((val, i) => {
+            labelMaps.category[val] = lbls[i] || val;
+          });
+        });
+      }
+    }
+
+    function getLabel(group, val) {
+      if (!val) return '';
+      const trimmed = String(val).trim();
+      return (labelMaps[group] && labelMaps[group][trimmed]) ? labelMaps[group][trimmed] : trimmed;
+    }
+
+    function parseCommaLabels(group, commaStr) {
+      if (!commaStr) return [];
+      return String(commaStr)
+        .split(',')
+        .map(v => v.trim())
+        .filter(Boolean)
+        .map(v => getLabel(group, v));
+    }
+
+    function renderMediaItem(item) {
+      if (!item || !item.url) return '';
+      const type = item.type || 'image';
+      const url = item.url.trim();
+      const customImg = item.image ? normalizeDriveUrl(item.image, 'image') : null;
+
+      if (type === 'image') {
+        const imgUrl = normalizeDriveUrl(url, 'image');
+        return `
+          <div class="media-box">
+            <img src="${imgUrl}" class="modal-work-img" alt="作品画像">
+          </div>
+        `;
+      }
+
+      if (type === 'music') {
+        const isDrive = url.includes('drive.google.com');
+        const audioSrc = isDrive ? normalizeDriveUrl(url, 'preview') : url;
+        const playerHtml = isDrive
+          ? `<iframe src="${audioSrc}" style="width:100%; height:48px; border:0;" allow="autoplay"></iframe>`
+          : `<audio controls src="${audioSrc}" style="width:100%; height:36px;"></audio>`;
+
+        if (customImg) {
+          return `
+            <div class="media-box" style="display:flex; flex-direction:column; background:#fff;">
+              <div style="width:100%; height:98px; background:#0f172a; overflow:hidden;">
+                <img src="${customImg}" style="width:100%; height:100%; object-fit:cover;" alt="ジャケット画像">
+              </div>
+              <div style="height:60px; padding:6px 12px; display:flex; align-items:center; background:#fff; border-top:1px solid var(--border);">
+                ${playerHtml}
+              </div>
+            </div>
+          `;
+        }
+
+        return `
+          <div class="media-box media-audio-box">
+            <div style="font-size:0.8rem; font-weight:bold; margin-bottom:8px; color:var(--primary);">🎵 音声サンプル</div>
+            ${playerHtml}
+          </div>
+        `;
+      }
+
+      if (type === 'video') {
+        const ytMatch = url.match(/(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
+        if (ytMatch) {
+          return `
+            <div class="media-box">
+              <iframe src="https://www.youtube.com/embed/${ytMatch[1]}" style="width:100%; height:100%; border:0;" allowfullscreen></iframe>
+            </div>
+          `;
+        }
+        const isDrive = url.includes('drive.google.com');
+        const videoSrc = isDrive ? normalizeDriveUrl(url, 'preview') : url;
+        return `
+          <div class="media-box">
+            ${isDrive 
+              ? `<iframe src="${videoSrc}" style="width:100%; height:100%; border:0;" allow="autoplay" allowfullscreen></iframe>`
+              : `<video controls src="${videoSrc}" style="width:100%; height:100%; object-fit:cover;"></video>`}
+          </div>
+        `;
+      }
+
+      if (type === 'web') {
+        let domain = url;
+        try { domain = new URL(url).hostname; } catch(e){}
+
+        if (customImg) {
+          return `
+            <div class="media-box">
+              <a href="${url}" target="_blank" rel="noopener" class="media-link-card">
+                <div class="media-link-thumb">
+                  <img src="${customImg}" alt="サイトキャプチャ">
+                </div>
+                <div class="media-link-meta">
+                  <span style="font-size:0.8rem; font-weight:bold; color:var(--primary); overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${escapeHtml(domain)}</span>
+                  <span style="font-size:0.9rem; color:var(--primary);">↗</span>
+                </div>
+              </a>
+            </div>
+          `;
+        }
+
+        return `
+          <div class="media-box media-audio-box">
+            <div style="font-size:0.75rem; color:#64748b; margin-bottom:4px;">🔗 Webサイト・リンク</div>
+            <a href="${url}" target="_blank" rel="noopener" class="external-work-link" style="margin:0;">
+              <span>${escapeHtml(domain)}</span>
+              <span>↗</span>
+            </a>
+          </div>
+        `;
+      }
+    }
+
+    function renderHeaderNav() {
+      const nav = document.getElementById('headerAuthNav');
+      const session = sessionStorage.getItem('castelier_session');
+
+      if (session) {
+        nav.innerHTML = `
+          <button class="btn-hamburger" onclick="toggleMenuDrawer()" title="メニューを開く">
+            <span></span>
+            <span></span>
+            <span></span>
+          </button>
+        `;
+        document.getElementById('drawerUserIdBadge').textContent = `ID: ${currentUserId}`;
       } else {
-        showStatus(data.message || '登録に失敗しました。', false);
+        nav.innerHTML = `
+          <a href="./index.html" class="btn-login">ログイン / 登録</a>
+        `;
       }
-    } catch (err) {
-      console.error(err);
-      showStatus('通信エラーが発生しました: ' + err.message, false);
-    } finally {
-      btn.disabled = false;
-      btn.textContent = '登録してTOPへ進む';
-    }
-  }
-
-  function normalizeDriveUrl(url, type = 'image') {
-    if (!url || typeof url !== 'string') return '';
-    const trimmed = url.trim();
-    const driveRegex = /(?:drive\.google\.com\/(?:file\/d\/|open\?id=)|docs\.google\.com\/file\/d\/)([a-zA-Z0-9_-]{25,})/;
-    const match = trimmed.match(driveRegex);
-    if (match && match[1]) {
-      const fileId = match[1];
-      return type === 'image'
-        ? `https://drive.google.com/thumbnail?id=${fileId}&sz=w800`
-        : `https://drive.google.com/file/d/${fileId}/preview`;
-    }
-    return trimmed;
-  }
-
-  function isValidImageUrl(url) {
-    if (!url) return true;
-    const trimmed = url.trim();
-    if (/drive\.google\.com/.test(trimmed)) return true;
-    const isDirectImage = /\.(jpeg|jpg|gif|png|webp|svg)(\?.*)?$/i.test(trimmed);
-    const isHttps = /^https?:\/\//i.test(trimmed);
-    return isHttps && (isDirectImage || trimmed.includes('googleusercontent.com'));
-  }
-
-  function updateImagePreview(inputId, previewBoxId) {
-    const input = document.getElementById(inputId);
-    const box = document.getElementById(previewBoxId);
-    const img = box.querySelector('img');
-    const rawVal = input.value.trim();
-
-    if (!rawVal) {
-      box.style.display = 'none';
-      img.src = '';
-      return;
     }
 
-    const converted = normalizeDriveUrl(rawVal, 'image');
-    if (isValidImageUrl(rawVal)) {
-      img.src = converted;
-      img.onload = () => { box.style.display = 'flex'; };
-      img.onerror = () => { box.style.display = 'none'; };
-    } else {
-      box.style.display = 'none';
-    }
-  }
+    function toggleMenuDrawer() {
+      const drawer = document.getElementById('menuDrawer');
+      const overlay = document.getElementById('menuDrawerOverlay');
+      const isOpen = drawer.classList.contains('open');
 
-  function setupTooltipToggle() {
-    document.addEventListener('click', (e) => {
-      const targetIcon = e.target.closest('.info-icon');
-      document.querySelectorAll('.info-icon.active').forEach(icon => {
-        if (icon !== targetIcon) icon.classList.remove('active');
+      if (isOpen) {
+        closeAllDrawers();
+      } else {
+        drawer.classList.add('open');
+        overlay.classList.add('open');
+      }
+    }
+
+    function closeAllDrawers() {
+      document.getElementById('menuDrawer').classList.remove('open');
+      document.getElementById('listDrawer').classList.remove('open');
+      document.getElementById('menuDrawerOverlay').classList.remove('open');
+    }
+
+    function openFavoritesListDrawer() {
+      document.getElementById('menuDrawer').classList.remove('open');
+      document.getElementById('listDrawerTitle').innerHTML = '⭐ お気に入りリスト';
+      const body = document.getElementById('listDrawerBody');
+
+      const favIds = Array.from(myFavoritesSet);
+      if (favIds.length === 0) {
+        body.innerHTML = '<div class="empty-drawer-notice">お気に入りに登録したユーザーはいません。<br>カードの☆をタップしてキープしてみましょう！</div>';
+      } else {
+        body.innerHTML = favIds.map(uid => {
+          const u = allUsersMap.get(uid) || { userId: uid, displayName: '非公開または読み込み中', role: 'creator' };
+          const avatar = normalizeDriveUrl(u.avatarUrl, 'image');
+          const isMutual = mutualSet.has(uid);
+
+          return `
+            <div class="drawer-user-card" id="drawer-fav-item-${escapeHtml(uid)}">
+              ${avatar ? `<img src="${avatar}" class="drawer-user-avatar" alt="">` : '<div class="drawer-user-avatar"></div>'}
+              <div class="drawer-user-info-text" onclick="openModalByUserId('${escapeHtml(uid)}')">
+                <div class="drawer-user-name">${escapeHtml(u.displayName || '名無し')}</div>
+                <div class="drawer-user-sub">
+                  <span>${u.role === 'streamer' ? '配信者' : 'クリエイター'}</span>
+                  ${isMutual ? '<span class="badge-mutual">🤝 相互</span>' : ''}
+                </div>
+              </div>
+              <button class="btn-drawer-unfav" title="お気に入り解除" onclick="handleRemoveFromDrawer('${escapeHtml(uid)}')">✕</button>
+            </div>
+          `;
+        }).join('');
+      }
+
+      document.getElementById('listDrawer').classList.add('open');
+    }
+
+    function openFollowersListDrawer() {
+      document.getElementById('menuDrawer').classList.remove('open');
+      document.getElementById('listDrawerTitle').innerHTML = '👥 フォロワー（注目ユーザー）';
+      const body = document.getElementById('listDrawerBody');
+
+      if (interestedInMeList.length === 0) {
+        body.innerHTML = '<div class="empty-drawer-notice">あなたをフォロー・注目しているユーザーはまだいません。</div>';
+      } else {
+        body.innerHTML = interestedInMeList.map(uid => {
+          const u = allUsersMap.get(uid) || { userId: uid, displayName: '非公開または読み込み中', role: 'streamer' };
+          const avatar = normalizeDriveUrl(u.avatarUrl, 'image');
+          const isMutual = mutualSet.has(uid);
+
+          return `
+            <div class="drawer-user-card">
+              ${avatar ? `<img src="${avatar}" class="drawer-user-avatar" alt="">` : '<div class="drawer-user-avatar"></div>'}
+              <div class="drawer-user-info-text" onclick="openModalByUserId('${escapeHtml(uid)}')">
+                <div class="drawer-user-name">${escapeHtml(u.displayName || '名無し')}</div>
+                <div class="drawer-user-sub">
+                  <span>${u.role === 'streamer' ? '配信者' : 'クリエイター'}</span>
+                  ${isMutual ? '<span class="badge-mutual">🤝 相互</span>' : ''}
+                </div>
+              </div>
+            </div>
+          `;
+        }).join('');
+      }
+
+      document.getElementById('listDrawer').classList.add('open');
+    }
+
+    async function handleRemoveFromDrawer(targetUserId) {
+      if (!confirm('お気に入りを解除しますか？')) return;
+      await handleToggleFavorite(null, targetUserId);
+      openFavoritesListDrawer();
+    }
+
+    function handleLogout() {
+      if (confirm('ログアウトしますか？')) {
+        sessionStorage.removeItem('castelier_session');
+        localStorage.removeItem('castelier_registered_at');
+        alert('ログアウトしました。');
+        window.location.href = './index.html';
+      }
+    }
+
+    window.addEventListener('DOMContentLoaded', async () => {
+      const registeredAt = localStorage.getItem('castelier_registered_at');
+      const now = Date.now();
+      const FIFTEEN_MINUTES = 15 * 60 * 1000;
+      const isRecentlyRegistered = registeredAt && (now - parseInt(registeredAt, 10) < FIFTEEN_MINUTES);
+
+      const session = sessionStorage.getItem('castelier_session');
+      currentUserId = session ? JSON.parse(session).userId : null;
+
+      renderHeaderNav();
+
+      if (document.getElementById('btnViewDetailed')) {
+        document.getElementById('btnViewDetailed').classList.toggle('active', currentViewMode === 'detailed');
+        document.getElementById('btnViewCompact').classList.toggle('active', currentViewMode === 'compact');
+      }
+
+      try {
+        const fetchSchema = fetch('./schema/accounts.yaml').then(r => r.text());
+
+        const fetchJsonUsers = fetch(`./data/users.json?t=${now}`)
+          .then(r => r.ok ? r.json() : [])
+          .catch(() => []);
+
+        const fetchContactConfig = fetch(`./config/contact.json?t=${now}`)
+          .then(r => r.ok ? r.json() : null)
+          .catch(() => null);
+
+        const fetchSelfUser = (async () => {
+          if (isRecentlyRegistered && currentUserId) {
+            try {
+              const res = await fetch(`${GAS_API_URL}?action=getUserById&userId=${encodeURIComponent(currentUserId)}`);
+              const data = await res.json();
+              return data.success ? data.user : null;
+            } catch(e) {
+              return null;
+            }
+          }
+          return null;
+        })();
+
+        const fetchMyFavorites = (async () => {
+          if (!currentUserId) return null;
+          try {
+            const res = await fetch(GAS_API_URL, {
+              method: 'POST',
+              headers: { 'Content-Type': 'text/plain' },
+              body: JSON.stringify({
+                action: 'getFavoriteRelations',
+                data: { userId: currentUserId }
+              })
+            });
+            return await res.json();
+          } catch (e) {
+            console.warn('お気に入りデータの取得失敗:', e);
+            return null;
+          }
+        })();
+
+        const [schemaYaml, baseUsers, selfUser, favResult, loadedContact] = await Promise.all([
+          fetchSchema, fetchJsonUsers, fetchSelfUser, fetchMyFavorites, fetchContactConfig
+        ]);
+
+        contactConfig = loadedContact;
+
+        if (favResult && favResult.success) {
+          myFavoritesSet = new Set(favResult.myFavorites || []);
+          interestedInMeList = favResult.interestedInMe || [];
+          mutualSet = new Set(favResult.mutual || []);
+
+          document.getElementById('drawerFavCount').textContent = myFavoritesSet.size;
+          document.getElementById('drawerFollowerCount').textContent = interestedInMeList.length;
+        }
+
+        const loadedYaml = jsyaml.load(schemaYaml);
+        schemaData = loadedYaml.accounts.columns;
+        buildLabelMaps(schemaData);
+
+        renderFilterChips();
+
+        let mergedList = [...baseUsers];
+        if (selfUser) {
+          mergedList = mergedList.filter(u => u.userId !== selfUser.userId);
+          mergedList.unshift(selfUser);
+        }
+
+        allUsers = mergedList;
+        allUsersMap.clear();
+        allUsers.forEach(u => {
+          if (u.userId) allUsersMap.set(u.userId, u);
+        });
+
+        renderFilteredUsers();
+
+      } catch (err) {
+        console.warn('読み込みエラー:', err);
+        document.getElementById('userGrid').innerHTML = '<div class="loading-state">ユーザー一覧の取得に失敗しました。</div>';
+      }
+    });
+
+    function setViewMode(mode) {
+      currentViewMode = mode;
+      localStorage.setItem('castelier_view_mode', mode);
+      document.getElementById('btnViewDetailed').classList.toggle('active', mode === 'detailed');
+      document.getElementById('btnViewCompact').classList.toggle('active', mode === 'compact');
+      renderFilteredUsers();
+    }
+
+    function setRoleFilter(role) {
+      currentRole = role;
+      document.querySelectorAll('.role-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.role === role);
       });
-      if (targetIcon) targetIcon.classList.toggle('active');
-    });
-  }
+      renderCategoryChips();
+      renderFilteredUsers();
+    }
 
-  function setupTermsUnlock() {
-    const termsLink = document.getElementById('termsLink');
-    const agreeCheckbox = document.getElementById('regAgreeTerms');
-    const notice = document.getElementById('termsNotice');
+    function renderFilterChips() {
+      renderCategoryChips();
+      renderTagChips();
+    }
 
-    if (!termsLink || !agreeCheckbox) return;
+    function renderCategoryChips() {
+      const container = document.getElementById('categoryChipsContainer');
+      if (!schemaData || !schemaData.category || !schemaData.category.options) return;
 
-    termsLink.addEventListener('click', () => {
-      agreeCheckbox.disabled = false;
-      agreeCheckbox.checked = true;
-      if (notice) {
-        notice.style.color = '#10b981';
-        notice.textContent = '✓ ガイドラインを確認しました。';
+      let categoryKeys = [];
+      if (currentRole === 'creator') {
+        categoryKeys = schemaData.category.options.creator || [];
+      } else if (currentRole === 'streamer') {
+        categoryKeys = schemaData.category.options.streamer || [];
+      } else {
+        const c1 = schemaData.category.options.creator || [];
+        const c2 = schemaData.category.options.streamer || [];
+        categoryKeys = Array.from(new Set([...c1, ...c2]));
       }
-    });
-  }
-</script>
+
+      container.innerHTML = categoryKeys.map(catKey => {
+        const label = getLabel('category', catKey);
+        const isActive = selectedCategoriesSet.has(catKey);
+        return `
+          <div class="filter-chip ${isActive ? 'active' : ''}" onclick="toggleCategoryChip('${escapeHtml(catKey)}')">
+            ${escapeHtml(label)}
+          </div>
+        `;
+      }).join('');
+    }
+
+    function renderTagChips() {
+      const container = document.getElementById('tagChipsContainer');
+      if (!schemaData || !schemaData.tags || !schemaData.tags.options) return;
+
+      const tagKeys = schemaData.tags.options || [];
+
+      container.innerHTML = tagKeys.map(tagKey => {
+        const label = getLabel('tags', tagKey);
+        const isActive = selectedTagsSet.has(tagKey);
+        return `
+          <div class="filter-chip ${isActive ? 'active' : ''}" onclick="toggleTagChip('${escapeHtml(tagKey)}')">
+            #${escapeHtml(label)}
+          </div>
+        `;
+      }).join('');
+    }
+
+    function toggleCategoryChip(catKey) {
+      if (selectedCategoriesSet.has(catKey)) {
+        selectedCategoriesSet.delete(catKey);
+      } else {
+        selectedCategoriesSet.add(catKey);
+      }
+      renderCategoryChips();
+      renderFilteredUsers();
+    }
+
+    function clearSelectedCategories() {
+      selectedCategoriesSet.clear();
+      renderCategoryChips();
+      renderFilteredUsers();
+    }
+
+    function toggleTagChip(tagKey) {
+      if (selectedTagsSet.has(tagKey)) {
+        selectedTagsSet.delete(tagKey);
+      } else {
+        selectedTagsSet.add(tagKey);
+      }
+      renderTagChips();
+      renderFilteredUsers();
+    }
+
+    function clearSelectedTags() {
+      selectedTagsSet.clear();
+      renderTagChips();
+      renderFilteredUsers();
+    }
+
+    function renderFilteredUsers() {
+      updateFilterActiveBadge();
+      
+      const keyword = document.getElementById('keywordSearch').value.toLowerCase().trim();
+
+      const filtered = allUsers.filter(u => {
+        if (currentRole !== 'all' && u.role !== currentRole) return false;
+
+        const userCatKeys = (u.category || '').split(',').map(s => s.trim()).filter(Boolean);
+        const userCatLabels = parseCommaLabels('category', u.category);
+
+        const userTagKeys = (u.tags || '').split(',').map(s => s.trim()).filter(Boolean);
+        const userTagLabels = parseCommaLabels('tags', u.tags);
+        const userFreeTags = (u.freeTags ? String(u.freeTags).split(',') : []).map(t => t.trim()).filter(Boolean);
+
+        if (selectedCategoriesSet.size > 0) {
+          const hasMatchedCategory = userCatKeys.some(k => selectedCategoriesSet.has(k));
+          if (!hasMatchedCategory) return false;
+        }
+
+        if (selectedTagsSet.size > 0) {
+          const hasMatchedTag = userTagKeys.some(k => selectedTagsSet.has(k));
+          if (!hasMatchedTag) return false;
+        }
+
+        if (keyword) {
+          const searchTargets = [
+            u.displayName || '',
+            ...userCatLabels,
+            ...userTagLabels,
+            ...userFreeTags
+          ].join(' ').toLowerCase();
+
+          if (!searchTargets.includes(keyword)) return false;
+        }
+
+        return true;
+      });
+
+      document.getElementById('resultsCount').textContent = `該当ユーザー: ${filtered.length} 件`;
+
+      const grid = document.getElementById('userGrid');
+      if (filtered.length === 0) {
+        grid.innerHTML = '<div class="loading-state">条件に一致するユーザーは見つかりませんでした。</div>';
+        return;
+      }
+
+      const isCompact = currentViewMode === 'compact';
+
+      grid.innerHTML = filtered.map((u, idx) => {
+        const avatarUrl = normalizeDriveUrl(u.avatarUrl, 'image');
+        const roleLabel = getLabel('role', u.role);
+
+        const userWorks = normalizeUserWorks(u);
+        const firstWork = userWorks.length > 0 ? userWorks[0] : null;
+        let thumbHtml = '<div class="card-thumb-empty">No Work Preview</div>';
+
+        if (firstWork && firstWork.url) {
+          const customThumb = firstWork.image ? normalizeDriveUrl(firstWork.image, 'image') : null;
+
+          if (firstWork.type === 'image') {
+            thumbHtml = `<img src="${normalizeDriveUrl(firstWork.url, 'image')}" alt="作品">`;
+          } else if (firstWork.type === 'music') {
+            thumbHtml = customThumb 
+              ? `<img src="${customThumb}" alt="楽曲ジャケット"><span style="position:absolute; bottom:8px; right:8px; background:rgba(0,0,0,0.6); color:#fff; padding:2px 8px; border-radius:12px; font-size:0.7rem;">🎵 楽曲</span>`
+              : `<div class="card-thumb-empty" style="background:#e0e7ff; color:var(--primary); font-weight:bold;">🎵 音声作品</div>`;
+          } else if (firstWork.type === 'web') {
+            thumbHtml = customThumb 
+              ? `<img src="${customThumb}" alt="サイトキャプチャ"><span style="position:absolute; bottom:8px; right:8px; background:rgba(0,0,0,0.6); color:#fff; padding:2px 8px; border-radius:12px; font-size:0.7rem;">🔗 Web</span>`
+              : `<div class="card-thumb-empty" style="background:#f1f5f9; color:#64748b; font-weight:bold;">🔗 Webサイト</div>`;
+          } else if (firstWork.type === 'video') {
+            const ytMatch = firstWork.url.match(/(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
+            const thumbUrl = ytMatch ? `https://img.youtube.com/vi/${ytMatch[1]}/hqdefault.jpg` : normalizeDriveUrl(firstWork.url, 'image');
+            thumbHtml = thumbUrl 
+              ? `<img src="${thumbUrl}" alt="動画サムネイル"><span style="position:absolute; inset:0; display:flex; align-items:center; justify-content:center; background:rgba(0,0,0,0.35); font-size:2rem; color:#fff;">▶</span>`
+              : '<div class="card-thumb-empty">🎬 動画作品</div>';
+          }
+        }
+
+        const catLabels = parseCommaLabels('category', u.category);
+        const categoryDisplay = catLabels.join(' / ') || '未設定';
+
+        const standardTags = parseCommaLabels('tags', u.tags);
+        const freeTags = (u.freeTags ? String(u.freeTags).split(',') : []).map(t => t.trim()).filter(Boolean);
+        const allCardTags = standardTags.concat(freeTags);
+
+        const isFav = myFavoritesSet.has(u.userId);
+        const isSelf = currentUserId && (currentUserId === u.userId);
+
+        return `
+          <div class="user-card ${isCompact ? 'compact' : ''}" onclick="openModal(${idx})">
+            ${!isSelf ? `
+              <button 
+                class="btn-fav-card ${isFav ? 'active' : ''}" 
+                title="${isFav ? 'お気に入り解除' : 'お気に入りに追加'}"
+                onclick="handleToggleFavorite(event, '${escapeHtml(u.userId)}')"
+                id="fav-card-${escapeHtml(u.userId)}"
+              >
+                ${isFav ? '★' : '☆'}
+              </button>
+            ` : ''}
+
+            <div class="card-thumb">
+              ${thumbHtml}
+              <span class="role-badge ${u.role}">${roleLabel}</span>
+            </div>
+
+            <div class="card-body">
+              <div class="card-header">
+                ${avatarUrl ? `<img src="${avatarUrl}" class="card-avatar" alt="">` : '<div class="card-avatar"></div>'}
+                <div style="overflow: hidden; flex-grow: 1;">
+                  <div class="card-name">
+                    ${isCompact ? `<span class="role-badge-inline ${u.role}">${roleLabel}</span>` : ''}
+                    <span style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${escapeHtml(u.displayName || '名無し')}</span>
+                  </div>
+                  <div class="card-category">${escapeHtml(categoryDisplay)}</div>
+                </div>
+              </div>
+
+              <div class="card-desc">${escapeHtml(u.description || '自己紹介文はありません。')}</div>
+
+              <div class="card-tags">
+                ${allCardTags.map(t => `<span class="tag-badge">#${escapeHtml(t)}</span>`).join('')}
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function openModalByUserId(uid) {
+      const idx = allUsers.findIndex(u => u.userId === uid);
+      if (idx !== -1) {
+        closeAllDrawers();
+        openModal(idx);
+      }
+    }
+
+    function scrollWorks(direction) {
+      const container = document.getElementById('modalWorksGrid');
+      if (!container) return;
+      const scrollAmount = 296;
+      container.scrollBy({
+        left: direction * scrollAmount,
+        behavior: 'smooth'
+      });
+    }
+
+    function openModal(index) {
+      const u = allUsers[index];
+      if (!u) return;
+
+      const avatarUrl = normalizeDriveUrl(u.avatarUrl, 'image');
+      const roleLabel = getLabel('role', u.role);
+      const categoryDisplay = parseCommaLabels('category', u.category).join(' / ') || '未設定';
+      const priceLabel = getLabel('priceGuide', u.priceGuide);
+      
+      const userWorks = normalizeUserWorks(u);
+      const userPlatforms = normalizeUserPlatforms(u);
+
+      const standardTags = parseCommaLabels('tags', u.tags);
+      const freeTags = (u.freeTags ? String(u.freeTags).split(',') : []).map(t => t.trim()).filter(Boolean);
+      const allModalTags = standardTags.concat(freeTags);
+
+      const links = [];
+      if (u.xUrl) links.push(`<a href="${u.xUrl}" target="_blank" rel="noopener">X (Twitter)</a>`);
+      if (u.portfolioUrl) links.push(`<a href="${u.portfolioUrl}" target="_blank" rel="noopener">ポートフォリオHP</a>`);
+      userPlatforms.forEach(p => {
+        if (p.url) {
+          links.push(`<a href="${escapeHtml(p.url)}" target="_blank" rel="noopener">${escapeHtml(p.label || 'リンク')}</a>`);
+        }
+      });
+
+      const isFav = myFavoritesSet.has(u.userId);
+      const isSelf = currentUserId && (currentUserId === u.userId);
+
+      let favBtnHtml = '';
+      if (!isSelf) {
+        favBtnHtml = `
+          <button 
+            class="modal-fav-btn ${isFav ? 'active' : ''}" 
+            id="modal-fav-btn"
+            onclick="handleToggleFavorite(event, '${escapeHtml(u.userId)}', true)"
+          >
+            <span>${isFav ? '★' : '☆'}</span>
+            <span id="modal-fav-label">${isFav ? '登録中' : 'キープ'}</span>
+          </button>
+        `;
+      }
+
+      let reportHtml = '';
+      if (!isSelf) {
+        const reporterId = currentUserId ? encodeURIComponent(currentUserId) : 'guest';
+        const targetId = encodeURIComponent(u.userId);
+        const formUrl = `https://docs.google.com/forms/d/e/1FAIpQLSdb1s3o_0wx7q-qN-UWPdNYjeLD7tfeR0UPhX0194aYLmdeyQ/viewform?usp=pp_url&entry.377515000=${reporterId}&entry.676496849=${targetId}`;
+
+        reportHtml = `
+          <div class="report-link-wrap">
+            <a href="${formUrl}" target="_blank" rel="noopener noreferrer" class="report-link">
+              <span>⚠️ このユーザーを通報・違反報告する</span>
+            </a>
+          </div>
+        `;
+      }
+
+      document.getElementById('modalFavContainer').innerHTML = '';
+
+      document.getElementById('modalBody').innerHTML = `
+        <div class="modal-header-top">
+          <div class="modal-user-profile">
+            ${avatarUrl ? `<img src="${avatarUrl}" style="width:54px; height:54px; border-radius:50%; object-fit:cover; border:1px solid rgba(191, 219, 254, 0.8); flex-shrink:0;" alt="">` : ''}
+            <div style="min-width: 0;">
+              <span class="role-badge ${u.role}" style="position:static; margin-bottom:4px; display:inline-block;">${roleLabel}</span>
+              <h2 style="margin:2px 0 0; font-size:1.15rem; word-break:break-word;">${escapeHtml(u.displayName || '')}</h2>
+              <div style="font-size:0.8rem; color:#64748b;">${escapeHtml(categoryDisplay)}</div>
+            </div>
+          </div>
+          ${favBtnHtml}
+        </div>
+
+        <div style="margin-bottom:12px; white-space:pre-wrap; font-size:0.85rem; line-height:1.6; color:#334155;">${escapeHtml(u.description || '自己紹介文はありません。')}</div>
+
+        ${allModalTags.length > 0 ? `
+          <div class="modal-tags">
+            ${allModalTags.map(t => `<span class="tag-badge">#${escapeHtml(t)}</span>`).join('')}
+          </div>
+        ` : ''}
+
+        ${userWorks.length > 0 ? `
+          <div style="font-weight:bold; font-size:0.85rem; margin-bottom:4px; display:flex; justify-content:space-between; align-items:center;">
+            <span>代表作品・メディア</span>
+            <span style="font-size:0.75rem; color:#94a3b8; font-weight:normal;">横スクロール可 ➔</span>
+          </div>
+          <div class="modal-works-wrapper">
+            <button class="works-scroll-btn btn-prev" onclick="scrollWorks(-1)" title="前へ">‹</button>
+            <div class="modal-works-grid" id="modalWorksGrid">
+              ${userWorks.map(w => renderMediaItem(w)).join('')}
+            </div>
+            <button class="works-scroll-btn btn-next" onclick="scrollWorks(1)" title="次へ">›</button>
+          </div>
+        ` : ''}
+
+        ${priceLabel ? `
+          <div style="margin:12px 0; font-size:0.85rem;">
+            <strong>活動・依頼スタンス:</strong> ${escapeHtml(priceLabel)}
+          </div>
+        ` : ''}
+
+        ${links.length > 0 ? `
+          <div style="font-weight:bold; font-size:0.85rem; margin-top:16px; margin-bottom:8px;">リンク・活動先</div>
+          <div class="modal-links">${links.join('')}</div>
+        ` : ''}
+
+        ${u.contactInfo ? `
+          <div style="margin-top:16px; padding:12px; background:rgba(240, 246, 255, 0.6); border-radius:6px; font-size:0.85rem; border:1px solid rgba(191, 219, 254, 0.7);">
+            <strong>連絡先窓口:</strong> ${escapeHtml(u.contactInfo)}
+          </div>
+        ` : ''}
+
+        ${reportHtml}
+      `;
+
+      document.getElementById('userModal').classList.add('open');
+
+      const worksContainer = document.getElementById('modalWorksGrid');
+      if (worksContainer) {
+        worksContainer.onwheel = function(e) {
+          if (e.deltaY !== 0) {
+            e.preventDefault();
+            worksContainer.scrollBy({
+              left: e.deltaY * 2.5,
+              behavior: 'auto'
+            });
+          }
+        };
+      }
+    }
+
+    function closeModal() {
+      document.getElementById('userModal').classList.remove('open');
+    }
+
+    async function handleToggleFavorite(event, targetUserId) {
+      if (event) event.stopPropagation();
+
+      if (!currentUserId) {
+        if (confirm('お気に入り機能を利用するにはログインが必要です。ログイン画面へ移動しますか？')) {
+          window.location.href = './index.html';
+        }
+        return;
+      }
+
+      const isAdding = !myFavoritesSet.has(targetUserId);
+
+      if (isAdding) {
+        myFavoritesSet.add(targetUserId);
+        if (interestedInMeList.includes(targetUserId)) {
+          mutualSet.add(targetUserId);
+        }
+      } else {
+        myFavoritesSet.delete(targetUserId);
+        mutualSet.delete(targetUserId);
+      }
+      updateFavUI(targetUserId);
+
+      try {
+        const res = await fetch(GAS_API_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain' },
+          body: JSON.stringify({
+            action: 'toggleFavorite',
+            data: {
+              fromUserId: currentUserId,
+              toUserId: targetUserId
+            }
+          })
+        });
+        const result = await res.json();
+
+        if (!result.success) {
+          if (isAdding) myFavoritesSet.delete(targetUserId);
+          else myFavoritesSet.add(targetUserId);
+          updateFavUI(targetUserId);
+          alert(result.message || '操作に失敗しました。');
+        }
+      } catch (err) {
+        if (isAdding) myFavoritesSet.delete(targetUserId);
+        else myFavoritesSet.add(targetUserId);
+        updateFavUI(targetUserId);
+        alert('通信に失敗しました。');
+      }
+    }
+
+    function updateFavUI(targetUserId) {
+      const isFav = myFavoritesSet.has(targetUserId);
+
+      const cardBtn = document.getElementById(`fav-card-${targetUserId}`);
+      if (cardBtn) {
+        cardBtn.classList.toggle('active', isFav);
+        cardBtn.textContent = isFav ? '★' : '☆';
+        cardBtn.title = isFav ? 'お気に入り解除' : 'お気に入りに追加';
+      }
+
+      const modalBtn = document.getElementById('modal-fav-btn');
+      const modalLabel = document.getElementById('modal-fav-label');
+      if (modalBtn && modalLabel) {
+        modalBtn.classList.toggle('active', isFav);
+        modalBtn.querySelector('span:first-child').textContent = isFav ? '★' : '☆';
+        modalLabel.textContent = isFav ? '登録中' : 'キープ';
+      }
+
+      const badge = document.getElementById('drawerFavCount');
+      if (badge) badge.textContent = myFavoritesSet.size;
+    }
+
+    function escapeHtml(str) {
+      if (!str) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+
+    function backToMenuDrawer() {
+      document.getElementById('listDrawer').classList.remove('open');
+      document.getElementById('menuDrawer').classList.add('open');
+    }
+
+    function openFeedbackForm(e) {
+      if (e) e.preventDefault();
+      const uid = currentUserId ? encodeURIComponent(currentUserId) : '';
+      const url = `https://docs.google.com/forms/d/e/1FAIpQLSep1VRHITjUqvQ1aE31fhGs7EsHfuiC9FSPeqMJBxGaklqt2g/viewform?usp=pp_url&entry.267937224=${uid}`;
+      window.open(url, '_blank', 'noopener,noreferrer');
+    }
+
+    function handleContactClick(e) {
+      if (e) e.preventDefault();
+
+      const conf = contactConfig || {
+        to: 'project.creatorsplatform@gmail.com',
+        subject: '【Castelier】お問い合わせ',
+        body: 'Castelier 運営チーム 御中\r\n\r\nお名前（活動名）：\r\nユーザーID（任意）：\r\n\r\n\r\n【お問い合わせ種別】\r\n[ ] 規約・利用に関する質問\r\n[ ] アカウント関連\r\n[ ] その他\r\n\r\n【お問い合わせ内容】\r\n\r\n\r\n--------------------\r\n※不具合や改善要望は、ハンバーガーメニュー内の「ご意見・ご要望」フォームからも受領可能です。\r\n※件名は変更しないでください。(変更すると通知が届かなくなり気づけない場合があります)'
+      };
+
+      const to = conf.to || '';
+      const subject = conf.subject || '【Castelier】お問い合わせ';
+      let body = conf.body || '';
+
+      if (currentUserId) {
+        body = body.replace('ユーザーID（任意）：', `ユーザーID（任意）：${currentUserId}`);
+      }
+
+      const normalizedBody = body.replace(/\r?\n/g, '\r\n');
+      const mailtoUrl = `mailto:${to}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(normalizedBody)}`;
+
+      window.location.href = mailtoUrl;
+    }
+
+    function toggleFilterAccordion() {
+      const body = document.getElementById('filterAccordionBody');
+      const btn = document.getElementById('btnToggleFilter');
+      const isCollapsed = body.classList.toggle('collapsed');
+      btn.classList.toggle('open', !isCollapsed);
+    }
+
+    function updateFilterActiveBadge() {
+      const keyword = (document.getElementById('keywordSearch')?.value || '').trim();
+      let count = 0;
+      if (keyword) count += 1;
+      count += selectedCategoriesSet.size;
+      count += selectedTagsSet.size;
+
+      const badge = document.getElementById('filterActiveBadge');
+      if (badge) {
+        if (count > 0) {
+          badge.textContent = count;
+          badge.classList.remove('hidden');
+        } else {
+          badge.classList.add('hidden');
+        }
+      }
+    }
+  </script>
 </body>
 </html>
