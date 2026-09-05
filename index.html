@@ -268,6 +268,59 @@
       align-items: center;
       justify-content: space-between;
     }
+
+    /* オリジナル画像ローディングスピナー */
+    .custom-spinner-wrapper {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 40px 16px;
+      gap: 14px;
+    }
+
+    .custom-spinner {
+      width: 56px;
+      height: 56px;
+      position: relative;
+      /* 画像の透過部分を活かすマスク指定 */
+      -webkit-mask: url('assets/spinner.png') no-repeat center / contain;
+      mask: url('assets/spinner.png') no-repeat center / contain;
+      background-color: #cbd5e1; /* 未充填時のベース下地色 */
+      overflow: hidden;
+    }
+
+    /* 下から上へ色が満ちていくアニメーションレイヤー */
+    .custom-spinner::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to top, var(--primary, #4f46e5), #818cf8);
+      transform-origin: bottom;
+      animation: spinner-fill-up 1.4s ease-in-out infinite;
+    }
+
+    @keyframes spinner-fill-up {
+      0% {
+        transform: scaleY(0);
+        opacity: 0.3;
+      }
+      50% {
+        transform: scaleY(1);
+        opacity: 1;
+      }
+      100% {
+        transform: scaleY(1);
+        opacity: 0; /* 満ちきったあとにフェードアウトしてループ */
+      }
+    }
+
+    .custom-spinnerText {
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--text-sub, #64748b);
+      letter-spacing: 0.05em;
+    }
   </style>
 </head>
 <body>
@@ -651,9 +704,13 @@
     hideStatus();
   }
 
-  function showStatus(msg, isSuccess) {
+  function showStatus(msg, isSuccess, isHtml = false) {
     const el = document.getElementById('statusMsg');
-    el.textContent = msg;
+    if (isHtml) {
+      el.innerHTML = msg;
+    } else {
+      el.textContent = msg;
+    }
     el.className = `status-box ${isSuccess ? 'success' : 'error'}`;
     el.style.display = 'block';
   }
@@ -669,7 +726,12 @@
       const user = result.user;
       authenticatedUser = user;
 
-      showStatus('認証中...', true);
+      showStatus(`
+        <div class="custom-spinner-wrapper" style="padding: 10px 0;">
+          <div class="custom-spinner"></div>
+          <div class="custom-spinnerText">認証照合中...</div>
+        </div>
+      `, true, true);
       const res = await fetch(GAS_API_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'text/plain' },
