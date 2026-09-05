@@ -16,8 +16,13 @@
       --text-main: #1e293b;
       --text-sub: #64748b;
       --primary: #4f46e5;
-      --border: #e2e8f0;
+      --border: rgba(191, 219, 254, 0.8);
       --radius: 12px;
+
+      /* ★ 蒼白グラデーション */
+      --card-gradient: linear-gradient(135deg, rgba(255, 255, 255, 0.96) 0%, rgba(240, 246, 255, 0.93) 50%, rgba(224, 238, 255, 0.90) 100%);
+      --card-border: 1px solid rgba(191, 219, 254, 0.85);
+      --card-shadow: 0 15px 35px -5px rgba(30, 58, 138, 0.1), 0 4px 12px rgba(0, 0, 0, 0.04);
     }
     body {
       margin: 0;
@@ -30,11 +35,13 @@
     .container {
       max-width: 680px;
       margin: 0 auto;
-      background: var(--card-bg);
+      background: var(--card-gradient) !important;
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
       padding: 32px 28px;
       border-radius: var(--radius);
-      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.08);
-      border: 1px solid var(--border);
+      box-shadow: var(--card-shadow) !important;
+      border: var(--card-border) !important;
     }
     .top-banner-wrap {
       text-align: center;
@@ -46,7 +53,7 @@
       display: inline-block;
       border-radius: 8px;
     }
-    h1 { font-size: 1.35rem; margin-top: 0; padding-bottom: 12px; border-bottom: 2px solid var(--border); text-align: center; }
+    h1 { font-size: 1.35rem; margin-top: 0; padding-bottom: 12px; border-bottom: 2px solid rgba(191, 219, 254, 0.8); text-align: center; }
     h2 { font-size: 1.05rem; margin-top: 24px; color: var(--primary); }
     ul { padding-left: 20px; color: var(--text-sub); font-size: 0.9rem; }
     li { margin-bottom: 8px; }
