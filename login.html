@@ -754,7 +754,7 @@
           userId: data.userId,
           uid: user.uid
         }));
-        window.location.href = './top.html';
+        window.location.href = './index.html';
       } else if (data.notRegistered) {
         switchAuthTab('register');
         document.getElementById('regAuthGate').classList.add('hidden');
@@ -885,7 +885,7 @@
           userId: data.userId,
           uid: authenticatedUser.uid
         }));
-        window.location.href = './top.html';
+        window.location.href = './index.html';
       } else {
         showStatus(data.message || '登録に失敗しました。', false);
       }
