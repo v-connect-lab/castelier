@@ -81,6 +81,34 @@
     }
     .btn-sub:hover { background: #475569; }
 
+    /* メインタブ */
+    .main-nav-tabs {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 20px;
+      border-bottom: 2px solid var(--border);
+      padding-bottom: 8px;
+    }
+    .main-tab-btn {
+      padding: 8px 18px;
+      border-radius: 6px;
+      font-size: 0.9rem;
+      font-weight: 700;
+      cursor: pointer;
+      border: 1px solid transparent;
+      background: #1e293b;
+      color: var(--text-sub);
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s;
+    }
+    .main-tab-btn:hover { background: #334155; color: #fff; }
+    .main-tab-btn.active {
+      background: var(--primary);
+      color: #ffffff;
+    }
+
     /* ログインカード */
     .login-box {
       max-width: 420px;
@@ -112,10 +140,7 @@
       background-color: #f9fafb;
       box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     }
-    .btn-google:disabled {
-      opacity: 0.6;
-      cursor: not-allowed;
-    }
+    .btn-google:disabled { opacity: 0.6; cursor: not-allowed; }
 
     /* ダッシュボードパネル */
     .dashboard-panel {
@@ -177,7 +202,7 @@
       border-color: var(--primary);
     }
 
-    /* ユーザーテーブル */
+    /* テーブル共通 */
     .table-container {
       overflow-x: auto;
       border: 1px solid var(--border);
@@ -243,6 +268,57 @@
     }
     .btn-unban:hover { background: #047857; }
 
+    /* お知らせ管理フォーム */
+    .news-form-card {
+      background: #0f172a;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 16px;
+      margin-bottom: 20px;
+    }
+    .form-grid {
+      display: grid;
+      grid-template-columns: 140px 130px 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+    @media (max-width: 768px) {
+      .form-grid { grid-template-columns: 1fr; }
+    }
+    .form-control {
+      width: 100%;
+      padding: 8px 12px;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      background: #1e293b;
+      color: #fff;
+      font-size: 0.85rem;
+    }
+    .btn-post-news {
+      background: var(--primary);
+      color: #fff;
+      border: none;
+      padding: 9px 20px;
+      border-radius: 6px;
+      font-size: 0.85rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .btn-post-news:hover { background: var(--primary-hover); }
+    .btn-post-news:disabled { opacity: 0.6; cursor: not-allowed; }
+
+    .btn-delete-news {
+      background: #7f1d1d;
+      color: #fca5a5;
+      border: 1px solid #b91c1c;
+      padding: 4px 10px;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      cursor: pointer;
+    }
+    .btn-delete-news:hover { background: #991b1b; }
+
     .hidden { display: none !important; }
     .loading-notice {
       text-align: center;
@@ -287,58 +363,152 @@
 
   <!-- 2. 管理メイン画面 -->
   <div id="dashboardView" class="hidden">
-    <!-- 統計サマリー -->
-    <div class="stats-grid">
-      <div class="stat-card">
-        <div class="stat-label">総アカウント数</div>
-        <div class="stat-value" id="statTotalUsers">0</div>
+    
+    <!-- メインタブ切り替え -->
+    <div class="main-nav-tabs">
+      <button class="main-tab-btn active" id="tabNavUsers" onclick="switchMainTab('users')">👥 ユーザー管理</button>
+      <button class="main-tab-btn" id="tabNavNews" onclick="switchMainTab('news')">📢 お知らせ管理 (news.json)</button>
+    </div>
+
+    <!-- ────────────────────────────────────────── -->
+    <!-- タブ1: ユーザー管理 -->
+    <!-- ────────────────────────────────────────── -->
+    <div id="sectionUsers">
+      <!-- 統計サマリー -->
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-label">総アカウント数</div>
+          <div class="stat-value" id="statTotalUsers">0</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">正常アカウント (Active)</div>
+          <div class="stat-value" style="color: var(--success);" id="statActiveUsers">0</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">凍結アカウント (Banned)</div>
+          <div class="stat-value" style="color: var(--danger);" id="statBannedUsers">0</div>
+        </div>
       </div>
-      <div class="stat-card">
-        <div class="stat-label">正常アカウント (Active)</div>
-        <div class="stat-value" style="color: var(--success);" id="statActiveUsers">0</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-label">凍結アカウント (Banned)</div>
-        <div class="stat-value" style="color: var(--danger);" id="statBannedUsers">0</div>
+
+      <div class="dashboard-panel">
+        <!-- フィルタコントロール -->
+        <div class="filter-bar">
+          <div class="search-wrap">
+            <input type="text" id="userSearchInput" placeholder="ID・表示名で絞り込み..." oninput="renderUsersTable()">
+          </div>
+          <div class="status-tabs">
+            <button class="tab-btn active" data-filter="all" onclick="setStatusFilter('all')">すべて</button>
+            <button class="tab-btn" data-filter="active" onclick="setStatusFilter('active')">通常</button>
+            <button class="tab-btn" data-filter="banned" onclick="setStatusFilter('banned')">凍結のみ</button>
+          </div>
+          <button class="btn-sub" onclick="loadUsersList()" title="最新データを再取得">🔄 更新</button>
+        </div>
+
+        <!-- テーブル -->
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>ユーザーID</th>
+                <th>活動名</th>
+                <th>区分</th>
+                <th>公開設定</th>
+                <th>状態</th>
+                <th>登録日時</th>
+                <th>操作</th>
+              </tr>
+            </thead>
+            <tbody id="usersTableBody">
+              <tr>
+                <td colspan="7" class="loading-notice">データを読み込んでいます...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
 
-    <div class="dashboard-panel">
-      <!-- フィルタコントロール -->
-      <div class="filter-bar">
-        <div class="search-wrap">
-          <input type="text" id="userSearchInput" placeholder="ID・表示名で絞り込み..." oninput="renderUsersTable()">
+    <!-- ────────────────────────────────────────── -->
+    <!-- タブ2: お知らせ管理（GitHub REST API直接更新） -->
+    <!-- ────────────────────────────────────────── -->
+    <div id="sectionNews" class="hidden">
+      <div class="dashboard-panel">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+          <h3 style="font-size: 1.05rem; color: #fff;">⚙️ GitHub連携設定</h3>
+          <button class="btn-sub" onclick="saveGitHubSettings()">設定を保存</button>
         </div>
-        <div class="status-tabs">
-          <button class="tab-btn active" data-filter="all" onclick="setStatusFilter('all')">すべて</button>
-          <button class="tab-btn" data-filter="active" onclick="setStatusFilter('active')">通常</button>
-          <button class="tab-btn" data-filter="banned" onclick="setStatusFilter('banned')">凍結のみ</button>
+        <p style="font-size: 0.8rem; color: var(--text-sub); margin-bottom: 12px;">
+          リポジトリ内の <code>data/news.json</code> に直接コミットをプッシュするための設定です（ブラウザの localStorage にのみ保存されます）。
+        </p>
+        <div style="display: grid; grid-template-columns: 1fr 1fr 2fr; gap: 10px; margin-bottom: 24px;">
+          <div>
+            <label style="font-size:0.75rem; color:var(--text-sub); display:block; margin-bottom:4px;">リポジトリ所有者 (Owner)</label>
+            <input type="text" id="ghOwnerInput" class="form-control" placeholder="例: holodrea-wiki">
+          </div>
+          <div>
+            <label style="font-size:0.75rem; color:var(--text-sub); display:block; margin-bottom:4px;">リポジトリ名 (Repo)</label>
+            <input type="text" id="ghRepoInput" class="form-control" placeholder="例: Castelier">
+          </div>
+          <div>
+            <label style="font-size:0.75rem; color:var(--text-sub); display:block; margin-bottom:4px;">GitHub Personal Access Token (Fine-grained)</label>
+            <input type="password" id="ghTokenInput" class="form-control" placeholder="github_pat_...">
+          </div>
         </div>
-        <button class="btn-sub" onclick="loadUsersList()" title="最新データを再取得">🔄 更新</button>
-      </div>
 
-      <!-- テーブル -->
-      <div class="table-container">
-        <table>
-          <thead>
-            <tr>
-              <th>ユーザーID</th>
-              <th>活動名</th>
-              <th>区分</th>
-              <th>公開設定</th>
-              <th>状態</th>
-              <th>登録日時</th>
-              <th>操作</th>
-            </tr>
-          </thead>
-          <tbody id="usersTableBody">
-            <tr>
-              <td colspan="7" class="loading-notice">データを読み込んでいます...</td>
-            </tr>
-          </tbody>
-        </table>
+        <h3 style="font-size: 1.05rem; margin-bottom: 14px; color: #fff;">📝 お知らせの新規追加</h3>
+        <form class="news-form-card" onsubmit="handleCreateNewsDirect(event)">
+          <div class="form-grid">
+            <div>
+              <label style="font-size:0.75rem; color:var(--text-sub); display:block; margin-bottom:4px;">日付</label>
+              <input type="text" id="newsDateInput" class="form-control" placeholder="2026.09.05">
+            </div>
+            <div>
+              <label style="font-size:0.75rem; color:var(--text-sub); display:block; margin-bottom:4px;">バッジ種別</label>
+              <select id="newsBadgeInput" class="form-control">
+                <option value="NEW">NEW（新着）</option>
+                <option value="UPDATE">UPDATE（更新）</option>
+                <option value="INFO">INFO（告知）</option>
+                <option value="">なし</option>
+              </select>
+            </div>
+            <div style="grid-column: span 2;">
+              <label style="font-size:0.75rem; color:var(--text-sub); display:block; margin-bottom:4px;">リンク先URL（任意）</label>
+              <input type="text" id="newsUrlInput" class="form-control" placeholder="./terms.html または https://...">
+            </div>
+          </div>
+          <div style="margin-bottom: 12px;">
+            <label style="font-size:0.75rem; color:var(--text-sub); display:block; margin-bottom:4px;">お知らせ本文 *</label>
+            <input type="text" id="newsTextInput" class="form-control" placeholder="例: 配信者向け「お声がけ歓迎設定」機能を追加しました。" required>
+          </div>
+          <button type="submit" class="btn-post-news" id="btnPostNews">news.json にコミット</button>
+        </form>
+
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+          <h3 style="font-size: 1.05rem; color: #fff;">📋 現在の news.json</h3>
+          <button class="btn-sub" onclick="loadNewsFromGitHub()">🔄 再取得</button>
+        </div>
+
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th style="width: 110px;">日付</th>
+                <th style="width: 90px;">バッジ</th>
+                <th>本文</th>
+                <th>リンク</th>
+                <th style="width: 80px;">操作</th>
+              </tr>
+            </thead>
+            <tbody id="newsTableBody">
+              <tr>
+                <td colspan="5" class="loading-notice">GitHubから読み込んでいます...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
+
   </div>
 </div>
 
@@ -365,10 +535,21 @@
 
   let currentAdminUid = null;
   let allAdminUsers = [];
+  let allAdminNews = [];
+  let currentFileSha = null;
   let currentStatusFilter = 'all';
 
   window.addEventListener('DOMContentLoaded', () => {
-    // 既存セッションが存在し、uidを保持している場合は自動照合
+    // 今日の日付を初期値にセット
+    const today = new Date();
+    const y = today.getFullYear();
+    const m = String(today.getMonth() + 1).padStart(2, '0');
+    const d = String(today.getDate()).padStart(2, '0');
+    const dateInput = document.getElementById('newsDateInput');
+    if (dateInput) dateInput.value = `${y}.${m}.${d}`;
+
+    loadGitHubSettings();
+
     const sessionStr = sessionStorage.getItem('castelier_session');
     if (sessionStr) {
       try {
@@ -379,6 +560,18 @@
       } catch (e) {}
     }
   });
+
+  function switchMainTab(tab) {
+    const isUsers = tab === 'users';
+    document.getElementById('tabNavUsers').classList.toggle('active', isUsers);
+    document.getElementById('tabNavNews').classList.toggle('active', !isUsers);
+    document.getElementById('sectionUsers').classList.toggle('hidden', !isUsers);
+    document.getElementById('sectionNews').classList.toggle('hidden', isUsers);
+
+    if (!isUsers && allAdminNews.length === 0) {
+      loadNewsFromGitHub();
+    }
+  }
 
   async function handleGoogleAdminLogin() {
     const errEl = document.getElementById('loginError');
@@ -434,15 +627,7 @@
         errEl.textContent = data.message || '管理者権限がありません。';
         errEl.style.display = 'block';
         btn.disabled = false;
-        btn.innerHTML = `
-          <svg width="18" height="18" viewBox="0 0 48 48">
-            <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
-            <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
-            <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
-            <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
-          </svg>
-          Googleアカウントで認証
-        `;
+        btn.textContent = 'Googleアカウントで認証';
       }
     } catch (err) {
       errEl.textContent = '通信エラー: ' + err.message;
@@ -460,17 +645,12 @@
 
     const btn = document.getElementById('btnLoginGoogle');
     btn.disabled = false;
-    btn.innerHTML = `
-      <svg width="18" height="18" viewBox="0 0 48 48">
-        <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
-        <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
-        <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
-        <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
-      </svg>
-      Googleアカウントで認証
-    `;
+    btn.textContent = 'Googleアカウントで認証';
   }
 
+  // ─────────────────────────────────────────────
+  // ユーザー管理ロジック
+  // ─────────────────────────────────────────────
   async function loadUsersList() {
     if (!currentAdminUid) return;
     const tbody = document.getElementById('usersTableBody');
@@ -510,7 +690,7 @@
 
   function setStatusFilter(status) {
     currentStatusFilter = status;
-    document.querySelectorAll('.tab-btn').forEach(btn => {
+    document.querySelectorAll('.status-tabs .tab-btn').forEach(btn => {
       btn.classList.toggle('active', btn.dataset.filter === status);
     });
     renderUsersTable();
@@ -536,7 +716,6 @@
       return;
     }
 
-    // セッションがある場合は自身のuserIdを取得して自操作BANを抑止
     const sessionStr = sessionStorage.getItem('castelier_session');
     const myUserId = sessionStr ? JSON.parse(sessionStr).userId : null;
 
@@ -577,9 +756,7 @@
 
   async function handleToggleBan(targetUserId, nextStatus) {
     const actionName = nextStatus === 'banned' ? 'アカウントを凍結（BAN）' : '凍結を解除';
-    if (!confirm(`ユーザー「${targetUserId}」の${actionName}しますか？`)) {
-      return;
-    }
+    if (!confirm(`ユーザー「${targetUserId}」の${actionName}しますか？`)) return;
 
     try {
       const res = await fetch(GAS_API_URL, {
@@ -608,6 +785,168 @@
       }
     } catch (e) {
       alert('通信エラーが発生しました: ' + e.message);
+    }
+  }
+
+  // ─────────────────────────────────────────────
+  // GitHub REST API による news.json 直接操作ロジック
+  // ─────────────────────────────────────────────
+  function loadGitHubSettings() {
+    document.getElementById('ghOwnerInput').value = localStorage.getItem('castelier_gh_owner') || '';
+    document.getElementById('ghRepoInput').value = localStorage.getItem('castelier_gh_repo') || '';
+    document.getElementById('ghTokenInput').value = localStorage.getItem('castelier_gh_token') || '';
+  }
+
+  function saveGitHubSettings() {
+    localStorage.setItem('castelier_gh_owner', document.getElementById('ghOwnerInput').value.trim());
+    localStorage.setItem('castelier_gh_repo', document.getElementById('ghRepoInput').value.trim());
+    localStorage.setItem('castelier_gh_token', document.getElementById('ghTokenInput').value.trim());
+    alert('GitHub連携設定をローカルに保存しました。');
+    loadNewsFromGitHub();
+  }
+
+  function getGitHubConfig() {
+    const owner = localStorage.getItem('castelier_gh_owner');
+    const repo = localStorage.getItem('castelier_gh_repo');
+    const token = localStorage.getItem('castelier_gh_token');
+    if (!owner || !repo || !token) {
+      alert('GitHub連携設定（Owner, Repo, Token）を入力・保存してください。');
+      return null;
+    }
+    return { owner, repo, token };
+  }
+
+  async function loadNewsFromGitHub() {
+    const conf = getGitHubConfig();
+    if (!conf) return;
+
+    const tbody = document.getElementById('newsTableBody');
+    tbody.innerHTML = '<tr><td colspan="5" class="loading-notice">GitHubから取得中...</td></tr>';
+
+    try {
+      const res = await fetch(`https://api.github.com/repos/${conf.owner}/${conf.repo}/contents/data/news.json`, {
+        headers: {
+          'Authorization': `Bearer ${conf.token}`,
+          'Accept': 'application/vnd.github.v3+json'
+        }
+      });
+
+      if (!res.ok) throw new Error('news.json の取得に失敗しました: ' + res.statusText);
+
+      const data = await res.json();
+      currentFileSha = data.sha;
+
+      // Base64デコード（日本語UTF-8対応）
+      const decodedContent = decodeURIComponent(escape(atob(data.content.replace(/\s/g, ''))));
+      allAdminNews = JSON.parse(decodedContent);
+
+      renderNewsTableDirect();
+    } catch (err) {
+      tbody.innerHTML = `<tr><td colspan="5" class="loading-notice" style="color:var(--danger);">${escapeHtml(err.message)}</td></tr>`;
+    }
+  }
+
+  function renderNewsTableDirect() {
+    const tbody = document.getElementById('newsTableBody');
+    if (!Array.isArray(allAdminNews) || allAdminNews.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="5" class="loading-notice">登録されているお知らせはありません。</td></tr>';
+      return;
+    }
+
+    tbody.innerHTML = allAdminNews.map((item, idx) => `
+      <tr>
+        <td style="font-feature-settings: 'tnum'; white-space: nowrap;">${escapeHtml(item.date || '')}</td>
+        <td>
+          ${item.badge ? `<span style="font-size:0.7rem; font-weight:700; padding:2px 6px; border-radius:4px; background:#4f46e5; color:#fff;">${escapeHtml(item.badge)}</span>` : '<span style="color:var(--text-sub);">-</span>'}
+        </td>
+        <td>${escapeHtml(item.text || '')}</td>
+        <td style="font-size:0.75rem; max-width:200px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">
+          ${item.url ? `<a href="${escapeHtml(item.url)}" target="_blank" rel="noopener" style="color:#93c5fd;">${escapeHtml(item.url)}</a>` : '<span style="color:var(--text-sub);">-</span>'}
+        </td>
+        <td>
+          <button class="btn-delete-news" onclick="handleDeleteNewsDirect(${idx})">削除</button>
+        </td>
+      </tr>
+    `).join('');
+  }
+
+  async function commitNewsJson(newNewsArray, commitMessage) {
+    const conf = getGitHubConfig();
+    if (!conf || !currentFileSha) return false;
+
+    const jsonString = JSON.stringify(newNewsArray, null, 2);
+    // Base64エンコード（日本語UTF-8対応）
+    const encodedContent = btoa(unescape(encodeURIComponent(jsonString)));
+
+    const res = await fetch(`https://api.github.com/repos/${conf.owner}/${conf.repo}/contents/data/news.json`, {
+      method: 'PUT',
+      headers: {
+        'Authorization': `Bearer ${conf.token}`,
+        'Accept': 'application/vnd.github.v3+json',
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        message: commitMessage,
+        content: encodedContent,
+        sha: currentFileSha
+      })
+    });
+
+    if (!res.ok) {
+      const err = await res.json();
+      throw new Error(err.message || 'コミットに失敗しました');
+    }
+
+    const resData = await res.json();
+    currentFileSha = resData.content.sha;
+    return true;
+  }
+
+  async function handleCreateNewsDirect(e) {
+    e.preventDefault();
+    const btn = document.getElementById('btnPostNews');
+    const textVal = document.getElementById('newsTextInput').value.trim();
+    if (!textVal) return;
+
+    btn.disabled = true;
+    btn.textContent = 'コミット中...';
+
+    const newItem = {
+      date: document.getElementById('newsDateInput').value.trim(),
+      badge: document.getElementById('newsBadgeInput').value.trim(),
+      text: textVal,
+      url: document.getElementById('newsUrlInput').value.trim()
+    };
+
+    const updatedNews = [newItem, ...allAdminNews];
+
+    try {
+      await commitNewsJson(updatedNews, `feat: add news (${newItem.date})`);
+      allAdminNews = updatedNews;
+      renderNewsTableDirect();
+      document.getElementById('newsTextInput').value = '';
+      document.getElementById('newsUrlInput').value = '';
+      alert('GitHubの news.json にコミット・公開しました！');
+    } catch (err) {
+      alert('エラー: ' + err.message);
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'news.json にコミット';
+    }
+  }
+
+  async function handleDeleteNewsDirect(index) {
+    if (!confirm('このお知らせを削除してGitHubにコミットしますか？')) return;
+
+    const updatedNews = allAdminNews.filter((_, i) => i !== index);
+
+    try {
+      await commitNewsJson(updatedNews, `chore: remove news index ${index}`);
+      allAdminNews = updatedNews;
+      renderNewsTableDirect();
+      alert('news.json を更新しました。');
+    } catch (err) {
+      alert('エラー: ' + err.message);
     }
   }
 
