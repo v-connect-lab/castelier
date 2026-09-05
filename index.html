@@ -9,6 +9,11 @@
   
   <title>Castelier | ログイン・新規登録</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/js-yaml/4.1.0/js-yaml.min.js"></script>
+
+  <!-- Firebase App & Auth SDK (v10 Compat) -->
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+
   <style>
     :root {
       --primary: #4f46e5;
@@ -57,6 +62,33 @@
       text-align: center;
     }
     .tab-btn.active { color: var(--primary); font-weight: bold; border-bottom-color: var(--primary); }
+
+    /* Googleログインボタン */
+    .btn-google-auth {
+      width: 100%;
+      padding: 12px 16px;
+      background-color: #ffffff;
+      color: #374151;
+      border: 1px solid #d1d5db;
+      border-radius: var(--radius);
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      transition: background-color 0.2s, box-shadow 0.2s;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+    }
+    .btn-google-auth:hover {
+      background-color: #f9fafb;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.08);
+    }
+    .btn-google-auth svg {
+      width: 20px;
+      height: 20px;
+    }
 
     .form-group { margin-bottom: 16px; }
     label {
@@ -107,7 +139,7 @@
       pointer-events: none;
     }
     
-    input[type="text"], input[type="password"], textarea, select {
+    input[type="text"], textarea, select {
       width: 100%;
       padding: 10px;
       border: 1px solid var(--border);
@@ -142,16 +174,6 @@
       gap: 6px;
       cursor: pointer;
       margin-bottom: 0;
-    }
-
-    .toggle-password-wrap {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      margin-top: 6px;
-      font-size: 0.8rem;
-      color: var(--text-sub);
-      cursor: pointer;
     }
 
     button.btn-primary {
@@ -223,263 +245,296 @@
       margin-bottom: 0;
       font-weight: normal;
     }
+
+    /* 認証完了バッジ */
+    .auth-badge {
+      background: #e0e7ff;
+      color: #3730a3;
+      border: 1px solid #c7d2fe;
+      padding: 10px 14px;
+      border-radius: var(--radius);
+      font-size: 0.85rem;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
   </style>
 </head>
 <body>
 
 <div class="container">
   <h1>Castelier（キャストリエ）</h1>
-  <p class="lead">アカウント作成またはログインしてプラットフォームをご利用ください。</p>
+  <p class="lead">Googleアカウントで安全にログイン・登録を行えます。</p>
 
   <div class="tabs">
     <button type="button" class="tab-btn active" onclick="switchAuthTab('login')">ログイン</button>
     <button type="button" class="tab-btn" onclick="switchAuthTab('register')">新規登録</button>
   </div>
 
-  <!-- ログインフォーム -->
-  <form id="loginForm" onsubmit="handleLogin(event)">
-    <div class="form-group">
-      <label>ユーザーID <span class="info-icon" id="tip-login-userId" data-tooltip="登録時に発行された固有IDです">ℹ</span></label>
-      <input type="text" id="loginUserId" placeholder="usr_xxxxxxxx" required>
-    </div>
-    <div class="form-group">
-      <label>パスワード <span class="info-icon" id="tip-login-password" data-tooltip="登録時のパスワードです">ℹ</span></label>
-      <input type="password" id="loginPassword" placeholder="パスワードを入力" required>
-      <label class="toggle-password-wrap">
-        <input type="checkbox" onchange="togglePasswordVisibility(['loginPassword'], this.checked)">
-        パスワードを表示
-      </label>
-    </div>
-    <button type="submit" class="btn-primary" id="loginBtn">ログイン</button>
-  </form>
+  <!-- ログイン画面 -->
+  <div id="loginSection">
+    <button type="button" class="btn-google-auth" onclick="handleGoogleAuth('login')">
+      <svg viewBox="0 0 24 24">
+        <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+        <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+        <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+        <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+      </svg>
+      Googleでログイン
+    </button>
+  </div>
 
-  <!-- 新規登録フォーム -->
-  <form id="registerForm" class="hidden" onsubmit="handleRegister(event)">
-    <div class="form-group">
-      <label>ユーザー区分 * <span class="info-icon" id="tip-reg-role">ℹ</span></label>
-      <select id="regRole" required onchange="handleRoleChange()">
-        <option value="creator">クリエイター</option>
-        <option value="streamer">配信者</option>
-      </select>
-    </div>
-
-    <div class="form-group">
-      <label>活動名（表示名） * <span class="info-icon" id="tip-reg-displayName">ℹ</span></label>
-      <input type="text" id="regDisplayName" placeholder="ニックネーム" required>
+  <!-- 新規登録画面 -->
+  <div id="registerSection" class="hidden">
+    <!-- Google認証トリガー -->
+    <div id="regAuthGate">
+      <button type="button" class="btn-google-auth" onclick="handleGoogleAuth('register')">
+        <svg viewBox="0 0 24 24">
+          <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+          <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+          <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+          <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+        </svg>
+        Googleアカウントで登録を開始
+      </button>
     </div>
 
-    <div class="grid-2">
-      <div class="form-group">
-        <label>パスワード * <span class="info-icon" id="tip-reg-password">ℹ</span></label>
-        <input type="password" id="regPassword" placeholder="英数字パスワード" required>
+    <!-- 認証完了後に表示されるプロフィール設定フォーム -->
+    <form id="registerForm" class="hidden" onsubmit="handleRegister(event)">
+      <div class="auth-badge">
+        <span>Google認証完了: <strong id="authEmailLabel"></strong></span>
+        <span style="font-size: 0.75rem; color: #4338ca;">連携済み</span>
       </div>
-      <div class="form-group">
-        <label>パスワード（確認用） *</label>
-        <input type="password" id="regPasswordConfirm" placeholder="もう一度入力" required>
-      </div>
-    </div>
-    <div style="position: absolute; left: -9999px; top: -9999px; opacity: 0; pointer-events: none;" aria-hidden="true" tabindex="-1">
-      <label for="regWebsiteUrl">Website Confirm</label>
-      <input type="text" id="regWebsiteUrl" name="regWebsiteUrl" autocomplete="off">
-    </div>
-    <label class="toggle-password-wrap" style="margin-top:-8px; margin-bottom:16px;">
-      <input type="checkbox" onchange="togglePasswordVisibility(['regPassword', 'regPasswordConfirm'], this.checked)">
-      パスワードを表示
-    </label>
 
-    <!-- 配信者のみ表示する設定 -->
-    <div class="grid-2 hidden" id="regStreamerSettingsGroup">
       <div class="form-group">
-        <label>公開設定 <span class="info-icon" id="tip-reg-isPublic">ℹ</span></label>
-        <select id="regIsPublic" onchange="handlePublicChange('reg')">
-          <option value="true">公開</option>
-          <option value="false">非公開</option>
+        <label>ユーザー区分 * <span class="info-icon" id="tip-reg-role">ℹ</span></label>
+        <select id="regRole" required onchange="handleRoleChange()">
+          <option value="creator">クリエイター</option>
+          <option value="streamer">配信者</option>
         </select>
       </div>
+
       <div class="form-group">
-        <label id="lbl-regIsContactWelcome">お声がけ歓迎設定 <span class="info-icon" id="tip-reg-isContactWelcome">ℹ</span></label>
-        <select id="regIsContactWelcome">
-          <option value="true">声掛け歓迎</option>
-          <option value="false">閲覧のみ</option>
-        </select>
+        <label>活動名（表示名） * <span class="info-icon" id="tip-reg-displayName">ℹ</span></label>
+        <input type="text" id="regDisplayName" placeholder="ニックネーム" required>
       </div>
-    </div>
 
-    <div class="form-group">
-      <label>メインカテゴリ（複数選択可・最低1つ） * <span class="info-icon" id="tip-reg-category">ℹ</span></label>
-      <div id="regCategoryContainer" class="checkbox-group"></div>
-    </div>
-
-    <div class="form-group">
-      <label>属性・作風タグ（複数選択可・最低1つ） * <span class="info-icon" id="tip-reg-tags">ℹ</span></label>
-      <div id="regTagsContainer" class="checkbox-group"></div>
-    </div>
-
-    <div class="form-group">
-      <label>フリータグ（カンマ区切り） <span class="info-icon" id="tip-reg-freeTags">ℹ</span></label>
-      <input type="text" id="regFreeTags" placeholder="例: 青年声, SF好き, 短納期相談可">
-    </div>
-
-    <div class="form-group" id="regPriceGuideGroup">
-      <label>料金目安（クリエイター） * <span class="info-icon" id="tip-reg-priceGuide">ℹ</span></label>
-      <select id="regPriceGuide"></select>
-    </div>
-
-    <hr class="section-divider">
-
-    <div class="form-group">
-      <label>アイコン画像URL <span class="info-icon" id="tip-reg-avatarUrl">ℹ</span></label>
-      <input type="text" id="regAvatarUrl" placeholder="https://...（Googleドライブリンク可）" oninput="updateImagePreview('regAvatarUrl', 'avatarPreview')">
-      <div id="avatarPreview" class="img-preview-box">
-        <img src="" alt="アイコンプレビュー">
-        <span>アイコン表示プレビュー</span>
+      <!-- 配信者のみ表示する設定 -->
+      <div class="grid-2 hidden" id="regStreamerSettingsGroup">
+        <div class="form-group">
+          <label>公開設定 <span class="info-icon" id="tip-reg-isPublic">ℹ</span></label>
+          <select id="regIsPublic" onchange="handlePublicChange('reg')">
+            <option value="true">公開</option>
+            <option value="false">非公開</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label id="lbl-regIsContactWelcome">お声がけ歓迎設定 <span class="info-icon" id="tip-reg-isContactWelcome">ℹ</span></label>
+          <select id="regIsContactWelcome">
+            <option value="true">声掛け歓迎</option>
+            <option value="false">閲覧のみ</option>
+          </select>
+        </div>
       </div>
-    </div>
 
-    <div class="form-group">
-      <label>自己紹介・アピール文 <span class="info-icon" id="tip-reg-description">ℹ</span></label>
-      <textarea id="regDescription" placeholder="活動内容や依頼時の希望など">よろしくお願いします。</textarea>
-    </div>
+      <div class="form-group">
+        <label>メインカテゴリ（複数選択可・最低1つ） * <span class="info-icon" id="tip-reg-category">ℹ</span></label>
+        <div id="regCategoryContainer" class="checkbox-group"></div>
+      </div>
 
-    <div class="form-group">
-      <label>連絡先窓口 <span class="info-icon" id="tip-reg-contactInfo">ℹ</span></label>
-      <input type="text" id="regContactInfo" placeholder="例: XのDM / contact@example.com">
-    </div>
+      <div class="form-group">
+        <label>属性・作風タグ（複数選択可・最低1つ） * <span class="info-icon" id="tip-reg-tags">ℹ</span></label>
+        <div id="regTagsContainer" class="checkbox-group"></div>
+      </div>
 
-    <div class="form-group">
-      <label>X (Twitter) URL</label>
-      <input type="text" id="regXUrl" placeholder="https://x.com/ユーザー名">
-    </div>
+      <div class="form-group">
+        <label>フリータグ（カンマ区切り） <span class="info-icon" id="tip-reg-freeTags">ℹ</span></label>
+        <input type="text" id="regFreeTags" placeholder="例: 青年声, SF好き, 短納期相談可">
+      </div>
 
-    <div class="form-group">
-      <label>ポートフォリオ・個人HP <span class="info-icon" id="tip-reg-portfolioUrl">ℹ</span></label>
-      <input type="text" id="regPortfolioUrl" placeholder="https://...">
-    </div>
+      <div class="form-group" id="regPriceGuideGroup">
+        <label>料金目安（クリエイター） * <span class="info-icon" id="tip-reg-priceGuide">ℹ</span></label>
+        <select id="regPriceGuide"></select>
+      </div>
 
-    <!-- 代表作品URL（最大4枠） -->
-    <div class="form-group">
-      <label>代表作品（最大4枠） <span class="info-icon" id="tip-reg-works" data-tooltip="画像、音楽、動画、Webサイトの作品を最大4枠まで登録できます。">ℹ</span></label>
+      <hr class="section-divider">
+
+      <div class="form-group">
+        <label>アイコン画像URL <span class="info-icon" id="tip-reg-avatarUrl">ℹ</span></label>
+        <input type="text" id="regAvatarUrl" placeholder="https://...（Googleドライブリンク可）" oninput="updateImagePreview('regAvatarUrl', 'avatarPreview')">
+        <div id="avatarPreview" class="img-preview-box">
+          <img src="" alt="アイコンプレビュー">
+          <span>アイコン表示プレビュー</span>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>自己紹介・アピール文 <span class="info-icon" id="tip-reg-description">ℹ</span></label>
+        <textarea id="regDescription" placeholder="活動内容や希望など">よろしくお願いします。</textarea>
+      </div>
+
+      <div class="form-group">
+        <label>連絡先窓口 <span class="info-icon" id="tip-reg-contactInfo">ℹ</span></label>
+        <input type="text" id="regContactInfo" placeholder="例: XのDM / contact@example.com">
+      </div>
+
+      <div class="form-group">
+        <label>X (Twitter) URL</label>
+        <input type="text" id="regXUrl" placeholder="https://x.com/ユーザー名">
+      </div>
+
+      <div class="form-group">
+        <label>ポートフォリオ・個人HP <span class="info-icon" id="tip-reg-portfolioUrl">ℹ</span></label>
+        <input type="text" id="regPortfolioUrl" placeholder="https://...">
+      </div>
+
+      <!-- 代表作品URL（最大4枠） -->
+      <div class="form-group">
+        <label>代表作品（最大4枠） <span class="info-icon" id="tip-reg-works" data-tooltip="画像、音楽、動画、Webサイトの作品を最大4枠まで登録できます。">ℹ</span></label>
+        <p class="sublead" style="margin-bottom: 20px; line-height: 1.6;">
+          Googleドライブの共有URLにも対応しています。<br>
+          <span style="color: #ef4444; font-size: 0.8rem; font-weight: 600; display: inline-block; margin-top: 4px;">
+            ※動画・音楽はYouTubeなどの配信プラットフォームのURLを推奨します。
+          </span>
+        </p>
+        <div id="regWorksContainer">
+          <!-- 枠 1 -->
+          <div class="reg-work-block" style="border: 1px solid var(--border); border-radius: var(--radius); padding: 10px; margin-bottom: 8px; background: #fafafa;">
+            <div class="grid-2" style="grid-template-columns: 140px 1fr; margin-bottom: 6px;">
+              <select class="reg-work-type" onchange="toggleWorkImageInput(this)">
+                <option value="image">画像</option>
+                <option value="music">音楽・音声</option>
+                <option value="video">動画</option>
+                <option value="web">Webサイト</option>
+              </select>
+              <input type="text" class="reg-work-url" placeholder="作品URL 1（Googleドライブ可）">
+            </div>
+            <div class="reg-work-image-wrap hidden">
+              <input type="text" class="reg-work-image" placeholder="サムネイル・ジャケット画像URL（任意）">
+            </div>
+          </div>
+
+          <!-- 枠 2 -->
+          <div class="reg-work-block" style="border: 1px solid var(--border); border-radius: var(--radius); padding: 10px; margin-bottom: 8px; background: #fafafa;">
+            <div class="grid-2" style="grid-template-columns: 140px 1fr; margin-bottom: 6px;">
+              <select class="reg-work-type" onchange="toggleWorkImageInput(this)">
+                <option value="image">画像</option>
+                <option value="music">音楽・音声</option>
+                <option value="video">動画</option>
+                <option value="web">Webサイト</option>
+              </select>
+              <input type="text" class="reg-work-url" placeholder="作品URL 2">
+            </div>
+            <div class="reg-work-image-wrap hidden">
+              <input type="text" class="reg-work-image" placeholder="サムネイル・ジャケット画像URL（任意）">
+            </div>
+          </div>
+
+          <!-- 枠 3 -->
+          <div class="reg-work-block" style="border: 1px solid var(--border); border-radius: var(--radius); padding: 10px; margin-bottom: 8px; background: #fafafa;">
+            <div class="grid-2" style="grid-template-columns: 140px 1fr; margin-bottom: 6px;">
+              <select class="reg-work-type" onchange="toggleWorkImageInput(this)">
+                <option value="image">画像</option>
+                <option value="music">音楽・音声</option>
+                <option value="video">動画</option>
+                <option value="web">Webサイト</option>
+              </select>
+              <input type="text" class="reg-work-url" placeholder="作品URL 3">
+            </div>
+            <div class="reg-work-image-wrap hidden">
+              <input type="text" class="reg-work-image" placeholder="サムネイル・ジャケット画像URL（任意）">
+            </div>
+          </div>
+
+          <!-- 枠 4 -->
+          <div class="reg-work-block" style="border: 1px solid var(--border); border-radius: var(--radius); padding: 10px; margin-bottom: 8px; background: #fafafa;">
+            <div class="grid-2" style="grid-template-columns: 140px 1fr; margin-bottom: 6px;">
+              <select class="reg-work-type" onchange="toggleWorkImageInput(this)">
+                <option value="image">画像</option>
+                <option value="music">音楽・音声</option>
+                <option value="video">動画</option>
+                <option value="web">Webサイト</option>
+              </select>
+              <input type="text" class="reg-work-url" placeholder="作品URL 4">
+            </div>
+            <div class="reg-work-image-wrap hidden">
+              <input type="text" class="reg-work-image" placeholder="サムネイル・ジャケット画像URL（任意）">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 活動プラットフォーム（最大3枠） -->
+      <div class="form-group">
+        <label>活動プラットフォーム（最大3枠） <span class="info-icon" id="tip-reg-platforms" data-tooltip="YouTube、Twitch、BOOTHなどのリンク先と表示名を入力できます。">ℹ</span></label>
+        <div id="regPlatformsContainer">
+          <div class="grid-2 reg-platform-row" style="grid-template-columns: 140px 1fr; margin-bottom: 6px;">
+            <input type="text" class="reg-platform-label" placeholder="例: YouTube">
+            <input type="text" class="reg-platform-url" placeholder="https://...">
+          </div>
+          <div class="grid-2 reg-platform-row" style="grid-template-columns: 140px 1fr; margin-bottom: 6px;">
+            <input type="text" class="reg-platform-label" placeholder="例: Twitch">
+            <input type="text" class="reg-platform-url" placeholder="https://...">
+          </div>
+          <div class="grid-2 reg-platform-row" style="grid-template-columns: 140px 1fr; margin-bottom: 6px;">
+            <input type="text" class="reg-platform-label" placeholder="例: BOOTH">
+            <input type="text" class="reg-platform-url" placeholder="https://...">
+          </div>
+        </div>
+      </div>
+
+      <div class="terms-box">
+        <label style="cursor: pointer;">
+          <input type="checkbox" id="regAgreeTerms" disabled required>
+          <span>
+            <a href="./terms.html" target="_blank" id="termsLink" style="color: var(--primary); text-decoration: underline; font-weight: 600;">無断転載・自作発言の禁止、健全な交流ガイドライン</a>
+            を確認し、同意する *
+          </span>
+        </label>
+        <div id="termsNotice" style="font-size: 0.75rem; color: #ef4444; margin-top: 6px; padding-left: 24px;">
+          ※リンク先を開いて規約内容を確認するとチェック可能になります。
+        </div>
+      </div>
+
       <p class="sublead" style="margin-bottom: 20px; line-height: 1.6;">
-        Googleドライブの共有URLにも対応しています。<br>
         <span style="color: #ef4444; font-size: 0.8rem; font-weight: 600; display: inline-block; margin-top: 4px;">
-          ※動画・音楽はYouTubeなどの配信プラットフォームのURLを推奨します。（Googleドライブも可能ですが表示が崩れる場合があります）
+          ⚠️ 登録から3日以内に「アイコン画像」と「自己紹介文（初期値からの変更）」が設定されない場合、一覧への掲載が一時停止されます（再設定で復帰します）。
         </span>
       </p>
-      <div id="regWorksContainer">
-        <!-- 枠 1 -->
-        <div class="reg-work-block" style="border: 1px solid var(--border); border-radius: var(--radius); padding: 10px; margin-bottom: 8px; background: #fafafa;">
-          <div class="grid-2" style="grid-template-columns: 140px 1fr; margin-bottom: 6px;">
-            <select class="reg-work-type" onchange="toggleWorkImageInput(this)">
-              <option value="image">画像</option>
-              <option value="music">音楽・音声</option>
-              <option value="video">動画</option>
-              <option value="web">Webサイト</option>
-            </select>
-            <input type="text" class="reg-work-url" placeholder="作品URL 1（Googleドライブ可）">
-          </div>
-          <div class="reg-work-image-wrap hidden">
-            <input type="text" class="reg-work-image" placeholder="サムネイル・ジャケット画像URL（任意・Googleドライブ可）">
-          </div>
-        </div>
 
-        <!-- 枠 2 -->
-        <div class="reg-work-block" style="border: 1px solid var(--border); border-radius: var(--radius); padding: 10px; margin-bottom: 8px; background: #fafafa;">
-          <div class="grid-2" style="grid-template-columns: 140px 1fr; margin-bottom: 6px;">
-            <select class="reg-work-type" onchange="toggleWorkImageInput(this)">
-              <option value="image">画像</option>
-              <option value="music">音楽・音声</option>
-              <option value="video">動画</option>
-              <option value="web">Webサイト</option>
-            </select>
-            <input type="text" class="reg-work-url" placeholder="作品URL 2">
-          </div>
-          <div class="reg-work-image-wrap hidden">
-            <input type="text" class="reg-work-image" placeholder="サムネイル・ジャケット画像URL（任意・Googleドライブ可）">
-          </div>
-        </div>
-
-        <!-- 枠 3 -->
-        <div class="reg-work-block" style="border: 1px solid var(--border); border-radius: var(--radius); padding: 10px; margin-bottom: 8px; background: #fafafa;">
-          <div class="grid-2" style="grid-template-columns: 140px 1fr; margin-bottom: 6px;">
-            <select class="reg-work-type" onchange="toggleWorkImageInput(this)">
-              <option value="image">画像</option>
-              <option value="music">音楽・音声</option>
-              <option value="video">動画</option>
-              <option value="web">Webサイト</option>
-            </select>
-            <input type="text" class="reg-work-url" placeholder="作品URL 3">
-          </div>
-          <div class="reg-work-image-wrap hidden">
-            <input type="text" class="reg-work-image" placeholder="サムネイル・ジャケット画像URL（任意・Googleドライブ可）">
-          </div>
-        </div>
-
-        <!-- 枠 4 -->
-        <div class="reg-work-block" style="border: 1px solid var(--border); border-radius: var(--radius); padding: 10px; margin-bottom: 8px; background: #fafafa;">
-          <div class="grid-2" style="grid-template-columns: 140px 1fr; margin-bottom: 6px;">
-            <select class="reg-work-type" onchange="toggleWorkImageInput(this)">
-              <option value="image">画像</option>
-              <option value="music">音楽・音声</option>
-              <option value="video">動画</option>
-              <option value="web">Webサイト</option>
-            </select>
-            <input type="text" class="reg-work-url" placeholder="作品URL 4">
-          </div>
-          <div class="reg-work-image-wrap hidden">
-            <input type="text" class="reg-work-image" placeholder="サムネイル・ジャケット画像URL（任意・Googleドライブ可）">
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- 活動プラットフォーム（最大3枠） -->
-    <div class="form-group">
-      <label>活動プラットフォーム（最大3枠） <span class="info-icon" id="tip-reg-platforms" data-tooltip="YouTube、Twitch、BOOTHなどのリンク先と表示名を入力できます。">ℹ</span></label>
-      <div id="regPlatformsContainer">
-        <div class="grid-2 reg-platform-row" style="grid-template-columns: 140px 1fr; margin-bottom: 6px;">
-          <input type="text" class="reg-platform-label" placeholder="例: YouTube">
-          <input type="text" class="reg-platform-url" placeholder="https://...">
-        </div>
-        <div class="grid-2 reg-platform-row" style="grid-template-columns: 140px 1fr; margin-bottom: 6px;">
-          <input type="text" class="reg-platform-label" placeholder="例: Twitch">
-          <input type="text" class="reg-platform-url" placeholder="https://...">
-        </div>
-        <div class="grid-2 reg-platform-row" style="grid-template-columns: 140px 1fr; margin-bottom: 6px;">
-          <input type="text" class="reg-platform-label" placeholder="例: BOOTH">
-          <input type="text" class="reg-platform-url" placeholder="https://...">
-        </div>
-      </div>
-    </div>
-
-    <div class="terms-box">
-      <label style="cursor: pointer;">
-        <input type="checkbox" id="regAgreeTerms" disabled required>
-        <span>
-          <a href="./terms.html" target="_blank" id="termsLink" style="color: var(--primary); text-decoration: underline; font-weight: 600;">無断転載・自作発言の禁止、健全な交流ガイドライン</a>
-          を確認し、同意する *
-        </span>
-      </label>
-      <div id="termsNotice" style="font-size: 0.75rem; color: #ef4444; margin-top: 6px; padding-left: 24px;">
-        ※リンク先を開いて規約内容を確認するとチェック可能になります。
-      </div>
-    </div>
-
-    <p class="sublead" style="margin-bottom: 20px; line-height: 1.6;">
-      <span style="color: #ef4444; font-size: 0.8rem; font-weight: 600; display: inline-block; margin-top: 4px;">
-        ⚠️ 登録から3日以内に「アイコン画像」と「自己紹介文（初期値からの変更）」が設定されない場合、一覧への掲載が一時停止されます（再設定で復帰します）。
-      </span>
-    </p>
-
-    <button type="submit" class="btn-primary" id="regBtn">登録してTOPへ進む</button>
-  </form>
+      <button type="submit" class="btn-primary" id="regBtn">登録してTOPへ進む</button>
+    </form>
+  </div>
 
   <div id="statusMsg" class="status-box"></div>
 </div>
 
 <script>
+  // ─────────────────────────────────────────────
+  // ★ Firebase初期化設定
+  // ※ご自身のFirebaseコンソールの設定値に置き換えてください
+  // ─────────────────────────────────────────────
+  const firebaseConfig = {
+    apiKey: "YOUR_API_KEY",
+    authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+    projectId: "YOUR_PROJECT_ID",
+    storageBucket: "YOUR_PROJECT_ID.appspot.com",
+    messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+    appId: "YOUR_APP_ID"
+  };
+
+  if (!firebase.apps.length) {
+    firebase.initializeApp(firebaseConfig);
+  }
+  const auth = firebase.auth();
+  const googleProvider = new firebase.auth.GoogleAuthProvider();
+
+  // GASエンドポイント
   const GAS_API_URL = "https://script.google.com/macros/s/AKfycbyk1gWVq5JmKoz73D6zGB_k0WmpWgs4BGsH00J7WyewnW-iWAFzM6ORGOC4aR_ePRry4Q/exec";
 
   let schemaData = null;
+  let authenticatedUser = null; // Google認証済みユーザー情報（uid, email等）
 
   window.addEventListener('DOMContentLoaded', async () => {
     try {
@@ -580,13 +635,6 @@
     }
   }
 
-  function togglePasswordVisibility(fieldIds, isVisible) {
-    fieldIds.forEach(id => {
-      const el = document.getElementById(id);
-      if (el) el.type = isVisible ? 'text' : 'password';
-    });
-  }
-
   function getCheckedValues(name) {
     return Array.from(document.querySelectorAll(`input[name="${name}"]:checked`)).map(cb => cb.value);
   }
@@ -595,8 +643,8 @@
     const isLogin = type === 'login';
     document.querySelectorAll('.tab-btn')[0].classList.toggle('active', isLogin);
     document.querySelectorAll('.tab-btn')[1].classList.toggle('active', !isLogin);
-    document.getElementById('loginForm').classList.toggle('hidden', !isLogin);
-    document.getElementById('registerForm').classList.toggle('hidden', isLogin);
+    document.getElementById('loginSection').classList.toggle('hidden', !isLogin);
+    document.getElementById('registerSection').classList.toggle('hidden', isLogin);
     hideStatus();
   }
 
@@ -611,15 +659,68 @@
     document.getElementById('statusMsg').style.display = 'none';
   }
 
-  // 新規登録処理（スプレッドシートの各列名に合わせてフラットに送信）
+  // ─────────────────────────────────────────────
+  // Google認証ハンドラー（ログイン・新規登録共用）
+  // ─────────────────────────────────────────────
+  async function handleGoogleAuth(mode) {
+    hideStatus();
+    try {
+      const result = await auth.signInWithPopup(googleProvider);
+      const user = result.user;
+      authenticatedUser = user;
+
+      // GASへログイン照合リクエスト
+      showStatus('認証中...', true);
+      const res = await fetch(GAS_API_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain' },
+        body: JSON.stringify({
+          action: 'login',
+          data: { uid: user.uid }
+        }),
+        redirect: 'follow'
+      });
+      const data = await res.json();
+
+      if (data.success) {
+        // すでに登録済み ➔ セッションを保持してTOPへ遷移
+        sessionStorage.setItem('castelier_session', JSON.stringify({
+          userId: data.userId,
+          uid: user.uid
+        }));
+        window.location.href = './top.html';
+      } else if (data.notRegistered) {
+        // 未登録 ➔ 新規登録フォームを開く
+        switchAuthTab('register');
+        document.getElementById('regAuthGate').classList.add('hidden');
+        document.getElementById('registerForm').classList.remove('hidden');
+        document.getElementById('authEmailLabel').textContent = user.email;
+        
+        // Googleの表示名があれば初期値としてセット
+        if (user.displayName && !document.getElementById('regDisplayName').value) {
+          document.getElementById('regDisplayName').value = user.displayName;
+        }
+        showStatus('Google認証が完了しました。プロフィールを設定してください。', true);
+      } else {
+        showStatus(data.message || '認証に失敗しました。', false);
+      }
+    } catch (err) {
+      console.error(err);
+      if (err.code !== 'auth/popup-closed-by-user') {
+        showStatus('ログインエラー: ' + err.message, false);
+      }
+    }
+  }
+
+  // ─────────────────────────────────────────────
+  // 新規登録送信処理（Google UIDを紐付けてGASへ送信）
+  // ─────────────────────────────────────────────
   async function handleRegister(e) {
     e.preventDefault();
     hideStatus();
 
-    const honeypot = document.getElementById('regWebsiteUrl').value;
-    if (honeypot) {
-      console.warn('Bot detected by honeypot.');
-      alert('登録が完了しました！');
+    if (!authenticatedUser || !authenticatedUser.uid) {
+      showStatus('Google認証が確認できません。再度認証を行ってください。', false);
       return;
     }
 
@@ -631,13 +732,6 @@
     const displayName = document.getElementById('regDisplayName').value.trim();
     if (displayName.length > 30) {
       showStatus('活動名は30文字以内で入力してください。', false);
-      return;
-    }
-
-    const pwd = document.getElementById('regPassword').value;
-    const pwdConfirm = document.getElementById('regPasswordConfirm').value;
-    if (pwd !== pwdConfirm) {
-      showStatus('確認用パスワードが一致しません。もう一度ご確認ください。', false);
       return;
     }
 
@@ -675,12 +769,11 @@
     const isPublic = isStreamer ? (document.getElementById('regIsPublic').value === 'true') : true;
     const isContactWelcome = (isStreamer && isPublic) ? (document.getElementById('regIsContactWelcome').value === 'true') : (!isStreamer ? true : false);
 
-    // ★ スプレッドシートの全35列キーに合わせたフラットデータオブジェクト
+    // GAS送信ペイロード（B列に渡すuidを含む）
     const payloadData = {
-      honeypot: document.getElementById('regWebsiteUrl').value,
+      uid: authenticatedUser.uid,
       role: role,
       displayName: displayName,
-      password: pwd.trim(),
       isPublic: isPublic,
       isContactWelcome: isContactWelcome,
       category: selectedCategories.join(','),
@@ -694,7 +787,7 @@
       portfolioUrl: document.getElementById('regPortfolioUrl').value.trim()
     };
 
-    // 代表作品 1〜4 を各列キーでセット（Googleドライブ自動変換付き）
+    // 代表作品 1〜4
     const workBlocks = document.querySelectorAll('.reg-work-block');
     workBlocks.forEach((block, idx) => {
       const i = idx + 1;
@@ -707,7 +800,7 @@
       payloadData[`works_image-${i}`] = rawImg ? normalizeDriveUrl(rawImg, 'image') : '';
     });
 
-    // プラットフォーム 1〜3 を各列キーでセット
+    // プラットフォーム 1〜3
     const platformRows = document.querySelectorAll('.reg-platform-row');
     platformRows.forEach((row, idx) => {
       const i = idx + 1;
@@ -729,10 +822,10 @@
 
       if (data.success) {
         localStorage.setItem('castelier_registered_at', Date.now().toString());
-        alert(`登録が完了しました！\nあなたのアカウントIDは【 ${data.userId} 】です。\nログイン時に必要となるため必ず控えてください。`);
+        alert(`登録が完了しました！\nあなたのアカウントIDは【 ${data.userId} 】です。`);
         sessionStorage.setItem('castelier_session', JSON.stringify({
           userId: data.userId,
-          password: pwd.trim()
+          uid: authenticatedUser.uid
         }));
         window.location.href = './top.html';
       } else {
@@ -744,47 +837,6 @@
     } finally {
       btn.disabled = false;
       btn.textContent = '登録してTOPへ進む';
-    }
-  }
-
-  // ログイン処理
-  async function handleLogin(e) {
-    e.preventDefault();
-    const btn = document.getElementById('loginBtn');
-    btn.disabled = true;
-    btn.textContent = '照合中...';
-    hideStatus();
-
-    const userId = document.getElementById('loginUserId').value.trim();
-    const password = document.getElementById('loginPassword').value.trim();
-
-    try {
-      const res = await fetch(GAS_API_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'text/plain' },
-        body: JSON.stringify({
-          action: 'login',
-          data: { userId, password }
-        }),
-        redirect: 'follow'
-      });
-      const data = await res.json();
-
-      if (data.success) {
-        sessionStorage.setItem('castelier_session', JSON.stringify({
-          userId: userId,
-          password: password
-        }));
-        window.location.href = './top.html';
-      } else {
-        showStatus(data.message || 'ログインに失敗しました。', false);
-      }
-    } catch (err) {
-      console.error(err);
-      showStatus('通信エラーが発生しました: ' + err.message, false);
-    } finally {
-      btn.disabled = false;
-      btn.textContent = 'ログイン';
     }
   }
 
