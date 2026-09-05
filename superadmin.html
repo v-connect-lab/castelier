@@ -5,6 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="robots" content="noindex, nofollow, noai, noimageai">
   <title>Castelier | 運営用ダッシュボード</title>
+
+  <!-- Firebase SDK (互換バージョン) -->
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+
   <style>
     :root {
       --bg: #0f172a;
@@ -78,36 +83,39 @@
 
     /* ログインカード */
     .login-box {
-      max-width: 400px;
+      max-width: 420px;
       margin: 80px auto;
       background: var(--card-bg);
       border: 1px solid var(--border);
       border-radius: var(--radius);
-      padding: 28px;
+      padding: 32px 28px;
+      text-align: center;
     }
-    .form-group { margin-bottom: 14px; }
-    label { display: block; font-size: 0.8rem; font-weight: bold; margin-bottom: 6px; color: var(--text-sub); }
-    input[type="text"], input[type="password"] {
+
+    .btn-google {
       width: 100%;
-      padding: 10px;
+      padding: 12px;
+      background-color: #ffffff;
+      color: #1f2937;
+      border: 1px solid #d1d5db;
       border-radius: 6px;
-      border: 1px solid var(--border);
-      background: #0f172a;
-      color: #fff;
-      font-size: 0.9rem;
-    }
-    .btn-primary {
-      width: 100%;
-      padding: 10px;
-      background: var(--primary);
-      color: #fff;
-      border: none;
-      border-radius: 6px;
-      font-weight: bold;
+      font-size: 0.95rem;
+      font-weight: 600;
       cursor: pointer;
-      font-size: 0.9rem;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      transition: background-color 0.2s, box-shadow 0.2s;
     }
-    .btn-primary:hover { background: var(--primary-hover); }
+    .btn-google:hover {
+      background-color: #f9fafb;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .btn-google:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
 
     /* ダッシュボードパネル */
     .dashboard-panel {
@@ -143,6 +151,15 @@
       margin-bottom: 16px;
     }
     .search-wrap { flex-grow: 1; max-width: 340px; }
+    .search-wrap input {
+      width: 100%;
+      padding: 8px 12px;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      background: #0f172a;
+      color: #fff;
+      font-size: 0.85rem;
+    }
     .status-tabs { display: flex; gap: 6px; }
     .tab-btn {
       padding: 6px 12px;
@@ -249,19 +266,23 @@
     </div>
   </div>
 
-  <!-- 1. 管理者ログイン画面 -->
+  <!-- 1. 管理者Googleログイン画面 -->
   <div id="loginView" class="login-box">
-    <h2 style="font-size: 1.1rem; margin-bottom: 16px; text-align: center;">管理者認証</h2>
-    <div class="form-group">
-      <label>管理者ユーザーID</label>
-      <input type="text" id="adminUserId" placeholder="usr_...">
-    </div>
-    <div class="form-group">
-      <label>パスコード</label>
-      <input type="password" id="adminPassword" placeholder="••••••••">
-    </div>
-    <button class="btn-primary" id="btnLogin" onclick="handleAdminLogin()">ログイン</button>
-    <div id="loginError" style="color: var(--danger); font-size: 0.8rem; margin-top: 10px; display: none;"></div>
+    <h2 style="font-size: 1.15rem; margin-bottom: 12px; color: #fff;">管理者サインイン</h2>
+    <p style="font-size: 0.85rem; color: var(--text-sub); margin-bottom: 24px; line-height: 1.5;">
+      運営権限（administrator: TRUE）が付与されたGoogleアカウントでログインしてください。
+    </p>
+
+    <button class="btn-google" id="btnLoginGoogle" onclick="handleGoogleAdminLogin()">
+      <svg width="18" height="18" viewBox="0 0 48 48">
+        <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
+        <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
+        <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
+        <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
+      </svg>
+      Googleアカウントで認証
+    </button>
+    <div id="loginError" style="color: var(--danger); font-size: 0.8rem; margin-top: 14px; display: none;"></div>
   </div>
 
   <!-- 2. 管理メイン画面 -->
@@ -322,40 +343,71 @@
 </div>
 
 <script>
+  // ─────────────────────────────────────────────
+  // Firebase設定
+  // ─────────────────────────────────────────────
+  const firebaseConfig = {
+    apiKey: "AIzaSyB9g5XzuCJp2VeuWXYo75DsLXUoqjbvRYQ",
+    authDomain: "castelier-app.firebaseapp.com",
+    projectId: "castelier-app",
+    storageBucket: "castelier-app.firebasestorage.app",
+    messagingSenderId: "113030475352",
+    appId: "1:113030475352:web:15050820c2022eee4fa42d"
+  };
+
+  if (!firebase.apps.length) {
+    firebase.initializeApp(firebaseConfig);
+  }
+  const auth = firebase.auth();
+  const googleProvider = new firebase.auth.GoogleAuthProvider();
+
   const GAS_API_URL = 'https://script.google.com/macros/s/AKfycbyk1gWVq5JmKoz73D6zGB_k0WmpWgs4BGsH00J7WyewnW-iWAFzM6ORGOC4aR_ePRry4Q/exec';
 
-  let currentAdminUser = null;
+  let currentAdminUid = null;
   let allAdminUsers = [];
   let currentStatusFilter = 'all';
 
   window.addEventListener('DOMContentLoaded', () => {
-    // 既存セッションのチェック
+    // 既存セッションが存在し、uidを保持している場合は自動照合
     const sessionStr = sessionStorage.getItem('castelier_session');
     if (sessionStr) {
       try {
         const session = JSON.parse(sessionStr);
-        document.getElementById('adminUserId').value = session.userId || '';
-        document.getElementById('adminPassword').value = session.password || '';
-        handleAdminLogin();
+        if (session.uid) {
+          authenticateWithUid(session.uid);
+        }
       } catch (e) {}
     }
   });
 
-  async function handleAdminLogin() {
-    const userId = document.getElementById('adminUserId').value.trim();
-    const password = document.getElementById('adminPassword').value.trim();
+  async function handleGoogleAdminLogin() {
     const errEl = document.getElementById('loginError');
-    const btn = document.getElementById('btnLogin');
-
-    if (!userId || !password) {
-      errEl.textContent = 'ユーザーIDとパスコードを入力してください。';
-      errEl.style.display = 'block';
-      return;
-    }
-
-    btn.disabled = true;
-    btn.textContent = '認証中...';
+    const btn = document.getElementById('btnLoginGoogle');
     errEl.style.display = 'none';
+    btn.disabled = true;
+
+    try {
+      const result = await auth.signInWithPopup(googleProvider);
+      const user = result.user;
+      if (!user || !user.uid) {
+        throw new Error('Google認証に失敗しました。');
+      }
+
+      await authenticateWithUid(user.uid);
+    } catch (err) {
+      console.error(err);
+      errEl.textContent = err.message || '認証エラーが発生しました。';
+      errEl.style.display = 'block';
+      btn.disabled = false;
+    }
+  }
+
+  async function authenticateWithUid(uid) {
+    const errEl = document.getElementById('loginError');
+    const btn = document.getElementById('btnLoginGoogle');
+    errEl.style.display = 'none';
+    btn.disabled = true;
+    btn.textContent = '権限を確認中...';
 
     try {
       const res = await fetch(GAS_API_URL, {
@@ -363,13 +415,13 @@
         headers: { 'Content-Type': 'text/plain' },
         body: JSON.stringify({
           action: 'superadminGetUsers',
-          data: { adminUserId: userId, adminPassword: password }
+          data: { adminUid: uid }
         })
       });
       const data = await res.json();
 
       if (data.success) {
-        currentAdminUser = { userId, password };
+        currentAdminUid = uid;
         allAdminUsers = data.users || [];
 
         document.getElementById('loginView').classList.add('hidden');
@@ -381,26 +433,46 @@
       } else {
         errEl.textContent = data.message || '管理者権限がありません。';
         errEl.style.display = 'block';
+        btn.disabled = false;
+        btn.innerHTML = `
+          <svg width="18" height="18" viewBox="0 0 48 48">
+            <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
+            <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
+            <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
+            <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
+          </svg>
+          Googleアカウントで認証
+        `;
       }
     } catch (err) {
       errEl.textContent = '通信エラー: ' + err.message;
       errEl.style.display = 'block';
-    } finally {
       btn.disabled = false;
-      btn.textContent = 'ログイン';
     }
   }
 
   function handleAdminLogout() {
-    currentAdminUser = null;
+    currentAdminUid = null;
+    auth.signOut().catch(() => {});
     document.getElementById('dashboardView').classList.add('hidden');
     document.getElementById('btnLogout').classList.add('hidden');
     document.getElementById('loginView').classList.remove('hidden');
-    document.getElementById('adminPassword').value = '';
+
+    const btn = document.getElementById('btnLoginGoogle');
+    btn.disabled = false;
+    btn.innerHTML = `
+      <svg width="18" height="18" viewBox="0 0 48 48">
+        <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
+        <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
+        <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
+        <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
+      </svg>
+      Googleアカウントで認証
+    `;
   }
 
   async function loadUsersList() {
-    if (!currentAdminUser) return;
+    if (!currentAdminUid) return;
     const tbody = document.getElementById('usersTableBody');
     tbody.innerHTML = '<tr><td colspan="7" class="loading-notice">最新データを取得中...</td></tr>';
 
@@ -410,7 +482,7 @@
         headers: { 'Content-Type': 'text/plain' },
         body: JSON.stringify({
           action: 'superadminGetUsers',
-          data: { adminUserId: currentAdminUser.userId, adminPassword: currentAdminUser.password }
+          data: { adminUid: currentAdminUid }
         })
       });
       const data = await res.json();
@@ -464,9 +536,13 @@
       return;
     }
 
+    // セッションがある場合は自身のuserIdを取得して自操作BANを抑止
+    const sessionStr = sessionStorage.getItem('castelier_session');
+    const myUserId = sessionStr ? JSON.parse(sessionStr).userId : null;
+
     tbody.innerHTML = filtered.map(u => {
       const isBanned = String(u.status || 'active').toLowerCase() === 'banned';
-      const isSelf = currentAdminUser && currentAdminUser.userId === u.userId;
+      const isSelf = myUserId && myUserId === u.userId;
       const roleLabel = u.role === 'streamer' ? '配信者' : 'クリエイター';
       const isPublic = (u.isPublic === true || String(u.isPublic).toLowerCase() === 'true');
 
@@ -512,8 +588,7 @@
         body: JSON.stringify({
           action: 'superadminToggleBan',
           data: {
-            adminUserId: currentAdminUser.userId,
-            adminPassword: currentAdminUser.password,
+            adminUid: currentAdminUid,
             targetUserId: targetUserId,
             newStatus: nextStatus
           }
@@ -522,7 +597,6 @@
       const data = await res.json();
 
       if (data.success) {
-        // ローカルデータを即時更新
         const target = allAdminUsers.find(u => u.userId === targetUserId);
         if (target) target.status = nextStatus;
 
