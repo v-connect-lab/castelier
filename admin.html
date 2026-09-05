@@ -1133,13 +1133,27 @@
     updateImagePreview('profAvatarUrl', 'profAvatarPreview');
   }
 
-  // 共有URLコピー処理
+  // 共有URLコピー処理（テキスト変化つき）
   function copyMyShareUrl() {
     const input = document.getElementById('myShareUrlInput');
+    const btn = document.getElementById('copyShareBtn'); // プレフィックス用にIDを追加するか、イベントからボタンを取得
     if (!input.value) return;
     
     navigator.clipboard.writeText(input.value).then(() => {
+      // 画面下部のステータス表示も出す場合
       showStatus('共有用URLをクリップボードにコピーしました！', true);
+
+      // ボタンの文字を一時的に変更
+      const btnEl = event.target;
+      const originalText = btnEl.textContent;
+      btnEl.textContent = 'コピーしました！';
+      btnEl.style.backgroundColor = '#10b981'; // 緑色にするなど
+      
+      setTimeout(() => {
+        btnEl.textContent = originalText;
+        btnEl.style.backgroundColor = '';
+      }, 2000);
+      
     }).catch(err => {
       showStatus('コピーに失敗しました', false);
     });
