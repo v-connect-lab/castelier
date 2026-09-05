@@ -4,10 +4,12 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <!-- AI学習抑止メタタグ -->
   <meta name="robots" content="noai, noimageai">
-  
   <title>Castelier | ログイン・新規登録</title>
+
+  <!-- ファビコン -->
+  <link rel="icon" type="image/png" href="assets/logo.png">
+
   <script src="https://cdnjs.cloudflare.com/ajax/libs/js-yaml/4.1.0/js-yaml.min.js"></script>
 
   <!-- Firebase App & Auth SDK (v10 Compat) -->
@@ -23,16 +25,16 @@
       --text: #1e293b;
       --text-sub: #64748b;
       --border: #e2e8f0;
-      --radius: 8px;
+      --radius: 12px;
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      background-color: var(--bg);
+      background: url('assets/background_white.jpg') center center / cover no-repeat fixed var(--bg);
       color: var(--text);
       line-height: 1.5;
-      padding: 24px 16px;
+      padding: 24px 16px 60px;
     }
 
     .container {
@@ -41,11 +43,23 @@
       background: var(--card-bg);
       padding: 32px 28px;
       border-radius: var(--radius);
-      box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.08);
       border: 1px solid var(--border);
     }
 
-    h1 { font-size: 1.5rem; margin-bottom: 6px; text-align: center; }
+    /* 最上部縦型バナー */
+    .top-banner-wrap {
+      text-align: center;
+      margin-bottom: 16px;
+    }
+    .top-banner-wrap img {
+      max-width: 140px;
+      height: auto;
+      display: inline-block;
+      border-radius: 8px;
+    }
+
+    h1 { font-size: 1.45rem; margin-bottom: 6px; text-align: center; }
     .lead { font-size: 0.85rem; color: var(--text-sub); margin-bottom: 24px; text-align: center; }
     .sublead { font-size: 0.85rem; color: var(--text-sub); margin-bottom: 24px; }
     
@@ -63,7 +77,6 @@
     }
     .tab-btn.active { color: var(--primary); font-weight: bold; border-bottom-color: var(--primary); }
 
-    /* Googleログインボタン */
     .btn-google-auth {
       width: 100%;
       padding: 12px 16px;
@@ -100,7 +113,6 @@
       margin-bottom: 6px;
     }
 
-    /* ツールチップ（インフォマーク） */
     .info-icon {
       display: inline-flex;
       align-items: center;
@@ -204,7 +216,6 @@
     .hidden { display: none !important; }
     .section-divider { border: 0; border-top: 1px dashed var(--border); margin: 20px 0; }
 
-    /* アイコンプレビュー */
     .img-preview-box {
       margin-top: 8px;
       display: none;
@@ -228,7 +239,6 @@
       color: var(--text-sub);
     }
 
-    /* 利用規約チェック */
     .terms-box {
       margin: 20px 0 16px;
       padding: 12px;
@@ -246,7 +256,6 @@
       font-weight: normal;
     }
 
-    /* 認証完了バッジ */
     .auth-badge {
       background: #e0e7ff;
       color: #3730a3;
@@ -264,6 +273,11 @@
 <body>
 
 <div class="container">
+  <!-- 画面最上部縦型バナー -->
+  <div class="top-banner-wrap">
+    <img src="assets/banner_vertical.png" alt="Castelier">
+  </div>
+
   <h1>Castelier（キャストリエ）</h1>
   <p class="lead">Googleアカウントで安全にログイン・登録を行えます。</p>
 
@@ -287,7 +301,6 @@
 
   <!-- 新規登録画面 -->
   <div id="registerSection" class="hidden">
-    <!-- Google認証トリガー -->
     <div id="regAuthGate">
       <button type="button" class="btn-google-auth" onclick="handleGoogleAuth('register')">
         <svg viewBox="0 0 24 24">
@@ -320,7 +333,6 @@
         <input type="text" id="regDisplayName" placeholder="ニックネーム" required>
       </div>
 
-      <!-- 配信者のみ表示する設定 -->
       <div class="grid-2 hidden" id="regStreamerSettingsGroup">
         <div class="form-group">
           <label>公開設定 <span class="info-icon" id="tip-reg-isPublic">ℹ</span></label>
@@ -399,7 +411,6 @@
           </span>
         </p>
         <div id="regWorksContainer">
-          <!-- 枠 1 -->
           <div class="reg-work-block" style="border: 1px solid var(--border); border-radius: var(--radius); padding: 10px; margin-bottom: 8px; background: #fafafa;">
             <div class="grid-2" style="grid-template-columns: 140px 1fr; margin-bottom: 6px;">
               <select class="reg-work-type" onchange="toggleWorkImageInput(this)">
@@ -415,7 +426,6 @@
             </div>
           </div>
 
-          <!-- 枠 2 -->
           <div class="reg-work-block" style="border: 1px solid var(--border); border-radius: var(--radius); padding: 10px; margin-bottom: 8px; background: #fafafa;">
             <div class="grid-2" style="grid-template-columns: 140px 1fr; margin-bottom: 6px;">
               <select class="reg-work-type" onchange="toggleWorkImageInput(this)">
@@ -431,7 +441,6 @@
             </div>
           </div>
 
-          <!-- 枠 3 -->
           <div class="reg-work-block" style="border: 1px solid var(--border); border-radius: var(--radius); padding: 10px; margin-bottom: 8px; background: #fafafa;">
             <div class="grid-2" style="grid-template-columns: 140px 1fr; margin-bottom: 6px;">
               <select class="reg-work-type" onchange="toggleWorkImageInput(this)">
@@ -447,7 +456,6 @@
             </div>
           </div>
 
-          <!-- 枠 4 -->
           <div class="reg-work-block" style="border: 1px solid var(--border); border-radius: var(--radius); padding: 10px; margin-bottom: 8px; background: #fafafa;">
             <div class="grid-2" style="grid-template-columns: 140px 1fr; margin-bottom: 6px;">
               <select class="reg-work-type" onchange="toggleWorkImageInput(this)">
@@ -511,9 +519,6 @@
 </div>
 
 <script>
-  // ─────────────────────────────────────────────
-  // ★ Firebase初期化設定
-  // ─────────────────────────────────────────────
   const firebaseConfig = {
     apiKey: "AIzaSyB9g5XzuCJp2VeuWXYo75DsLXUoqjbvRYQ",
     authDomain: "castelier-app.firebaseapp.com",
@@ -529,11 +534,10 @@
   const auth = firebase.auth();
   const googleProvider = new firebase.auth.GoogleAuthProvider();
 
-  // GASエンドポイント
   const GAS_API_URL = "https://script.google.com/macros/s/AKfycbyk1gWVq5JmKoz73D6zGB_k0WmpWgs4BGsH00J7WyewnW-iWAFzM6ORGOC4aR_ePRry4Q/exec";
 
   let schemaData = null;
-  let authenticatedUser = null; // Google認証済みユーザー情報（uid, email等）
+  let authenticatedUser = null;
 
   window.addEventListener('DOMContentLoaded', async () => {
     try {
@@ -658,9 +662,6 @@
     document.getElementById('statusMsg').style.display = 'none';
   }
 
-  // ─────────────────────────────────────────────
-  // Google認証ハンドラー（ログイン・新規登録共用）
-  // ─────────────────────────────────────────────
   async function handleGoogleAuth(mode) {
     hideStatus();
     try {
@@ -668,7 +669,6 @@
       const user = result.user;
       authenticatedUser = user;
 
-      // GASへログイン照合リクエスト
       showStatus('認証中...', true);
       const res = await fetch(GAS_API_URL, {
         method: 'POST',
@@ -682,20 +682,17 @@
       const data = await res.json();
 
       if (data.success) {
-        // すでに登録済み ➔ セッションを保持してTOPへ遷移
         sessionStorage.setItem('castelier_session', JSON.stringify({
           userId: data.userId,
           uid: user.uid
         }));
         window.location.href = './top.html';
       } else if (data.notRegistered) {
-        // 未登録 ➔ 新規登録フォームを開く
         switchAuthTab('register');
         document.getElementById('regAuthGate').classList.add('hidden');
         document.getElementById('registerForm').classList.remove('hidden');
         document.getElementById('authEmailLabel').textContent = user.email;
         
-        // Googleの表示名があれば初期値としてセット
         if (user.displayName && !document.getElementById('regDisplayName').value) {
           document.getElementById('regDisplayName').value = user.displayName;
         }
@@ -711,9 +708,6 @@
     }
   }
 
-  // ─────────────────────────────────────────────
-  // 新規登録送信処理（Google UIDを紐付けてGASへ送信）
-  // ─────────────────────────────────────────────
   async function handleRegister(e) {
     e.preventDefault();
     hideStatus();
@@ -768,7 +762,6 @@
     const isPublic = isStreamer ? (document.getElementById('regIsPublic').value === 'true') : true;
     const isContactWelcome = (isStreamer && isPublic) ? (document.getElementById('regIsContactWelcome').value === 'true') : (!isStreamer ? true : false);
 
-    // GAS送信ペイロード（B列に渡すuidを含む）
     const payloadData = {
       uid: authenticatedUser.uid,
       role: role,
@@ -786,7 +779,6 @@
       portfolioUrl: document.getElementById('regPortfolioUrl').value.trim()
     };
 
-    // 代表作品 1〜4
     const workBlocks = document.querySelectorAll('.reg-work-block');
     workBlocks.forEach((block, idx) => {
       const i = idx + 1;
@@ -799,7 +791,6 @@
       payloadData[`works_image-${i}`] = rawImg ? normalizeDriveUrl(rawImg, 'image') : '';
     });
 
-    // プラットフォーム 1〜3
     const platformRows = document.querySelectorAll('.reg-platform-row');
     platformRows.forEach((row, idx) => {
       const i = idx + 1;
@@ -839,7 +830,6 @@
     }
   }
 
-  // ユーティリティ関数
   function normalizeDriveUrl(url, type = 'image') {
     if (!url || typeof url !== 'string') return '';
     const trimmed = url.trim();
