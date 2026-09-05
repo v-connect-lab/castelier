@@ -166,7 +166,7 @@
       pointer-events: none;
     }
     
-    input[type="text"], input[type="password"], textarea, select {
+    input[type="text"], textarea, select {
       width: 100%;
       padding: 10px;
       border: 1px solid var(--border);
@@ -445,7 +445,7 @@
 
   <div id="mainContentView" class="hidden">
     <div class="title-row">
-      <h1 id="viewTitle">アカウント管理</h1>
+      <h1 id="viewTitle">プロフィール編集</h1>
       <span class="user-badge" id="displayUserId"></span>
     </div>
 
@@ -682,7 +682,7 @@
   let schemaData = null;
   let currentUserRole = "creator";
 
-  let allUsersMap = new Map(); // 全ユーザー情報マップ (userId -> userObj)
+  let allUsersMap = new Map();
   let favoriteData = {
     myFavorites: [],
     interestedInMe: [],
@@ -697,16 +697,27 @@
     }
     sessionUser = JSON.parse(stored);
 
+    // uidが存在しない旧セッションの場合はindex.htmlへ誘導
+    if (!sessionUser.uid) {
+      alert('セッション情報が更新されています。再度ログインしてください。');
+      logout();
+      return;
+    }
+
     try {
       const now = Date.now();
       const [schemaRes, userRes, usersJsonRes, favRes] = await Promise.all([
         fetch('./schema/accounts.yaml').then(r => r.text()),
+        // ★ uid を送信して照合・取得
         fetch(GAS_API_URL, {
           method: 'POST',
           headers: { 'Content-Type': 'text/plain' },
           body: JSON.stringify({
             action: 'login',
-            data: { userId: sessionUser.userId, password: sessionUser.password }
+            data: { 
+              userId: sessionUser.userId,
+              uid: sessionUser.uid
+            }
           })
         }).then(r => r.json()),
         fetch(`./data/users.json?t=${now}`).then(r => r.ok ? r.json() : []).catch(() => []),
@@ -723,7 +734,6 @@
       const loaded = jsyaml.load(schemaRes);
       schemaData = loaded.accounts.columns;
 
-      // 全公開ユーザーをMap化
       (usersJsonRes || []).forEach(u => {
         if (u.userId) allUsersMap.set(u.userId, u);
       });
@@ -775,7 +785,6 @@
     }
   }
 
-  // お気に入りタブの描画
   function renderFavoritesTab() {
     const listEl = document.getElementById('myFavoritesList');
     if (favoriteData.myFavorites.length === 0) {
@@ -790,7 +799,6 @@
     }).join('');
   }
 
-  // 気になるリストタブの描画
   function renderInterestedTab() {
     const listEl = document.getElementById('interestedList');
     if (favoriteData.interestedInMe.length === 0) {
@@ -830,7 +838,6 @@
     `;
   }
 
-  // お気に入り解除処理
   async function handleRemoveFavorite(targetUserId) {
     if (!confirm('このユーザーのお気に入りを解除しますか？')) return;
 
@@ -856,7 +863,6 @@
     }
   }
 
-  // 相手の詳細モーダル表示
   function showUserProfileModal(userId) {
     const u = allUsersMap.get(userId);
     if (!u) {
@@ -1039,6 +1045,7 @@
     document.getElementById('statusMsg').style.display = 'none';
   }
 
+  // ★ プロフィール更新処理（uid認証版）
   async function handleUpdate(e) {
     e.preventDefault();
     hideStatus();
@@ -1082,9 +1089,10 @@
     const isPublic = isStreamer ? (document.getElementById('profIsPublic').value === 'true') : true;
     const isContactWelcome = (isStreamer && isPublic) ? (document.getElementById('profIsContactWelcome').value === 'true') : (!isStreamer ? true : false);
 
+    // ★ password を撤廃し uid をセット
     const payloadData = {
       userId: sessionUser.userId,
-      password: sessionUser.password,
+      uid: sessionUser.uid,
       displayName: displayName,
       isPublic: isPublic,
       isContactWelcome: isContactWelcome,
