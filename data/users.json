@@ -1,13 +1,13 @@
 [
   {
-    "userId": "usr_beebb209",
-    "role": "",
+    "userId": "usr_45da380f",
+    "role": "creator",
     "displayName": "潤華ねろ",
     "isContactWelcome": true,
     "category": "Web",
-    "tags": "simple,narration",
-    "freeTags": "無償モニター",
-    "avatarUrl": "https://lh3.googleusercontent.com/d/1ZcK-qteXRtnGYkZoP-1wqklgzvTkiUQd",
+    "tags": "dark,pop,elegant,typo,narration",
+    "freeTags": "",
+    "avatarUrl": "https://drive.google.com/thumbnail?id=1ZcK-qteXRtnGYkZoP-1wqklgzvTkiUQd&sz=w800",
     "works": [
       {
         "type": "web",
@@ -29,44 +29,8 @@
       }
     ],
     "contactInfo": "urukanero.works@gmail.com",
-    "description": "よろしくお願いします！",
+    "description": "よろしくお願いします。",
     "priceGuide": "free_monitor",
-    "updatedAt": "2026-09-04T17:30:36.000Z"
-  },
-  {
-    "userId": "usr_8456be69",
-    "role": "streamer",
-    "displayName": "テスト",
-    "isContactWelcome": true,
-    "category": "VTuber",
-    "tags": "japanese",
-    "freeTags": "",
-    "avatarUrl": "",
-    "works": [],
-    "portfolioUrl": "",
-    "xUrl": "",
-    "platforms": [],
-    "contactInfo": "",
-    "description": "よろしくお願いします。",
-    "priceGuide": "",
-    "updatedAt": "2026-09-04T00:17:19.000Z"
-  },
-  {
-    "userId": "usr_f67bd4e7",
-    "role": "creator",
-    "displayName": "作成テスト",
-    "isContactWelcome": true,
-    "category": "illust",
-    "tags": "japanese",
-    "freeTags": "",
-    "avatarUrl": "",
-    "works": [],
-    "portfolioUrl": "",
-    "xUrl": "",
-    "platforms": [],
-    "contactInfo": "",
-    "description": "よろしくお願いします。",
-    "priceGuide": "flexible",
-    "updatedAt": "2026-09-04T12:44:04.000Z"
+    "updatedAt": "2026-09-05T04:58:21.000Z"
   }
 ]
