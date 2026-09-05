@@ -1483,7 +1483,7 @@
         document.getElementById('drawerUserIdBadge').textContent = `ID: ${currentUserId}`;
       } else {
         nav.innerHTML = `
-          <a href="./index.html" class="btn-login">ログイン / 登録</a>
+          <a href="./login.html" class="btn-login">ログイン / 登録</a>
         `;
       }
     }
@@ -1582,7 +1582,7 @@
         sessionStorage.removeItem('castelier_session');
         localStorage.removeItem('castelier_registered_at');
         alert('ログアウトしました。');
-        window.location.href = './index.html';
+        window.location.href = './login.html';
       }
     }
 
@@ -2069,7 +2069,7 @@
 
       if (!currentUserId) {
         if (confirm('お気に入り機能を利用するにはログインが必要です。ログイン画面へ移動しますか？')) {
-          window.location.href = './index.html';
+          window.location.href = './login.html';
         }
         return;
       }
