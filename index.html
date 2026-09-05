@@ -1864,8 +1864,19 @@
         allUsers.forEach(u => {
           if (u.userId) allUsersMap.set(u.userId, u);
         });
-
+        
         renderFilteredUsers();
+
+        // URLパラメータ（?id=xxx）をチェックして自動でモーダルを開く処理
+        const urlParams = new URLSearchParams(window.location.search);
+        const targetUserId = urlParams.get('id');
+        if (targetUserId) {
+          // 該当するユーザーがリストの何番目にいるか探してモーダルを開く
+          const targetIndex = allUsers.findIndex(u => u.userId === targetUserId);
+          if (targetIndex !== -1) {
+            openModal(targetIndex);
+          }
+        }
 
       } catch (err) {
         console.warn('読み込みエラー:', err);
