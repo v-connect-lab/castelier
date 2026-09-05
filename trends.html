@@ -4,6 +4,10 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Castelier | トレンド・活動統計</title>
+
+  <!-- ファビコン -->
+  <link rel="icon" type="image/png" href="assets/logo.png">
+
   <!-- YAMLパーサー -->
   <script src="https://cdn.jsdelivr.net/npm/js-yaml@4.1.0/dist/js-yaml.min.js"></script>
   <style>
@@ -24,7 +28,7 @@
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      background-color: var(--bg);
+      background: url('assets/background_white.jpg') center center / cover no-repeat fixed var(--bg);
       color: var(--text-main);
       line-height: 1.6;
       padding: 24px 16px 80px;
@@ -35,14 +39,28 @@
       margin: 0 auto;
     }
 
+    /* 最上部バナー */
+    .top-banner-wrap {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    .top-banner-wrap img {
+      max-width: 240px;
+      height: auto;
+      display: inline-block;
+    }
+
     /* ヘッダー */
     .trend-header {
+      background: rgba(255, 255, 255, 0.9);
+      backdrop-filter: blur(4px);
+      padding: 16px 20px;
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
       display: flex;
       justify-content: space-between;
       align-items: center;
       margin-bottom: 24px;
-      padding-bottom: 16px;
-      border-bottom: 1px solid var(--border);
     }
     .trend-title h1 {
       font-size: 1.4rem;
@@ -71,12 +89,13 @@
 
     /* カード */
     .trend-card {
-      background: var(--card-bg);
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(6px);
       border: 1px solid var(--border);
       border-radius: var(--radius);
       padding: 24px;
       margin-bottom: 24px;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.03);
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
     }
     .card-title {
       font-size: 1.05rem;
@@ -92,7 +111,6 @@
       margin-bottom: 18px;
     }
 
-    /* 比率バー */
     .ratio-summary-bar {
       height: 24px;
       border-radius: 12px;
@@ -128,7 +146,6 @@
       font-weight: 600;
     }
 
-    /* 左右比較グリッド */
     .compare-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -150,7 +167,6 @@
     .col-header.creator { color: var(--creator-color); border-color: var(--creator-color); }
     .col-header.streamer { color: var(--streamer-color); border-color: var(--streamer-color); }
 
-    /* ランキングアイテム */
     .rank-item {
       display: flex;
       align-items: center;
@@ -160,6 +176,7 @@
       border-radius: 6px;
       margin-bottom: 6px;
       font-size: 0.8rem;
+      border: 1px solid var(--border);
     }
     .rank-name {
       font-weight: 600;
@@ -178,7 +195,6 @@
     .badge-count.creator { background: var(--creator-bg); color: var(--creator-color); }
     .badge-count.streamer { background: var(--streamer-bg); color: var(--streamer-color); }
 
-    /* ヒントボックス（ブルーオーシャン分析） */
     .insight-box {
       margin-top: 20px;
       padding: 14px 18px;
@@ -198,7 +214,6 @@
       color: #b45309;
     }
 
-    /* フリータグクラウド・ランキング */
     .freetag-grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
@@ -215,8 +230,9 @@
       font-size: 0.8rem;
     }
     .freetag-badge {
-      background: #f1f5f9;
+      background: #ffffff;
       color: var(--text-sub);
+      border: 1px solid var(--border);
       font-size: 0.7rem;
       font-weight: bold;
       padding: 2px 6px;
@@ -234,12 +250,19 @@
       padding: 40px;
       color: var(--text-sub);
       font-size: 0.9rem;
+      background: rgba(255, 255, 255, 0.9);
+      border-radius: var(--radius);
     }
   </style>
 </head>
 <body>
 
 <div class="container">
+  <!-- 画面最上部バナー -->
+  <div class="top-banner-wrap">
+    <a href="./top.html"><img src="assets/banner_beside.png" alt="Castelier"></a>
+  </div>
+
   <div class="trend-header">
     <div class="trend-title">
       <h1>📊 トレンド・活動統計</h1>
@@ -355,7 +378,6 @@
 
     DICTIONARY = {};
 
-    // 1. category
     const catCol = cols.category;
     if (catCol && catCol.options && catCol.optionLabels) {
       ['creator', 'streamer'].forEach(role => {
@@ -367,7 +389,6 @@
       });
     }
 
-    // 2. tags
     const tagCol = cols.tags;
     if (tagCol && Array.isArray(tagCol.options) && Array.isArray(tagCol.optionLabels)) {
       tagCol.options.forEach((opt, idx) => {
@@ -375,7 +396,6 @@
       });
     }
 
-    // 3. priceGuide
     if (cols.priceGuide && Array.isArray(cols.priceGuide.options) && Array.isArray(cols.priceGuide.optionLabels)) {
       cols.priceGuide.options.forEach((opt, idx) => {
         if (cols.priceGuide.optionLabels[idx]) DICTIONARY[opt] = cols.priceGuide.optionLabels[idx];
@@ -396,7 +416,6 @@
       return;
     }
 
-    // 1. 全体比率
     const cRate = Math.round((totalC / total) * 100) || 0;
     const sRate = 100 - cRate;
     document.getElementById('barTotalCreator').style.width = `${cRate}%`;
@@ -406,11 +425,9 @@
     document.getElementById('countTotalCreator').textContent = totalC;
     document.getElementById('countTotalStreamer').textContent = totalS;
 
-    // 2. メインカテゴリ集計
     renderRankList(creators, 'category', 'creatorCatList', 'creator');
     renderRankList(streamers, 'category', 'streamerCatList', 'streamer');
 
-    // 3. 属性・作風タグ集計 & ブルーオーシャン分析
     const creatorTagCounts = getTagCounts(creators, 'tags');
     const streamerTagCounts = getTagCounts(streamers, 'tags');
 
@@ -418,7 +435,6 @@
     renderRankListFromCounts(streamerTagCounts, 'streamerTagList', 'streamer');
     generateInsight(creatorTagCounts, streamerTagCounts);
 
-    // 4. フリータグ上位20件集計
     renderFreeTags(users);
 
     document.getElementById('loadingView').style.display = 'none';
@@ -459,7 +475,6 @@
     `).join('');
   }
 
-  // ブルーオーシャン（需要過多）自動判定ロジック
   function generateInsight(creatorCounts, streamerCounts) {
     const el = document.getElementById('insightText');
     const streamerEntries = Object.entries(streamerCounts);
@@ -469,13 +484,11 @@
       return;
     }
 
-    // 配信者需要に対してクリエイター登録が少ないギャップ順にソート
     const gaps = streamerEntries.map(([tag, sCount]) => {
       const cCount = creatorCounts[tag] || 0;
       return { tag, sCount, cCount, gap: sCount - cCount };
     }).sort((a, b) => b.gap - a.gap);
 
-    // 配信者登録があり、かつクリエイターが同数以下（需要過多）な上位タグを抽出
     const blueOceans = gaps.filter(g => g.gap >= 0 && g.sCount > 0);
 
     if (blueOceans.length > 0 && blueOceans[0].gap > 0) {
