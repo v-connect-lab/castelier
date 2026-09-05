@@ -585,7 +585,7 @@
       gap: 20px;
     }
 
-    /* ★ ユーザーカード（蒼白＋区分別グラデーションボーダー） */
+    /* ユーザーカード（蒼白＋区分別グラデーションボーダー） */
     .user-card {
       border-radius: var(--radius);
       overflow: hidden;
@@ -598,13 +598,11 @@
       backdrop-filter: blur(8px);
       -webkit-backdrop-filter: blur(8px);
       
-      /* 2pxボーダー領域を確保し、下から上に明るくなるグラデーションを適用 */
       border: 2px solid transparent !important;
       background-clip: padding-box, border-box !important;
       background-origin: padding-box, border-box !important;
     }
 
-    /* クリエイター：ピンク系グラデーション（下：濃いピンク → 上：淡いパステルピンク） */
     .user-card.role-creator {
       background-image: 
         var(--card-gradient), 
@@ -614,7 +612,6 @@
       box-shadow: 0 16px 32px -4px rgba(236, 72, 153, 0.25), 0 6px 14px -2px rgba(236, 72, 153, 0.15) !important;
     }
 
-    /* 配信者：ブルー系グラデーション（下：深めのブルー → 上：淡いシアン・スカイブルー） */
     .user-card.role-streamer {
       background-image: 
         var(--card-gradient), 
@@ -651,19 +648,55 @@
       font-size: 0.85rem;
     }
 
-    .role-badge {
+    .card-badge-container {
       position: absolute;
       top: 10px;
       left: 10px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+      z-index: 2;
+    }
+
+    .role-badge {
       padding: 4px 10px;
       font-size: 0.75rem;
       font-weight: bold;
       border-radius: 12px;
       color: #fff;
-      z-index: 2;
     }
     .role-badge.creator { background: var(--creator-color); }
     .role-badge.streamer { background: var(--streamer-color); }
+
+    /* ★ お声がけ歓迎バッジ（グリーン系） */
+    .welcome-badge {
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      color: #ffffff;
+      padding: 3px 8px;
+      border-radius: 12px;
+      font-size: 0.7rem;
+      font-weight: bold;
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+      box-shadow: 0 2px 5px rgba(16, 185, 129, 0.35);
+      border: 1px solid rgba(255, 255, 255, 0.4);
+      white-space: nowrap;
+    }
+
+    .welcome-badge-inline {
+      background: #ecfdf5;
+      color: #065f46;
+      border: 1px solid #a7f3d0;
+      font-size: 0.65rem;
+      font-weight: bold;
+      padding: 1px 6px;
+      border-radius: 4px;
+      display: inline-flex;
+      align-items: center;
+      gap: 2px;
+      white-space: nowrap;
+    }
 
     .btn-fav-card {
       position: absolute;
@@ -794,6 +827,7 @@
     .user-card.compact .card-name {
       display: flex;
       align-items: center;
+      flex-wrap: wrap;
       gap: 6px;
       font-size: 0.95rem;
     }
@@ -1544,6 +1578,7 @@
         `;
         document.getElementById('drawerUserIdBadge').textContent = `ID: ${currentUserId}`;
       } else {
+        // ★ テキストリンクからボタン（.btn-login）に統一
         nav.innerHTML = `
           <a href="./login.html" class="btn-login">ログイン / 登録</a>
         `;
@@ -1933,6 +1968,9 @@
         const isFav = myFavoritesSet.has(u.userId);
         const isSelf = currentUserId && (currentUserId === u.userId);
 
+        // ★ 声掛け歓迎判定（配信者かつisContactWelcomeがtrue）
+        const isWelcome = u.role === 'streamer' && String(u.isContactWelcome) === 'true';
+
         // 区分別クラス名
         const roleClass = u.role === 'streamer' ? 'role-streamer' : 'role-creator';
 
@@ -1949,9 +1987,13 @@
               </button>
             ` : ''}
 
+            <!-- 詳細表示サムネイル -->
             <div class="card-thumb">
               ${thumbHtml}
-              <span class="role-badge ${u.role}">${roleLabel}</span>
+              <div class="card-badge-container">
+                <span class="role-badge ${u.role}">${roleLabel}</span>
+                ${isWelcome ? '<span class="welcome-badge">💬 声掛け歓迎</span>' : ''}
+              </div>
             </div>
 
             <div class="card-body">
@@ -1960,6 +2002,7 @@
                 <div style="overflow: hidden; flex-grow: 1;">
                   <div class="card-name">
                     ${isCompact ? `<span class="role-badge-inline ${u.role}">${roleLabel}</span>` : ''}
+                    ${(isCompact && isWelcome) ? '<span class="welcome-badge-inline">💬 声掛け歓迎</span>' : ''}
                     <span style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${escapeHtml(u.displayName || '名無し')}</span>
                   </div>
                   <div class="card-category">${escapeHtml(categoryDisplay)}</div>
@@ -2011,6 +2054,8 @@
       const freeTags = (u.freeTags ? String(u.freeTags).split(',') : []).map(t => t.trim()).filter(Boolean);
       const allModalTags = standardTags.concat(freeTags);
 
+      const isWelcome = u.role === 'streamer' && String(u.isContactWelcome) === 'true';
+
       const links = [];
       if (u.xUrl) links.push(`<a href="${u.xUrl}" target="_blank" rel="noopener">X (Twitter)</a>`);
       if (u.portfolioUrl) links.push(`<a href="${u.portfolioUrl}" target="_blank" rel="noopener">ポートフォリオHP</a>`);
@@ -2059,7 +2104,10 @@
           <div class="modal-user-profile">
             ${avatarUrl ? `<img src="${avatarUrl}" style="width:54px; height:54px; border-radius:50%; object-fit:cover; border:1px solid rgba(191, 219, 254, 0.8); flex-shrink:0;" alt="">` : ''}
             <div style="min-width: 0;">
-              <span class="role-badge ${u.role}" style="position:static; margin-bottom:4px; display:inline-block;">${roleLabel}</span>
+              <div style="display:flex; align-items:center; gap:6px; flex-wrap:wrap; margin-bottom:4px;">
+                <span class="role-badge ${u.role}" style="position:static;">${roleLabel}</span>
+                ${isWelcome ? '<span class="welcome-badge" style="box-shadow:none;">💬 声掛け歓迎</span>' : ''}
+              </div>
               <h2 style="margin:2px 0 0; font-size:1.15rem; word-break:break-word;">${escapeHtml(u.displayName || '')}</h2>
               <div style="font-size:0.8rem; color:#64748b;">${escapeHtml(categoryDisplay)}</div>
             </div>
