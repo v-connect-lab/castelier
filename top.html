@@ -512,41 +512,74 @@
       min-height: 2.6em;
     }
 
-    /* ★ カード内タグ：2段分固定（52px）、3段以上スクロール対応 */
+    /* ★ カード内タグ：枠・背景付き、2段分固定（約68px）、3段以上スクロール対応 */
     .card-tags {
       display: flex;
       flex-wrap: wrap;
       align-content: flex-start;
       gap: 6px;
-      height: 52px;
+      height: 68px;
       overflow-y: auto;
       margin-top: auto;
-      padding-right: 2px;
+      padding: 6px 8px;
+      background: #f8fafc;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      box-sizing: border-box;
     }
     .card-tags::-webkit-scrollbar {
       width: 4px;
+    }
+    .card-tags::-webkit-scrollbar-track {
+      background: transparent;
     }
     .card-tags::-webkit-scrollbar-thumb {
       background: #cbd5e1;
       border-radius: 4px;
     }
+    .card-tags::-webkit-scrollbar-thumb:hover {
+      background: #94a3b8;
+    }
 
     .tag-badge {
       font-size: 0.7rem;
-      background: #f1f5f9;
+      background: #ffffff;
       color: #475569;
+      border: 1px solid #e2e8f0;
       padding: 2px 8px;
       border-radius: 4px;
       white-space: nowrap;
       display: inline-block;
     }
 
-    /* モーダル内タグ一覧用 */
+    /* ★ モーダル内タグ：枠・背景付き、3段分固定（約98px）、4段目以上スクロール対応 */
     .modal-tags {
       display: flex;
       flex-wrap: wrap;
+      align-content: flex-start;
       gap: 6px;
+      height: 98px;
+      overflow-y: auto;
       margin: 12px 0 16px;
+      padding: 8px 10px;
+      background: #f8fafc;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      box-sizing: border-box;
+    }
+    .modal-tags::-webkit-scrollbar {
+      width: 5px;
+    }
+    .modal-tags::-webkit-scrollbar-track {
+      background: #f1f5f9;
+      border-radius: 4px;
+    }
+    .modal-tags::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 4px;
+    }
+    .modal-tags::-webkit-scrollbar-thumb:hover {
+      background: #94a3b8;
     }
 
     /* --- 詳細モーダル --- */
