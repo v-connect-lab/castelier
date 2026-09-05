@@ -431,6 +431,59 @@
       box-shadow: 0 1px 3px rgba(79, 70, 229, 0.3);
     }
 
+    /* 検索パネルのアコーディオン制御 */
+    .filter-panel-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .btn-toggle-filter {
+      padding: 7px 14px;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      cursor: pointer;
+      border: 1px solid var(--border);
+      background: #f8fafc;
+      color: var(--text-main);
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s ease;
+    }
+    .btn-toggle-filter:hover {
+      background: #f1f5f9;
+      border-color: #cbd5e1;
+    }
+    .btn-toggle-filter .arrow-icon {
+      font-size: 0.7rem;
+      transition: transform 0.2s ease;
+    }
+    .btn-toggle-filter.open .arrow-icon {
+      transform: rotate(180deg);
+    }
+    .filter-active-count {
+      background: var(--primary);
+      color: #fff;
+      font-size: 0.7rem;
+      padding: 1px 6px;
+      border-radius: 10px;
+    }
+
+    .filter-accordion-body {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      padding-top: 14px;
+      border-top: 1px solid var(--border);
+      transition: all 0.25s ease;
+    }
+    .filter-accordion-body.collapsed {
+      display: none;
+    }
+
     /* 表示モード切替バー */
     .view-mode-bar {
       display: flex;
@@ -1046,34 +1099,45 @@
   <div class="container">
     <!-- 検索・絞り込みパネル -->
     <div class="filter-panel">
-      <!-- 区分切り替えタブ -->
-      <div class="role-tabs">
-        <button class="role-btn active" data-role="all" onclick="setRoleFilter('all')">すべて</button>
-        <button class="role-btn" data-role="creator" onclick="setRoleFilter('creator')">クリエイター</button>
-        <button class="role-btn" data-role="streamer" onclick="setRoleFilter('streamer')">配信者</button>
-      </div>
-
-      <!-- テキスト検索（活動名・カテゴリ・タグ対象） -->
-      <div class="search-input-wrap">
-        <input type="text" id="keywordSearch" class="search-input" placeholder="活動名・カテゴリ・タグで検索..." oninput="renderFilteredUsers()">
-      </div>
-
-      <!-- メインカテゴリ選択フィルター（複数選択可） -->
-      <div class="filter-section">
-        <div class="filter-section-header">
-          <span class="filter-label">📁 メインカテゴリ（複数選択可）</span>
-          <button class="filter-clear-btn" onclick="clearSelectedCategories()">クリア</button>
+      <!-- 区分タブ ＆ アコーディオン開閉ボタン -->
+      <div class="filter-panel-top">
+        <div class="role-tabs" style="border-bottom: none; padding-bottom: 0;">
+          <button class="role-btn active" data-role="all" onclick="setRoleFilter('all')">すべて</button>
+          <button class="role-btn" data-role="creator" onclick="setRoleFilter('creator')">クリエイター</button>
+          <button class="role-btn" data-role="streamer" onclick="setRoleFilter('streamer')">配信者</button>
         </div>
-        <div class="filter-chips-container" id="categoryChipsContainer"></div>
+
+        <button class="btn-toggle-filter" id="btnToggleFilter" onclick="toggleFilterAccordion()">
+          <span>🔍 絞り込み条件</span>
+          <span class="filter-active-count hidden" id="filterActiveBadge">0</span>
+          <span class="arrow-icon">▼</span>
+        </button>
       </div>
 
-      <!-- タグ選択フィルター（複数選択可・フリータグ除外） -->
-      <div class="filter-section">
-        <div class="filter-section-header">
-          <span class="filter-label">🏷️ 属性・作風タグ（複数選択可）</span>
-          <button class="filter-clear-btn" onclick="clearSelectedTags()">クリア</button>
+      <!-- 一括開閉エリア（テキスト検索 〜 タグフィルター） -->
+      <div class="filter-accordion-body collapsed" id="filterAccordionBody">
+        <!-- 1. テキスト検索 -->
+        <div class="search-input-wrap">
+          <input type="text" id="keywordSearch" class="search-input" placeholder="活動名・カテゴリ・タグで検索..." oninput="renderFilteredUsers()">
         </div>
-        <div class="filter-chips-container" id="tagChipsContainer"></div>
+
+        <!-- 2. メインカテゴリ選択フィルター -->
+        <div class="filter-section">
+          <div class="filter-section-header">
+            <span class="filter-label">📁 メインカテゴリ（複数選択可）</span>
+            <button class="filter-clear-btn" onclick="clearSelectedCategories()">クリア</button>
+          </div>
+          <div class="filter-chips-container" id="categoryChipsContainer"></div>
+        </div>
+
+        <!-- 3. タグ選択フィルター -->
+        <div class="filter-section">
+          <div class="filter-section-header">
+            <span class="filter-label">🏷️ 属性・作風タグ（複数選択可）</span>
+            <button class="filter-clear-btn" onclick="clearSelectedTags()">クリア</button>
+          </div>
+          <div class="filter-chips-container" id="tagChipsContainer"></div>
+        </div>
       </div>
     </div>
 
@@ -1637,6 +1701,8 @@
 
     // 絞り込み判定処理
     function renderFilteredUsers() {
+      updateFilterActiveBadge();
+      
       const keyword = document.getElementById('keywordSearch').value.toLowerCase().trim();
 
       const filtered = allUsers.filter(u => {
@@ -2040,6 +2106,33 @@
       const mailtoUrl = `mailto:${to}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(normalizedBody)}`;
 
       window.location.href = mailtoUrl;
+    }
+
+    // アコーディオンの開閉処理
+    function toggleFilterAccordion() {
+      const body = document.getElementById('filterAccordionBody');
+      const btn = document.getElementById('btnToggleFilter');
+      const isCollapsed = body.classList.toggle('collapsed');
+      btn.classList.toggle('open', !isCollapsed);
+    }
+
+    // 設定中の絞り込み条件数をカウントしてバッジ表示
+    function updateFilterActiveBadge() {
+      const keyword = (document.getElementById('keywordSearch')?.value || '').trim();
+      let count = 0;
+      if (keyword) count += 1;
+      count += selectedCategoriesSet.size;
+      count += selectedTagsSet.size;
+
+      const badge = document.getElementById('filterActiveBadge');
+      if (badge) {
+        if (count > 0) {
+          badge.textContent = count;
+          badge.classList.remove('hidden');
+        } else {
+          badge.classList.add('hidden');
+        }
+      }
     }
   </script>
 </body>
