@@ -134,6 +134,14 @@
             border-color: var(--primary);
             transform: translateY(-2px);
         }
+        
+        /* スマホ画面のときだけ背景画像の調整を入れる */
+        @media (max-width: 768px) {
+            body {
+                background-size: 100% auto; /* または適度に収まるサイズに調整 */
+                background-attachment: scroll; /* スマホだと fixed がバグることがあるため scroll に変更すると安定します */
+            }
+        }
     </style>
 </head>
 <body>
