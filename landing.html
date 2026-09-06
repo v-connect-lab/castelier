@@ -6,91 +6,118 @@
     <title>Castelier（キャストリエ）- クリエイターと配信者の安心のつながり場</title>
     <!-- ファビコンの設定 -->
     <link rel="icon" href="assets/logo.png">
+    <!-- Google Fonts: M PLUS Rounded 1p (親しみやすく可愛い丸ゴシック) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1p:wght@400;500;700;800&display=swap" rel="stylesheet">
     <!-- Bootstrap 5 CSSの読み込み -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
+        :root {
+            /* 蒼白グラデーションパレット */
+            --card-gradient: linear-gradient(135deg, rgba(255, 255, 255, 0.96) 0%, rgba(240, 246, 255, 0.93) 50%, rgba(224, 238, 255, 0.90) 100%);
+            --card-border: 1px solid rgba(191, 219, 254, 0.85);
+            --card-shadow: 0 15px 35px -5px rgba(30, 58, 138, 0.1), 0 4px 12px rgba(0, 0, 0, 0.04);
+        }
+
         body {
-            font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            font-family: 'M PLUS Rounded 1p', sans-serif;
             color: #333;
             /* ページ背景の設定 */
             background: url('assets/background_white.jpg') no-repeat center center fixed;
             background-size: cover;
-            background-color: #fcfbfe; /* 画像読み込みまでの予備背景 */
+            background-color: #fcfbfe;
         }
+
         .hero-section {
-            background: linear-gradient(135deg, rgba(243, 240, 2ff, 0.95) 0%, rgba(232, 225, 2ff, 0.95) 100%);
-            padding: 60px 20px;
-            border-bottom: 1px solid #e0d8ff;
+            background: linear-gradient(135deg, rgba(243, 240, 2ff, 0.92) 0%, rgba(232, 225, 2ff, 0.92) 100%);
+            padding: 50px 20px;
+            border-bottom: 1px solid rgba(224, 216, 255, 0.8);
+            backdrop-filter: blur(5px);
         }
+
         .hero-logo {
-            max-width: 280px;
+            max-width: 260px;
             width: 100%;
             height: auto;
             display: block;
-            margin: 0 auto 20px auto;
+            margin: 0 auto 15px auto;
         }
+
         .main-title {
-            font-size: 2rem;
+            font-size: 1.8rem;
             font-weight: 800;
             color: #4a3c82;
             line-height: 1.4;
+            text-shadow: 0 2px 4px rgba(255, 255, 255, 0.8);
         }
+
         .sub-title {
-            font-size: 1.1rem;
-            color: #6c757d;
+            font-size: 1rem;
+            color: #555;
+            font-weight: 500;
         }
+
         .section-heading {
             font-weight: 700;
-            color: #333;
+            color: #3b306b;
             margin-bottom: 2rem;
+            text-shadow: 0 1px 2px rgba(255, 255, 255, 0.8);
         }
+
+        /* 共通の蒼白グラデーションカードスタイル */
+        .glass-card {
+            background: var(--card-gradient);
+            border: var(--card-border);
+            box-shadow: var(--card-shadow);
+            border-radius: 16px;
+            backdrop-filter: blur(8px);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .glass-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 40px -5px rgba(30, 58, 138, 0.15), 0 6px 16px rgba(0, 0, 0, 0.06);
+        }
+
         .trouble-card {
-            border: none;
-            background-color: rgba(255, 255, 255, 0.95);
-            border-left: 5px solid #6c5ce7;
+            border-left: 6px solid #6c5ce7;
         }
-        .feature-card {
-            border: none;
-            transition: transform 0.2s;
-            background-color: rgba(255, 255, 255, 0.95);
-        }
-        .feature-card:hover {
-            transform: translateY(-5px);
-        }
-        .convenient-box {
-            background-color: rgba(255, 255, 255, 0.95);
-            border: 1px solid #eae5ff;
-            border-radius: 10px;
-            transition: box-shadow 0.2s;
-        }
-        .convenient-box:hover {
-            box-shadow: 0 4px 15px rgba(108, 92, 231, 0.1);
-        }
+
         .btn-primary-custom {
             background-color: #6c5ce7;
             border-color: #6c5ce7;
             color: #fff;
             padding: 12px 30px;
-            font-weight: 600;
+            font-weight: 700;
             border-radius: 30px;
+            box-shadow: 0 4px 15px rgba(108, 92, 231, 0.3);
+            transition: all 0.2s;
         }
+
         .btn-primary-custom:hover {
             background-color: #5b4cc4;
             border-color: #5b4cc4;
             color: #fff;
+            transform: translateY(-2px);
         }
+
         .btn-outline-custom {
-            color: #6c5ce7;
-            border-color: #6c5ce7;
-            background-color: rgba(255, 255, 255, 0.8);
+            color: #5b4cc4;
+            border-color: #a5b4fc;
+            background-color: rgba(255, 255, 255, 0.9);
             padding: 12px 30px;
-            font-weight: 600;
+            font-weight: 700;
             border-radius: 30px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03);
+            transition: all 0.2s;
         }
+
         .btn-outline-custom:hover {
             background-color: #f3f0ff;
-            color: #5b4cc4;
+            color: #4a3c82;
             border-color: #6c5ce7;
+            transform: translateY(-2px);
         }
     </style>
 </head>
@@ -99,17 +126,15 @@
     <!-- 1. ファーストビュー（ヘッダーロゴ・キャッチコピー） -->
     <header class="hero-section text-center">
         <div class="container">
-            <!-- ヘッダーロゴ（中央寄せで大きく表示） -->
             <img src="assets/banner_vertical.png" alt="Castelier ロゴ" class="hero-logo">
 
-            <h1 class="main-title mb-3">
+            <h1 class="main-title mb-2">
                 クリエイターと配信者の<br>「やりたい」を形にする、安心のつながり場
             </h1>
             <p class="sub-title mb-4">
                 VTuber・Vライバーなどの配信者と、配信者を支えるクリエイターのための専用プラットフォーム
             </p>
             
-            <!-- アクションボタン（CTA）上部：指定の遷移先を設定 -->
             <div class="d-flex justify-content-center gap-3 flex-wrap">
                 <a href="login.html" class="btn btn-primary-custom btn-lg">ログイン / 新規登録</a>
                 <a href="index.html" class="btn btn-outline-custom btn-lg">登録せずにサイトを覗いてみる</a>
@@ -120,9 +145,9 @@
     <main class="container my-5">
 
         <!-- 2. こんなお悩み・要望ありませんか？ -->
-        <section class="mb-5 py-4">
+        <section class="mb-5 py-3">
             <h2 class="section-heading text-center">こんなお悩み・要望ありませんか？</h2>
-            <div class="card trouble-card p-4 shadow-sm mx-auto" style="max-width: 800px;">
+            <div class="glass-card trouble-card p-4 mx-auto" style="max-width: 800px;">
                 <ul class="list-unstyled mb-0">
                     <li class="mb-3">❌ 新衣装やLive2Dを依頼したいけど、自分の作風に合うクリエイターがなかなか見つからない…</li>
                     <li class="mb-3">❌ SNSだと他の情報が多すぎて、本当に見たい情報にたどり着けない</li>
@@ -134,15 +159,15 @@
         </section>
 
         <!-- 3. 主な特徴・機能の紹介 (3つの特徴) -->
-        <section class="mb-5 py-4">
+        <section class="mb-5 py-3">
             <h2 class="section-heading text-center">🌟 Castelierの3つの特徴</h2>
             
             <div class="row g-4">
                 <!-- 特徴1 -->
                 <div class="col-md-4">
-                    <div class="card feature-card h-100 p-4 shadow-sm border-top border-primary border-4">
+                    <div class="glass-card feature-card h-100 p-4 border-top border-primary border-4">
                         <h3 class="h5 font-weight-bold text-dark mb-3">1. VTuber・クリエイターに特化！<br>「ノイズのない」空間</h3>
-                        <ul class="text-muted small ps-3 mb-0">
+                        <ul class="text-muted small ps-3 mb-0" style="font-size: 0.9rem;">
                             <li class="mb-2"><strong>完全特化のプラットフォーム</strong>：無関係なコンテンツ（ゲームスキンやチラシ制作など）は一切ありません。</li>
                             <li><strong>数字で埋もれない評価システム</strong>：フォロワー数等の数字をあえて他者に非公開にし、純粋な「作風や属性」で探せます。新人でも埋もれません。</li>
                         </ul>
@@ -151,9 +176,9 @@
 
                 <!-- 特徴2 -->
                 <div class="col-md-4">
-                    <div class="card feature-card h-100 p-4 shadow-sm border-top border-primary border-4">
+                    <div class="glass-card feature-card h-100 p-4 border-top border-primary border-4">
                         <h3 class="h5 font-weight-bold text-dark mb-3">2. 理想の相手とピタッと出会える<br>「こだわり検索」</h3>
-                        <ul class="text-muted small ps-3 mb-0">
+                        <ul class="text-muted small ps-3 mb-0" style="font-size: 0.9rem;">
                             <li class="mb-2"><strong>メインカテゴリ絞り込み</strong>：イラスト、Live2D、3Dモデル、動画・Web制作、配信者など目的別に一発切替。</li>
                             <li><strong>属性・作風タグで深掘り</strong>：「和風」「ダーク・ホラー」など細かいテイストで絞り込み、世界観に完璧にマッチする相手が見つかります。</li>
                         </ul>
@@ -162,9 +187,9 @@
 
                 <!-- 特徴3 -->
                 <div class="col-md-4">
-                    <div class="card feature-card h-100 p-4 shadow-sm border-top border-primary border-4">
+                    <div class="glass-card feature-card h-100 p-4 border-top border-primary border-4">
                         <h3 class="h5 font-weight-bold text-dark mb-3">3. トレンド・需要が一目でわかる<br>「統計機能」</h3>
-                        <ul class="text-muted small ps-3 mb-0">
+                        <ul class="text-muted small ps-3 mb-0" style="font-size: 0.9rem;">
                             <li class="mb-2"><strong>需要トレンド統計機能</strong>：サイト全体の登録状況やタグの統計データを集計。</li>
                             <li><strong>活動戦略に活用</strong>：「今どんなジャンルが求められているか」「逆に狙い目は何か」をデータで確認できます。</li>
                         </ul>
@@ -174,33 +199,33 @@
         </section>
 
         <!-- 4. 安心・便利な機能 -->
-        <section class="mb-5 py-4">
+        <section class="mb-5 py-3">
             <h2 class="section-heading text-center">🛠️ 安心・便利な機能</h2>
             
             <div class="row g-4">
                 <div class="col-md-6">
-                    <div class="convenient-box p-4 h-100">
+                    <div class="glass-card convenient-box p-4 h-100">
                         <h4 class="h6 font-weight-bold text-dark mb-2">🔗 マイページ共有URL（ダイレクト詳細モーダル）</h4>
                         <p class="text-muted small mb-0">専用の共有URLを踏むだけで、あなたの詳細プロフィールや代表作（最大4枠）が開いた状態で直接ページを表示できます。SNSでの自己紹介に最適！</p>
                     </div>
                 </div>
 
                 <div class="col-md-6">
-                    <div class="convenient-box p-4 h-100">
+                    <div class="glass-card convenient-box p-4 h-100">
                         <h4 class="h6 font-weight-bold text-dark mb-2">⭐ お気に入り・相互キープ機能</h4>
                         <p class="text-muted small mb-0">気になる相手をお気に入り登録すると相手のリストに表示されます。お互い登録すれば「相互」になり、お互いに注目していることが一目で分かります。</p>
                     </div>
                 </div>
 
                 <div class="col-md-6">
-                    <div class="convenient-box p-4 h-100">
+                    <div class="glass-card convenient-box p-4 h-100">
                         <h4 class="h6 font-weight-bold text-dark mb-2">💬 いつも通りのやり取りでOK（金銭管理なし）</h4>
                         <p class="text-muted small mb-0">あくまで「つながりの場」のためサイト内で直接の金銭・決済管理は行いません。使い慣れた外部サイトやSNSのDMで安心やり取り。</p>
                     </div>
                 </div>
 
                 <div class="col-md-6">
-                    <div class="convenient-box p-4 h-100">
+                    <div class="glass-card convenient-box p-4 h-100">
                         <h4 class="h6 font-weight-bold text-dark mb-2">🛡️ 万全のセキュリティとプライバシー</h4>
                         <p class="text-muted small mb-0">公式AIの無断学習を防ぐ対策（robots.txt等）を導入。Google認証により面倒な個人情報入力が不要で、通報・問い合わせ導線も完備。</p>
                     </div>
@@ -211,10 +236,9 @@
     </main>
 
     <!-- 5. フッターアクションボタン（CTA） -->
-    <footer class="text-center py-5 bg-light border-top" style="background-color: rgba(248, 249, 250, 0.9) !important;">
+    <footer class="text-center py-5 border-top" style="background: linear-gradient(135deg, rgba(243, 240, 2ff, 0.9) 0%, rgba(232, 225, 2ff, 0.9) 100%); backdrop-filter: blur(5px);">
         <div class="container">
             <h3 class="h4 mb-4 text-dark font-weight-bold">さっそくCastelierを体験してみよう！</h3>
-            <!-- フッター側も同様に指定の遷移先を設定 -->
             <div class="d-flex justify-content-center gap-3 flex-wrap">
                 <a href="login.html" class="btn btn-primary-custom btn-lg">ログイン / 新規登録</a>
                 <a href="index.html" class="btn btn-outline-custom btn-lg">登録せずにサイトを覗いてみる</a>
