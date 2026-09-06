@@ -78,6 +78,7 @@ accounts:
                     - VTuber
                     - VLiveStreamer
                     - Streamer
+                    - individual
                     - UnderPreparation
                     - Newcomer
             optionLabels:
@@ -93,6 +94,7 @@ accounts:
                     - "VTuber"
                     - "Vライバー"
                     - "配信者"
+                    - "個人勢"
                     - "準備中"
                     - "新人"
         tags:
