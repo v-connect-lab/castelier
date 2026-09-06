@@ -38,10 +38,24 @@
         body {
             font-family: 'M PLUS Rounded 1p', sans-serif;
             color: var(--text-main);
-            /* ページ背景の設定 */
-            background: url('assets/background_white.jpg') no-repeat center center fixed;
-            background-size: cover;
             background-color: var(--bg);
+            min-height: 100vh;
+            position: relative;
+            /* 背景画像を直接 body に指定せず、擬似要素で画面全体に固定 */
+        }
+
+        /* 画面全体に追従する固定背景レイヤー */
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: url('assets/background_white.jpg') no-repeat center center;
+            background-size: cover;
+            z-index: -1; /* コンテンツの最背面に配置 */
+            pointer-events: none; /* クリック操作を邪魔しない */
         }
 
         .hero-section {
