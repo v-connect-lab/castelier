@@ -1282,6 +1282,34 @@
         gap: 6px;
       }
     }
+
+    /* サンプルユーザー用バッジ */
+    .sample-badge {
+      background: linear-gradient(135deg, #64748b 0%, #475569 100%);
+      color: #ffffff;
+      padding: 3px 8px;
+      border-radius: 12px;
+      font-size: 0.7rem;
+      font-weight: bold;
+      display: inline-flex;
+      align-items: center;
+      box-shadow: 0 2px 4px rgba(71, 85, 105, 0.3);
+      border: 1px solid rgba(255, 255, 255, 0.4);
+      white-space: nowrap;
+    }
+
+    .sample-badge-inline {
+      background: #f1f5f9;
+      color: #475569;
+      border: 1px solid #cbd5e1;
+      font-size: 0.65rem;
+      font-weight: bold;
+      padding: 1px 6px;
+      border-radius: 4px;
+      display: inline-flex;
+      align-items: center;
+      white-space: nowrap;
+    }
   </style>
 </head>
 <body oncontextmenu="return false;">
@@ -1439,6 +1467,7 @@
   </div>
 
   <script>
+    const SAMPLE_USER_IDS = new Set(['usr_a199b977', 'usr_1088b3b4']);
     const GAS_API_URL = 'https://script.google.com/macros/s/AKfycbyk1gWVq5JmKoz73D6zGB_k0WmpWgs4BGsH00J7WyewnW-iWAFzM6ORGOC4aR_ePRry4Q/exec';
 
     let allUsers = [];
@@ -2033,6 +2062,7 @@
       grid.innerHTML = filtered.map((u, idx) => {
         const avatarUrl = normalizeDriveUrl(u.avatarUrl, 'image');
         const roleLabel = getLabel('role', u.role);
+        const isSample = SAMPLE_USER_IDS.has(u.userId); // ★ サンプル判定
 
         const userWorks = normalizeUserWorks(u);
         const firstWork = userWorks.length > 0 ? userWorks[0] : null;
@@ -2091,6 +2121,7 @@
               ${thumbHtml}
               <div class="card-badge-container">
                 <span class="role-badge ${u.role}">${roleLabel}</span>
+                ${isSample ? '<span class="sample-badge">📌 サンプル</span>' : ''}
                 ${isWelcome ? '<span class="welcome-badge">💬 声掛け歓迎</span>' : ''}
               </div>
             </div>
@@ -2101,6 +2132,7 @@
                 <div style="overflow: hidden; flex-grow: 1;">
                   <div class="card-name">
                     ${isCompact ? `<span class="role-badge-inline ${u.role}">${roleLabel}</span>` : ''}
+                    ${(isCompact && isSample) ? '<span class="sample-badge-inline">📌 サンプル</span>' : ''}
                     ${(isCompact && isWelcome) ? '<span class="welcome-badge-inline">💬 声掛け歓迎</span>' : ''}
                     <span style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${escapeHtml(u.displayName || '名無し')}</span>
                   </div>
@@ -2141,6 +2173,7 @@
       const u = allUsers[index];
       if (!u) return;
 
+      const isSample = SAMPLE_USER_IDS.has(u.userId); // ★ サンプル判定
       const avatarUrl = normalizeDriveUrl(u.avatarUrl, 'image');
       const roleLabel = getLabel('role', u.role);
       const categoryDisplay = parseCommaLabels('category', u.category).join(' / ') || '未設定';
@@ -2205,6 +2238,7 @@
             <div style="min-width: 0;">
               <div style="display:flex; align-items:center; gap:6px; flex-wrap:wrap; margin-bottom:4px;">
                 <span class="role-badge ${u.role}" style="position:static;">${roleLabel}</span>
+                ${isSample ? '<span class="sample-badge" style="box-shadow:none;">📌 サンプル</span>' : ''}
                 ${isWelcome ? '<span class="welcome-badge" style="box-shadow:none;">💬 声掛け歓迎</span>' : ''}
               </div>
               <h2 style="margin:2px 0 0; font-size:1.15rem; word-break:break-word;">${escapeHtml(u.displayName || '')}</h2>
