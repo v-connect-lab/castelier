@@ -156,6 +156,97 @@
                 background-attachment: scroll; /* スマホだと fixed がバグることがあるため scroll に変更すると安定します */
             }
         }
+
+        /* サンプルギャラリー スライダー */
+        .sample-slider-wrapper {
+            position: relative;
+            padding: 0 20px;
+        margin-top: 1.5rem;
+        }
+
+        .sample-slider-container {
+            display: flex;
+            gap: 16px;
+            overflow-x: auto;
+            overflow-y: hidden;
+            scroll-snap-type: x mandatory;
+            scroll-behavior: smooth;
+            -webkit-overflow-scrolling: touch;
+            padding: 12px 4px 18px;
+        }
+
+        .sample-slider-container::-webkit-scrollbar {
+            height: 6px;
+        }
+        .sample-slider-container::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+
+        .sample-slide-item {
+            flex: 0 0 320px;
+            max-width: 80vw;
+            scroll-snap-align: start;
+            border-radius: var(--radius);
+            overflow: hidden;
+            border: 1px solid rgba(191, 219, 254, 0.8);
+            box-shadow: 0 4px 12px rgba(30, 58, 138, 0.06);
+            background: #ffffff;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .sample-slide-item:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(37, 99, 235, 0.15);
+        }
+
+        .sample-slide-item img {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            display: block;
+            user-select: none;
+            -webkit-user-drag: none;
+        }
+
+        .sample-slider-btn {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.95);
+            border: 1px solid rgba(191, 219, 254, 0.8);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+            color: var(--primary);
+            font-size: 1.4rem;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 10;
+            transition: all 0.2s ease;
+            user-select: none;
+        }
+
+        .sample-slider-btn:hover {
+            background: #ffffff;
+            transform: translateY(-50%) scale(1.08);
+            box-shadow: 0 6px 16px rgba(79, 70, 229, 0.25);
+        }
+
+        .sample-slider-btn.btn-prev { left: -6px; }
+        .sample-slider-btn.btn-next { right: -6px; }
+
+        @media (max-width: 768px) {
+            .sample-slider-wrapper { padding: 0 10px; }
+            .sample-slide-item { flex: 0 0 260px; }
+            .sample-slide-item img { height: 160px; }
+            .sample-slider-btn.btn-prev { left: -2px; }
+            .sample-slider-btn.btn-next { right: -2px; }
+        }
     </style>
 </head>
 <body>
@@ -270,6 +361,18 @@
             </div>
         </section>
 
+        <!-- 5. サイト画面・利用イメージ ギャラリー -->
+        <section class="mb-5 py-3">
+            <h2 class="section-heading text-center">📱 実際のサービス画面・利用イメージ</h2>
+            <div class="sample-slider-wrapper">
+                <button class="sample-slider-btn btn-prev" onclick="scrollSampleSlider(-1)" title="前へ">‹</button>
+                <div class="sample-slider-container" id="sampleSliderContainer">
+                    <!-- JSで assets/sample の画像を動的レンダリング -->
+                </div>
+                <button class="sample-slider-btn btn-next" onclick="scrollSampleSlider(1)" title="次へ">›</button>
+            </div>
+        </section>
+
     </main>
 
     <!-- 5. フッターアクションボタン（CTA） -->
@@ -283,6 +386,43 @@
             <p class="text-muted small mt-4 mb-0">&copy; Castelier All Rights Reserved.</p>
         </div>
     </footer>
+    
+    <script>
+        // assets/sample に格納されている画像ファイル名一覧
+        const sampleImages = [
+            'assets/sample/sampleview1.png',
+            'assets/sample/sampleview2.png',
+            'assets/sample/sampleview3.png',
+            'assets/sample/sampleview4.png',
+            'assets/sample/sampleview5.png',
+            'assets/sample/sampleview6.png',
+            'assets/sample/sampleview7.png',
+            'assets/sample/sampleview8.png',
+            'assets/sample/sampleview9.png',
+            'assets/sample/sampleview10.png'
+        ];
+
+        // スライダーのHTMLを生成
+        const container = document.getElementById('sampleSliderContainer');
+        if (container && sampleImages.length > 0) {
+            container.innerHTML = sampleImages.map((src, idx) => `
+                <div class="sample-slide-item">
+                    <img src="${src}" alt="Castelier 利用イメージ ${idx + 1}" loading="lazy">
+                </div>
+            `).join('');
+        }
+
+        // 送りボタン処理
+        function scrollSampleSlider(direction) {
+            const el = document.getElementById('sampleSliderContainer');
+            if (!el) return;
+            const scrollAmount = 340; // 1回あたりのスクロール移動量
+            el.scrollBy({
+                left: direction * scrollAmount,
+                behavior: 'smooth'
+            });
+        }
+    </script>
 
 </body>
 </html>
