@@ -471,9 +471,14 @@
     }
   }
 
+  const SAMPLE_USER_IDS = new Set(['usr_a199b977', 'usr_1088b3b4']);
+
   function calculateAndRender(users) {
-    const creators = users.filter(u => u.role === 'creator');
-    const streamers = users.filter(u => u.role === 'streamer');
+    // ★ サンプルユーザーを除外してから集計を行う
+    const actualUsers = users.filter(u => !SAMPLE_USER_IDS.has(u.userId));
+
+    const creators = actualUsers.filter(u => u.role === 'creator');
+    const streamers = actualUsers.filter(u => u.role === 'streamer');
 
     const totalC = creators.length;
     const totalS = streamers.length;
@@ -503,7 +508,8 @@
     renderRankListFromCounts(streamerTagCounts, 'streamerTagList', 'streamer');
     generateInsight(creatorTagCounts, streamerTagCounts);
 
-    renderFreeTags(users);
+    // ★ フリータグ集計にも actualUsers を渡す
+    renderFreeTags(actualUsers);
 
     document.getElementById('loadingView').style.display = 'none';
     document.getElementById('contentView').style.display = 'block';
