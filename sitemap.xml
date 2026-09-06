@@ -1,32 +1,44 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  
-  <!-- トップページ（最重要） -->
+
+  <!-- ランディングページ (LP) -->
   <url>
     <loc>https://v-connect-lab.github.io/castelier/</loc>
-    <changefreq>daily</changefreq>
+    <lastmod>2026-09-06</lastmod>
+    <changefreq>weekly</changefreq>
     <priority>1.0</priority>
   </url>
 
-  <!-- 需要トレンド統計 -->
+  <!-- TOP カタログ一覧画面 -->
+  <url>
+    <loc>https://v-connect-lab.github.io/castelier/top.html</loc>
+    <lastmod>2026-09-06</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+
+  <!-- トレンド・活動統計画面 -->
   <url>
     <loc>https://v-connect-lab.github.io/castelier/trends.html</loc>
-    <changefreq>weekly</changefreq>
+    <lastmod>2026-09-06</lastmod>
+    <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
 
-  <!-- ログイン画面 -->
+  <!-- 利用規約・ガイドライン -->
   <url>
-    <loc>https://v-connect-lab.github.io/castelier/login.html</loc>
+    <loc>https://v-connect-lab.github.io/castelier/terms.html</loc>
+    <lastmod>2026-09-06</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>
 
-  <!-- 利用規約 -->
+  <!-- ログイン / アカウント作成画面 -->
   <url>
-    <loc>https://v-connect-lab.github.io/castelier/terms.html</loc>
+    <loc>https://v-connect-lab.github.io/castelier/login.html</loc>
+    <lastmod>2026-09-06</lastmod>
     <changefreq>monthly</changefreq>
-    <priority>0.3</priority>
+    <priority>0.6</priority>
   </url>
 
 </urlset>
