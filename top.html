@@ -1310,6 +1310,44 @@
       align-items: center;
       white-space: nowrap;
     }
+
+    /* ★ ページネーション用UI */
+    .pagination-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 12px;
+      margin-top: 32px;
+      padding: 12px 16px;
+    }
+    .pagination-btn {
+      padding: 8px 16px;
+      border-radius: 8px;
+      border: 1px solid rgba(191, 219, 254, 0.8);
+      background: #ffffff;
+      color: var(--text-main);
+      font-size: 0.85rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
+    }
+    .pagination-btn:hover:not(:disabled) {
+      background: #f0f7ff;
+      border-color: var(--primary);
+      color: var(--primary);
+    }
+    .pagination-btn:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+      border-color: var(--border);
+    }
+    .pagination-info {
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--text-sub);
+      font-feature-settings: "tnum";
+    }
   </style>
 </head>
 <body oncontextmenu="return false;">
@@ -1414,7 +1452,7 @@
       <!-- 2. 検索・タグ選択エリア（ここだけ開閉） -->
       <div class="filter-accordion-body collapsed" id="filterAccordionBody">
         <div class="search-input-wrap">
-          <input type="text" id="keywordSearch" class="search-input" placeholder="活動名・カテゴリ・タグで検索..." oninput="renderFilteredUsers()">
+          <input type="text" id="keywordSearch" class="search-input" placeholder="活動名・カテゴリ・タグで検索..." oninput="onFilterChanged()">
         </div>
 
         <div class="filter-section">
@@ -1455,6 +1493,9 @@
         <div class="custom-spinnerText">ユーザー一覧を読み込み中...</div>
       </div>
     </div>
+
+    <!-- ★ ページネーションコントロール -->
+    <div class="pagination-container hidden" id="paginationControls"></div>
   </div>
 
   <!-- 詳細モーダル -->
@@ -1469,6 +1510,10 @@
   <script>
     const SAMPLE_USER_IDS = new Set(['usr_a199b977', 'usr_1088b3b4']);
     const GAS_API_URL = 'https://script.google.com/macros/s/AKfycbyk1gWVq5JmKoz73D6zGB_k0WmpWgs4BGsH00J7WyewnW-iWAFzM6ORGOC4aR_ePRry4Q/exec';
+
+    const PAGE_SIZE = 50; // ★ 1ページあたりの件数
+    let currentPage = 1;
+    let currentFilteredUsers = [];
 
     let allUsers = [];
     let allUsersMap = new Map();
@@ -1583,6 +1628,61 @@
         .map(v => v.trim())
         .filter(Boolean)
         .map(v => getLabel(group, v));
+    }
+
+    function parseDateSafe(val) {
+      if (!val) return 0;
+      if (val instanceof Date) return val.getTime();
+      const t = Date.parse(val);
+      return isNaN(t) ? 0 : t;
+    }
+
+    /* ★ ユーザーソートアルゴリズム
+       1. サンプルユーザーを指定IDで分離（末尾に配置）
+       2. 新規登録者（createdAt 降順）上位10名（不足分は更新枠に加算）
+       3. 最終更新（updatedAt 降順）上位15名＋不足分
+       4. 残りの一般ユーザー（createdAt 昇順・登録順）
+    */
+    function sortCastelierUsers(users) {
+      const samples = [];
+      const realUsers = [];
+
+      users.forEach(u => {
+        if (SAMPLE_USER_IDS.has(u.userId)) {
+          samples.push(u);
+        } else {
+          realUsers.push(u);
+        }
+      });
+
+      // 登録日時の新しい順でソート
+      const sortedByCreatedDesc = [...realUsers].sort((a, b) => {
+        return (parseDateSafe(b.createdAt || b.registeredAt) - parseDateSafe(a.createdAt || a.registeredAt));
+      });
+
+      // 新規登録枠（最大10枠）
+      const newUsers = sortedByCreatedDesc.slice(0, 10);
+      const newUserIds = new Set(newUsers.map(u => u.userId));
+
+      // 新規の不足分を更新枠に加算
+      const remainingSlotsForActive = 15 + Math.max(0, 10 - newUsers.length);
+
+      // 新規枠に入っていない実ユーザーを対象に、最終更新日の降順でソート
+      const eligibleForActive = realUsers.filter(u => !newUserIds.has(u.userId));
+      const sortedByUpdatedDesc = [...eligibleForActive].sort((a, b) => {
+        return (parseDateSafe(b.updatedAt || b.modifiedAt) - parseDateSafe(a.updatedAt || a.modifiedAt));
+      });
+
+      const activeUsers = sortedByUpdatedDesc.slice(0, remainingSlotsForActive);
+      const activeUserIds = new Set(activeUsers.map(u => u.userId));
+
+      // 残りの一般枠（登録順＝createdAt 昇順）
+      const normalUsers = eligibleForActive.filter(u => !activeUserIds.has(u.userId));
+      normalUsers.sort((a, b) => {
+        return (parseDateSafe(a.createdAt || a.registeredAt) - parseDateSafe(b.createdAt || b.registeredAt));
+      });
+
+      return [...newUsers, ...activeUsers, ...normalUsers, ...samples];
     }
 
     function renderMediaItem(item) {
@@ -1894,17 +1994,13 @@
           if (u.userId) allUsersMap.set(u.userId, u);
         });
         
-        renderFilteredUsers();
+        onFilterChanged();
 
         // URLパラメータ（?id=xxx）をチェックして自動でモーダルを開く処理
         const urlParams = new URLSearchParams(window.location.search);
         const targetUserId = urlParams.get('id');
         if (targetUserId) {
-          // 該当するユーザーがリストの何番目にいるか探してモーダルを開く
-          const targetIndex = allUsers.findIndex(u => u.userId === targetUserId);
-          if (targetIndex !== -1) {
-            openModal(targetIndex);
-          }
+          openModalByUserId(targetUserId);
         }
 
       } catch (err) {
@@ -1918,7 +2014,7 @@
       localStorage.setItem('castelier_view_mode', mode);
       document.getElementById('btnViewDetailed').classList.toggle('active', mode === 'detailed');
       document.getElementById('btnViewCompact').classList.toggle('active', mode === 'compact');
-      renderFilteredUsers();
+      renderCurrentPageUsers();
     }
 
     function setRoleFilter(role) {
@@ -1927,7 +2023,7 @@
         btn.classList.toggle('active', btn.dataset.role === role);
       });
       renderCategoryChips();
-      renderFilteredUsers();
+      onFilterChanged();
     }
 
     function renderFilterChips() {
@@ -1985,13 +2081,13 @@
         selectedCategoriesSet.add(catKey);
       }
       renderCategoryChips();
-      renderFilteredUsers();
+      onFilterChanged();
     }
 
     function clearSelectedCategories() {
       selectedCategoriesSet.clear();
       renderCategoryChips();
-      renderFilteredUsers();
+      onFilterChanged();
     }
 
     function toggleTagChip(tagKey) {
@@ -2001,21 +2097,27 @@
         selectedTagsSet.add(tagKey);
       }
       renderTagChips();
-      renderFilteredUsers();
+      onFilterChanged();
     }
 
     function clearSelectedTags() {
       selectedTagsSet.clear();
       renderTagChips();
-      renderFilteredUsers();
+      onFilterChanged();
     }
 
-    function renderFilteredUsers() {
+    // フィルター条件変更時は第1ページに戻す
+    function onFilterChanged() {
+      currentPage = 1;
+      applyFilterAndSort();
+    }
+
+    function applyFilterAndSort() {
       updateFilterActiveBadge();
       
       const keyword = document.getElementById('keywordSearch').value.toLowerCase().trim();
 
-      const filtered = allUsers.filter(u => {
+      const matched = allUsers.filter(u => {
         if (currentRole !== 'all' && u.role !== currentRole) return false;
 
         const userCatKeys = (u.category || '').split(',').map(s => s.trim()).filter(Boolean);
@@ -2049,20 +2151,34 @@
         return true;
       });
 
-      document.getElementById('resultsCount').textContent = `該当ユーザー: ${filtered.length} 件`;
+      // ★ 新規・更新・登録順・サンプル末尾ソートの適用
+      currentFilteredUsers = sortCastelierUsers(matched);
 
+      document.getElementById('resultsCount').textContent = `該当ユーザー: ${currentFilteredUsers.length} 件`;
+
+      renderCurrentPageUsers();
+      renderPaginationControls();
+    }
+
+    // 現在のページに応じたユーザー描画
+    function renderCurrentPageUsers() {
       const grid = document.getElementById('userGrid');
-      if (filtered.length === 0) {
+
+      if (currentFilteredUsers.length === 0) {
         grid.innerHTML = '<div class="loading-state">条件に一致するユーザーは見つかりませんでした。</div>';
         return;
       }
 
+      const startIndex = (currentPage - 1) * PAGE_SIZE;
+      const endIndex = startIndex + PAGE_SIZE;
+      const pageUsers = currentFilteredUsers.slice(startIndex, endIndex);
+
       const isCompact = currentViewMode === 'compact';
 
-      grid.innerHTML = filtered.map((u, idx) => {
+      grid.innerHTML = pageUsers.map(u => {
         const avatarUrl = normalizeDriveUrl(u.avatarUrl, 'image');
         const roleLabel = getLabel('role', u.role);
-        const isSample = SAMPLE_USER_IDS.has(u.userId); // ★ サンプル判定
+        const isSample = SAMPLE_USER_IDS.has(u.userId);
 
         const userWorks = normalizeUserWorks(u);
         const firstWork = userWorks.length > 0 ? userWorks[0] : null;
@@ -2104,7 +2220,7 @@
         const roleClass = u.role === 'streamer' ? 'role-streamer' : 'role-creator';
 
         return `
-          <div class="user-card ${roleClass} ${isCompact ? 'compact' : ''}" onclick="openModal(${idx})">
+          <div class="user-card ${roleClass} ${isCompact ? 'compact' : ''}" onclick="openModalByUserId('${escapeHtml(u.userId)}')">
             ${!isSelf ? `
               <button 
                 class="btn-fav-card ${isFav ? 'active' : ''}" 
@@ -2116,7 +2232,6 @@
               </button>
             ` : ''}
 
-            <!-- 詳細表示サムネイル -->
             <div class="card-thumb">
               ${thumbHtml}
               <div class="card-badge-container">
@@ -2151,29 +2266,50 @@
       }).join('');
     }
 
-    function openModalByUserId(uid) {
-      const idx = allUsers.findIndex(u => u.userId === uid);
-      if (idx !== -1) {
-        closeAllDrawers();
-        openModal(idx);
+    // ★ ページネーションコントロールの描画
+    function renderPaginationControls() {
+      const controls = document.getElementById('paginationControls');
+      const totalPages = Math.ceil(currentFilteredUsers.length / PAGE_SIZE);
+
+      if (totalPages <= 1) {
+        controls.classList.add('hidden');
+        controls.innerHTML = '';
+        return;
+      }
+
+      controls.classList.remove('hidden');
+      controls.innerHTML = `
+        <button class="pagination-btn" ${currentPage === 1 ? 'disabled' : ''} onclick="changePage(${currentPage - 1})">
+          ‹ 前へ
+        </button>
+        <span class="pagination-info">${currentPage} / ${totalPages}</span>
+        <button class="pagination-btn" ${currentPage === totalPages ? 'disabled' : ''} onclick="changePage(${currentPage + 1})">
+          次へ ›
+        </button>
+      `;
+    }
+
+    function changePage(newPage) {
+      const totalPages = Math.ceil(currentFilteredUsers.length / PAGE_SIZE);
+      if (newPage < 1 || newPage > totalPages) return;
+      currentPage = newPage;
+      renderCurrentPageUsers();
+      renderPaginationControls();
+      
+      // ページ遷移時にリスト上部へスムーズスクロール
+      const filterPanel = document.querySelector('.filter-panel');
+      if (filterPanel) {
+        filterPanel.scrollIntoView({ behavior: 'smooth' });
       }
     }
 
-    function scrollWorks(direction) {
-      const container = document.getElementById('modalWorksGrid');
-      if (!container) return;
-      const scrollAmount = 296;
-      container.scrollBy({
-        left: direction * scrollAmount,
-        behavior: 'smooth'
-      });
-    }
-
-    function openModal(index) {
-      const u = allUsers[index];
+    function openModalByUserId(uid) {
+      const u = allUsersMap.get(uid);
       if (!u) return;
 
-      const isSample = SAMPLE_USER_IDS.has(u.userId); // ★ サンプル判定
+      closeAllDrawers();
+
+      const isSample = SAMPLE_USER_IDS.has(u.userId);
       const avatarUrl = normalizeDriveUrl(u.avatarUrl, 'image');
       const roleLabel = getLabel('role', u.role);
       const categoryDisplay = parseCommaLabels('category', u.category).join(' / ') || '未設定';
@@ -2304,6 +2440,16 @@
           }
         };
       }
+    }
+
+    function scrollWorks(direction) {
+      const container = document.getElementById('modalWorksGrid');
+      if (!container) return;
+      const scrollAmount = 296;
+      container.scrollBy({
+        left: direction * scrollAmount,
+        behavior: 'smooth'
+      });
     }
 
     function closeModal() {
