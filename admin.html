@@ -1452,6 +1452,23 @@
       .replace(/"/g, '&quot;')
       .replace(/'/g, '&#039;');
   }
+
+  function openDriveHelpModal() {
+    document.getElementById('driveHelpModal').classList.add('open');
+  }
+
+  function closeDriveHelpModal() {
+    document.getElementById('driveHelpModal').classList.remove('open');
+  }
 </script>
+
+  <!-- Googleドライブヘルプモーダル -->
+  <div class="modal-overlay" id="driveHelpModal" onclick="closeDriveHelpModal(event)">
+    <div class="help-img-modal-content" onclick="event.stopPropagation()">
+      <button type="button" class="help-modal-close" onclick="closeDriveHelpModal()">×</button>
+      <img src="assets/imagehelp.png" alt="Googleドライブ共有手順" class="help-modal-img">
+    </div>
+  </div>
+  
 </body>
 </html>
