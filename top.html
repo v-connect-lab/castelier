@@ -360,7 +360,7 @@
       padding: 24px 16px 60px;
     }
 
-    /* ★ 統合コントロールパネル（タブ・検索・件数表示を内包） */
+    /* 統合コントロールパネル */
     .filter-panel {
       background: var(--card-gradient) !important;
       backdrop-filter: blur(12px);
@@ -535,7 +535,6 @@
       box-shadow: 0 1px 3px rgba(79, 70, 229, 0.3);
     }
 
-    /* ★ パネル下部に統合された「該当ユーザー数 ＆ 表示切替バー」 */
     .view-mode-bar {
       display: flex;
       justify-content: space-between;
@@ -992,12 +991,20 @@
       display: block;
       box-sizing: border-box;
     }
+    
+    /* 代表作品の画像表示スタイル（クリック可能であることを明示） */
     .media-box img.modal-work-img {
       width: 100%;
       height: 100%;
       object-fit: cover;
       display: block;
+      cursor: zoom-in;
+      transition: opacity 0.2s ease;
     }
+    .media-box img.modal-work-img:hover {
+      opacity: 0.9;
+    }
+
     .media-audio-box {
       background: #f8fafc !important;
       height: 100% !important;
@@ -1311,7 +1318,7 @@
       white-space: nowrap;
     }
 
-    /* ★ ページネーション用UI */
+    /* ページネーション用UI */
     .pagination-container {
       display: flex;
       justify-content: center;
@@ -1347,6 +1354,61 @@
       font-weight: 700;
       color: var(--text-sub);
       font-feature-settings: "tnum";
+    }
+
+    /* 代表作品 画像全体表示モーダル（ライトボックス） */
+    .work-image-lightbox-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(10, 15, 29, 0.88);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      z-index: 150; /* 詳細モーダル(120)のさらに最前面 */
+    }
+    .work-image-lightbox-overlay.open {
+      display: flex;
+    }
+    .work-image-lightbox-content {
+      position: relative;
+      max-width: 92vw;
+      max-height: 92vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    .work-image-lightbox-img {
+      max-width: 100%;
+      max-height: 90vh;
+      width: auto;
+      height: auto;
+      object-fit: contain;
+      border-radius: 8px;
+      box-shadow: 0 15px 40px rgba(0, 0, 0, 0.8);
+      user-select: none;
+      -webkit-user-drag: none;
+    }
+    .work-image-lightbox-close {
+      position: absolute;
+      top: -16px;
+      right: -16px;
+      background: #1e293b;
+      border: 1px solid rgba(191, 219, 254, 0.4);
+      color: #f8fafc;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      font-size: 1.3rem;
+      font-weight: bold;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 10;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
     }
   </style>
 </head>
@@ -1432,9 +1494,9 @@
       <div class="news-list" id="newsList"></div>
     </div>
 
-    <!-- ★ 統合コントロールパネル（タブ / 検索アコーディオン / 件数・表示切替を一体化） -->
+    <!-- 統合コントロールパネル -->
     <div class="filter-panel">
-      <!-- 1. タブ ＆ 絞り込みトグルボタン（常時表示） -->
+      <!-- 1. タブ ＆ 絞り込みトグルボタン -->
       <div class="filter-panel-top">
         <div class="role-tabs">
           <button class="role-btn active" data-role="all" onclick="setRoleFilter('all')">すべて</button>
@@ -1449,7 +1511,7 @@
         </button>
       </div>
 
-      <!-- 2. 検索・タグ選択エリア（ここだけ開閉） -->
+      <!-- 2. 検索・タグ選択エリア -->
       <div class="filter-accordion-body collapsed" id="filterAccordionBody">
         <div class="search-input-wrap">
           <input type="text" id="keywordSearch" class="search-input" placeholder="活動名・カテゴリ・タグで検索..." oninput="onFilterChanged()">
@@ -1472,7 +1534,7 @@
         </div>
       </div>
 
-      <!-- 3. 件数表示 ＆ 表示切り替えスイッチ（常時表示） -->
+      <!-- 3. 件数表示 ＆ 表示切り替えスイッチ -->
       <div class="view-mode-bar">
         <div class="results-count" id="resultsCount">読み込み中...</div>
         <div class="view-toggle-group">
@@ -1494,7 +1556,7 @@
       </div>
     </div>
 
-    <!-- ★ ページネーションコントロール -->
+    <!-- ページネーションコントロール -->
     <div class="pagination-container hidden" id="paginationControls"></div>
   </div>
 
@@ -1507,11 +1569,19 @@
     </div>
   </div>
 
+  <!-- 代表作品 画像全体表示モーダル（ライトボックス） -->
+  <div class="work-image-lightbox-overlay" id="workImageLightbox" onclick="closeWorkImageModal()">
+    <div class="work-image-lightbox-content" onclick="event.stopPropagation()">
+      <button type="button" class="work-image-lightbox-close" onclick="closeWorkImageModal()">×</button>
+      <img id="lightboxWorkImg" src="" alt="代表作品拡大" class="work-image-lightbox-img" oncontextmenu="return false;">
+    </div>
+  </div>
+
   <script>
     const SAMPLE_USER_IDS = new Set(['usr_a199b977', 'usr_1088b3b4']);
     const GAS_API_URL = 'https://script.google.com/macros/s/AKfycbyk1gWVq5JmKoz73D6zGB_k0WmpWgs4BGsH00J7WyewnW-iWAFzM6ORGOC4aR_ePRry4Q/exec';
 
-    const PAGE_SIZE = 50; // ★ 1ページあたりの件数
+    const PAGE_SIZE = 50;
     let currentPage = 1;
     let currentFilteredUsers = [];
 
@@ -1637,12 +1707,7 @@
       return isNaN(t) ? 0 : t;
     }
 
-    /* ★ ユーザーソートアルゴリズム
-       1. サンプルユーザーを指定IDで分離（末尾に配置）
-       2. 新規登録者（createdAt 降順）上位10名（不足分は更新枠に加算）
-       3. 最終更新（updatedAt 降順）上位15名＋不足分
-       4. 残りの一般ユーザー（createdAt 昇順・登録順）
-    */
+    /* ユーザーソートアルゴリズム */
     function sortCastelierUsers(users) {
       const samples = [];
       const realUsers = [];
@@ -1655,7 +1720,7 @@
         }
       });
 
-      // 登録日時の新しい順でソート
+      // 登録日時降順
       const sortedByCreatedDesc = [...realUsers].sort((a, b) => {
         return (parseDateSafe(b.createdAt || b.registeredAt) - parseDateSafe(a.createdAt || a.registeredAt));
       });
@@ -1664,10 +1729,10 @@
       const newUsers = sortedByCreatedDesc.slice(0, 10);
       const newUserIds = new Set(newUsers.map(u => u.userId));
 
-      // 新規の不足分を更新枠に加算
+      // 新規不足分を更新枠に加算
       const remainingSlotsForActive = 15 + Math.max(0, 10 - newUsers.length);
 
-      // 新規枠に入っていない実ユーザーを対象に、最終更新日の降順でソート
+      // 最終更新日降順
       const eligibleForActive = realUsers.filter(u => !newUserIds.has(u.userId));
       const sortedByUpdatedDesc = [...eligibleForActive].sort((a, b) => {
         return (parseDateSafe(b.updatedAt || b.modifiedAt) - parseDateSafe(a.updatedAt || a.modifiedAt));
@@ -1676,7 +1741,7 @@
       const activeUsers = sortedByUpdatedDesc.slice(0, remainingSlotsForActive);
       const activeUserIds = new Set(activeUsers.map(u => u.userId));
 
-      // 残りの一般枠（登録順＝createdAt 昇順）
+      // 残りの一般枠（登録順＝昇順）
       const normalUsers = eligibleForActive.filter(u => !activeUserIds.has(u.userId));
       normalUsers.sort((a, b) => {
         return (parseDateSafe(a.createdAt || a.registeredAt) - parseDateSafe(b.createdAt || b.registeredAt));
@@ -1694,7 +1759,7 @@
       if (type === 'image') {
         const imgUrl = normalizeDriveUrl(url, 'image');
         return `
-          <div class="media-box">
+          <div class="media-box" onclick="openWorkImageModal('${imgUrl}')" title="クリックして全体表示">
             <img src="${imgUrl}" class="modal-work-img" alt="作品画像">
           </div>
         `;
@@ -1996,7 +2061,7 @@
         
         onFilterChanged();
 
-        // URLパラメータ（?id=xxx）をチェックして自動でモーダルを開く処理
+        // URLパラメータ（?id=xxx）をチェックして自動でモーダルを開く
         const urlParams = new URLSearchParams(window.location.search);
         const targetUserId = urlParams.get('id');
         if (targetUserId) {
@@ -2106,7 +2171,6 @@
       onFilterChanged();
     }
 
-    // フィルター条件変更時は第1ページに戻す
     function onFilterChanged() {
       currentPage = 1;
       applyFilterAndSort();
@@ -2151,7 +2215,6 @@
         return true;
       });
 
-      // ★ 新規・更新・登録順・サンプル末尾ソートの適用
       currentFilteredUsers = sortCastelierUsers(matched);
 
       document.getElementById('resultsCount').textContent = `該当ユーザー: ${currentFilteredUsers.length} 件`;
@@ -2160,7 +2223,6 @@
       renderPaginationControls();
     }
 
-    // 現在のページに応じたユーザー描画
     function renderCurrentPageUsers() {
       const grid = document.getElementById('userGrid');
 
@@ -2266,7 +2328,6 @@
       }).join('');
     }
 
-    // ★ ページネーションコントロールの描画
     function renderPaginationControls() {
       const controls = document.getElementById('paginationControls');
       const totalPages = Math.ceil(currentFilteredUsers.length / PAGE_SIZE);
@@ -2296,7 +2357,6 @@
       renderCurrentPageUsers();
       renderPaginationControls();
       
-      // ページ遷移時にリスト上部へスムーズスクロール
       const filterPanel = document.querySelector('.filter-panel');
       if (filterPanel) {
         filterPanel.scrollIntoView({ behavior: 'smooth' });
@@ -2454,6 +2514,23 @@
 
     function closeModal() {
       document.getElementById('userModal').classList.remove('open');
+    }
+
+    /* 代表作品 画像全体表示モーダルの開閉処理 */
+    function openWorkImageModal(imgUrl) {
+      const modal = document.getElementById('workImageLightbox');
+      const img = document.getElementById('lightboxWorkImg');
+      if (!modal || !img) return;
+
+      img.src = imgUrl;
+      modal.classList.add('open');
+    }
+
+    function closeWorkImageModal() {
+      const modal = document.getElementById('workImageLightbox');
+      const img = document.getElementById('lightboxWorkImg');
+      if (modal) modal.classList.remove('open');
+      if (img) img.src = '';
     }
 
     async function handleToggleFavorite(event, targetUserId) {
