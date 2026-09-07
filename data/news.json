@@ -1,5 +1,11 @@
 [
   {
+    "date": "2026.09.07",
+    "badge": "NEW",
+    "text": "Googleドライブからの共有URL取得方法と設定内容についてのヘルプを設置（詳しくはアカウント管理画面にて確認できます）",
+    "url": "https://raw.githubusercontent.com/v-connect-lab/castelier/main/assets/imagehelp.png"
+  },
+  {
     "date": "2026.09.05",
     "badge": "NEW",
     "text": "Castelier（キャストリエ）のβ版を公開しました！",
