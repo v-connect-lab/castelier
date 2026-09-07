@@ -99,23 +99,8 @@
     "category": "illust",
     "tags": "cute",
     "freeTags": "",
-    "avatarUrl": "",
+    "avatarUrl": "https://drive.google.com/thumbnail?id=19WfhBv34oqkDysKAoydyNQFPykkjbIEb&sz=w800",
     "works": [
-      {
-        "type": "image",
-        "image": "",
-        "url": "https://drive.google.com/thumbnail?id=19WfhBv34oqkDysKAoydyNQFPykkjbIEb&sz=w800"
-      },
-      {
-        "type": "image",
-        "image": "",
-        "url": "https://drive.google.com/thumbnail?id=1KhoDPZnKvq5IoOSXFW8Aj_OJZdrm0UH5&sz=w800"
-      },
-      {
-        "type": "image",
-        "image": "",
-        "url": "https://drive.google.com/thumbnail?id=1z3jRssBGzLTy9YxsctWgWw3VEqGjmmgV&sz=w800"
-      },
       {
         "type": "image",
         "image": "",
@@ -127,7 +112,7 @@
     "platforms": [],
     "contactInfo": "",
     "description": "よろしくお願いします。",
-    "priceGuide": "flexible",
-    "updatedAt": "2026-09-07T13:35:44.000Z"
+    "priceGuide": "view_only",
+    "updatedAt": "2026-09-07T13:38:32.000Z"
   }
 ]
