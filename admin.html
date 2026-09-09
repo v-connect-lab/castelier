@@ -24,7 +24,6 @@
       --creator-color: #ec4899;
       --streamer-color: #3b82f6;
 
-      /* ★ ダーク画面用蒼白光沢（ネイビー・サファイア調） */
       --admin-card-gradient: linear-gradient(145deg, rgba(30, 41, 59, 0.95) 0%, rgba(15, 23, 42, 0.94) 50%, rgba(30, 58, 138, 0.45) 100%);
       --admin-card-border: 1px solid rgba(147, 197, 253, 0.35);
       --admin-card-shadow: 0 15px 30px -5px rgba(0, 0, 0, 0.5), 0 0 20px rgba(59, 130, 246, 0.15);
@@ -51,7 +50,6 @@
       border: var(--admin-card-border) !important;
     }
 
-    /* 最上部バナー */
     .top-banner-wrap {
       text-align: center;
       margin-bottom: 20px;
@@ -96,7 +94,6 @@
       font-weight: bold;
     }
 
-    /* 共有URL発行ボックス（タブの上部） */
     .share-url-box {
       background: rgba(99, 102, 241, 0.12);
       border: 1px solid rgba(147, 197, 253, 0.35);
@@ -500,7 +497,6 @@
       border: 1px dashed rgba(147, 197, 253, 0.3);
     }
 
-    /* オリジナル画像ローディングスピナー */
     .custom-spinner-wrapper {
       display: flex;
       flex-direction: column;
@@ -551,7 +547,6 @@
       letter-spacing: 0.05em;
     }
 
-    /* Googleドライブヘルプ用リンク & モーダル */
     .drive-help-link {
       display: inline-block;
       margin-top: 6px;
@@ -608,7 +603,6 @@
 <body>
 
 <div class="container">
-  <!-- 画面最上部バナー -->
   <div class="top-banner-wrap">
     <a href="./top.html"><img src="assets/banner_beside.png" alt="Castelier"></a>
   </div>
@@ -631,7 +625,6 @@
       <span class="user-badge" id="displayUserId"></span>
     </div>
 
-    <!-- 💡 タブのすぐ上に配置したマイページ共有URL発行ボックス -->
     <div class="share-url-box">
       <div class="share-url-label">
         🔗 あなたのマイページ共有URL
@@ -643,7 +636,6 @@
       </div>
     </div>
 
-    <!-- 管理ナビタブ -->
     <div class="admin-tabs">
       <button class="admin-tab-btn active" data-tab="profile" onclick="switchAdminTab('profile')">
         プロフィール編集
@@ -656,10 +648,9 @@
       </button>
     </div>
 
-    <!-- 1. プロフィール編集タブ -->
     <div id="tabView-profile">
       <p class="lead" style="margin-bottom: 20px; line-height: 1.6;">
-        登録・更新内容はデータベースに保存され、一覧ページへは最大10分程度で反映されます。<br>
+        登録・更新内容はデータベースに保存され、即座に反映されます。<br>
         <span style="color: #fca5a5; font-size: 0.8rem; font-weight: 600; display: inline-block; margin-top: 4px;">
           ⚠️ 登録から3日以内に「アイコン画像」と「自己紹介文（初期値からの変更）」が設定されない場合、一覧への掲載が一時停止されます（再設定で復帰します）。
         </span>
@@ -726,7 +717,6 @@
             <img src="" alt="アイコンプレビュー">
             <span>アイコン表示プレビュー</span>
           </div>
-          <!-- ★ 追加 -->
           <div>
             <a href="javascript:void(0)" class="drive-help-link" onclick="openDriveHelpModal()">❓ Googleドライブからのアップロードについて</a>
           </div>
@@ -752,7 +742,6 @@
           <input type="text" id="profPortfolioUrl" placeholder="https://...">
         </div>
 
-        <!-- 代表作品URL（最大4枠） -->
         <div class="form-group">
           <label>代表作品（最大4枠） <span class="info-icon" id="tip-prof-works" data-tooltip="画像、音楽、動画、Webサイトの作品を最大4枠まで登録できます。">ℹ</span></label>
           <p class="lead" style="margin-bottom: 20px; line-height: 1.6;">
@@ -761,7 +750,6 @@
               ※動画・音楽はYouTubeなどの配信プラットフォームのURLを推奨します。
             </span>
           </p>
-          <!-- ★ 追加 -->
           <div style="margin-top: -12px; margin-bottom: 14px;">
             <a href="javascript:void(0)" class="drive-help-link" onclick="openDriveHelpModal()">❓ Googleドライブからのアップロードについて</a>
           </div>
@@ -829,7 +817,6 @@
           </div>
         </div>
 
-        <!-- 活動プラットフォーム（最大3枠） -->
         <div class="form-group">
           <label>活動プラットフォーム（最大3枠） <span class="info-icon" id="tip-prof-platforms" data-tooltip="YouTube、Twitch、BOOTHなどのリンク先と表示名を入力できます。">ℹ</span></label>
           <div id="profPlatformsContainer">
@@ -853,13 +840,11 @@
       </form>
     </div>
 
-    <!-- 2. お気に入り一覧タブ -->
     <div id="tabView-favorites" class="hidden">
       <p class="lead">あなたがキープ・お気に入りに登録したユーザーです（他のユーザーには非公開です）。</p>
       <div id="myFavoritesList" class="fav-list-container"></div>
     </div>
 
-    <!-- 3. 気になるリストタブ -->
     <div id="tabView-interested" class="hidden">
       <p class="lead">あなたをキープ・お気に入りに登録してくれたユーザーです。相互に関心を持っている場合はバッジが表示されます。</p>
       <div id="interestedList" class="fav-list-container"></div>
@@ -870,7 +855,6 @@
   <div id="statusMsg" class="status-box"></div>
 </div>
 
-<!-- 相手プロフィール簡易モーダル -->
 <div class="modal-overlay" id="userModal" onclick="closeUserModal(event)">
   <div class="modal-content" onclick="event.stopPropagation()">
     <button class="modal-close" onclick="closeUserModal()">×</button>
@@ -879,7 +863,8 @@
 </div>
 
 <script>
-  const GAS_API_URL = "https://script.google.com/macros/s/AKfycbyk1gWVq5JmKoz73D6zGB_k0WmpWgs4BGsH00J7WyewnW-iWAFzM6ORGOC4aR_ePRry4Q/exec";
+  // Cloudflare Workers API エンドポイント
+  const API_URL = "https://castelier-api.urukanero-works.workers.dev";
 
   let sessionUser = null;
   let schemaData = null;
@@ -907,12 +892,11 @@
     }
 
     try {
-      const now = Date.now();
-      const [schemaRes, userRes, usersJsonRes, favRes] = await Promise.all([
+      const [schemaRes, userRes, usersDbRes, favRes] = await Promise.all([
         fetch('./schema/accounts.yaml').then(r => r.text()),
-        fetch(GAS_API_URL, {
+        fetch(API_URL, {
           method: 'POST',
-          headers: { 'Content-Type': 'text/plain' },
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             action: 'login',
             data: { 
@@ -921,10 +905,10 @@
             }
           })
         }).then(r => r.json()),
-        fetch(`./data/users.json?t=${now}`).then(r => r.ok ? r.json() : []).catch(() => []),
-        fetch(GAS_API_URL, {
+        fetch(`${API_URL}?action=getUsers`).then(r => r.json()).then(res => (res.success && Array.isArray(res.data)) ? res.data : []).catch(() => []),
+        fetch(API_URL, {
           method: 'POST',
-          headers: { 'Content-Type': 'text/plain' },
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             action: 'getFavoriteRelations',
             data: { userId: sessionUser.userId }
@@ -935,7 +919,7 @@
       const loaded = jsyaml.load(schemaRes);
       schemaData = loaded.accounts.columns;
 
-      (usersJsonRes || []).forEach(u => {
+      (usersDbRes || []).forEach(u => {
         if (u.userId) allUsersMap.set(u.userId, u);
       });
 
@@ -1048,9 +1032,9 @@
     renderFavoritesTab();
 
     try {
-      await fetch(GAS_API_URL, {
+      await fetch(API_URL, {
         method: 'POST',
-        headers: { 'Content-Type': 'text/plain' },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           action: 'toggleFavorite',
           data: {
@@ -1116,7 +1100,6 @@
     document.getElementById('mainContentView').classList.remove('hidden');
     document.getElementById('displayUserId').textContent = `ID: ${userData.userId}`;
 
-    // 自分の共有URLをセット
     const myShareUrl = `${window.location.origin}${window.location.pathname.replace('admin.html', '')}top.html?id=${userData.userId}`;
     document.getElementById('myShareUrlInput').value = myShareUrl;
 
@@ -1179,43 +1162,37 @@
       const urlInput = block.querySelector('.prof-work-url');
       const imgInput = block.querySelector('.prof-work-image');
 
-      typeSelect.value = userData[`works_type-${i}`] || 'image';
-      urlInput.value = userData[`works_url-${i}`] || '';
-      imgInput.value = userData[`works_image-${i}`] || '';
+      typeSelect.value = userData[`works_type-${i}`] || userData[`works_type_${i}`] || 'image';
+      urlInput.value = userData[`works_url-${i}`] || userData[`works_url_${i}`] || '';
+      imgInput.value = userData[`works_image-${i}`] || userData[`works_image_${i}`] || '';
       toggleWorkImageInput(typeSelect);
     });
 
     const platformRows = document.querySelectorAll('.prof-platform-row');
     platformRows.forEach((row, idx) => {
       const i = idx + 1;
-      row.querySelector('.prof-platform-label').value = userData[`platforms_name-${i}`] || '';
-      row.querySelector('.prof-platform-url').value = userData[`platforms_url-${i}`] || '';
+      row.querySelector('.prof-platform-label').value = userData[`platforms_name-${i}`] || userData[`platforms_name_${i}`] || '';
+      row.querySelector('.prof-platform-url').value = userData[`platforms_url-${i}`] || userData[`platforms_url_${i}`] || '';
     });
 
     updateImagePreview('profAvatarUrl', 'profAvatarPreview');
   }
 
-  // 共有URLコピー処理（テキスト変化つき）
   function copyMyShareUrl() {
     const input = document.getElementById('myShareUrlInput');
-    const btn = document.getElementById('copyShareBtn'); // プレフィックス用にIDを追加するか、イベントからボタンを取得
     if (!input.value) return;
     
     navigator.clipboard.writeText(input.value).then(() => {
-      // 画面下部のステータス表示も出す場合
       showStatus('共有用URLをクリップボードにコピーしました！', true);
-
-      // ボタンの文字を一時的に変更
       const btnEl = event.target;
       const originalText = btnEl.textContent;
       btnEl.textContent = 'コピーしました！';
-      btnEl.style.backgroundColor = '#10b981'; // 緑色にするなど
+      btnEl.style.backgroundColor = '#10b981';
       
       setTimeout(() => {
         btnEl.textContent = originalText;
         btnEl.style.backgroundColor = '';
       }, 2000);
-      
     }).catch(err => {
       showStatus('コピーに失敗しました', false);
     });
@@ -1344,27 +1321,26 @@
       const rawUrl = block.querySelector('.prof-work-url').value.trim();
       const rawImg = block.querySelector('.prof-work-image').value.trim();
 
-      payloadData[`works_type-${i}`] = type;
-      payloadData[`works_url-${i}`] = rawUrl ? normalizeDriveUrl(rawUrl, type === 'image' ? 'image' : 'preview') : '';
-      payloadData[`works_image-${i}`] = rawImg ? normalizeDriveUrl(rawImg, 'image') : '';
+      payloadData[`works_type_${i}`] = type;
+      payloadData[`works_url_${i}`] = rawUrl ? normalizeDriveUrl(rawUrl, type === 'image' ? 'image' : 'preview') : '';
+      payloadData[`works_image_${i}`] = rawImg ? normalizeDriveUrl(rawImg, 'image') : '';
     });
 
     const platformRows = document.querySelectorAll('.prof-platform-row');
     platformRows.forEach((row, idx) => {
       const i = idx + 1;
-      payloadData[`platforms_name-${i}`] = row.querySelector('.prof-platform-label').value.trim();
-      payloadData[`platforms_url-${i}`] = row.querySelector('.prof-platform-url').value.trim();
+      payloadData[`platforms_name_${i}`] = row.querySelector('.prof-platform-label').value.trim();
+      payloadData[`platforms_url_${i}`] = row.querySelector('.prof-platform-url').value.trim();
     });
 
     try {
-      const res = await fetch(GAS_API_URL, {
+      const res = await fetch(API_URL, {
         method: 'POST',
-        headers: { 'Content-Type': 'text/plain' },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           action: 'update',
           data: payloadData
-        }),
-        redirect: 'follow'
+        })
       });
       const data = await res.json();
 
@@ -1462,7 +1438,6 @@
   }
 </script>
 
-  <!-- Googleドライブヘルプモーダル -->
   <div class="modal-overlay" id="driveHelpModal" onclick="closeDriveHelpModal(event)">
     <div class="help-img-modal-content" onclick="event.stopPropagation()">
       <button type="button" class="help-modal-close" onclick="closeDriveHelpModal()">×</button>
