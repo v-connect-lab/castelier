@@ -1,0 +1,118 @@
+[
+  {
+    "userId": "usr_45da380f",
+    "role": "creator",
+    "displayName": "潤華ねろ",
+    "isContactWelcome": true,
+    "category": "Web",
+    "tags": "dark,pop,elegant,typo,narration,project_team",
+    "freeTags": "",
+    "avatarUrl": "https://drive.google.com/thumbnail?id=1ZcK-qteXRtnGYkZoP-1wqklgzvTkiUQd&sz=w800",
+    "works": [
+      {
+        "type": "web",
+        "image": "https://raw.githubusercontent.com/nr-works-dev/portfolio/main/assets/web2_image-1.jpg",
+        "url": "https://websample2000-ops.github.io/websample/"
+      },
+      {
+        "type": "web",
+        "image": "https://raw.githubusercontent.com/nr-works-dev/portfolio/main/assets/web1_image-1.jpg",
+        "url": "https://holodrea-wiki.github.io/holodreams-member/index.html"
+      }
+    ],
+    "portfolioUrl": "https://nr-works-dev.github.io/portfolio/",
+    "xUrl": "https://x.com/urukanero_works",
+    "platforms": [
+      {
+        "label": "YouTube",
+        "url": "https://www.youtube.com/@uruka_nero"
+      }
+    ],
+    "contactInfo": "urukanero.works@gmail.com",
+    "description": "活動者・配信者さん向けの「維持費がかからず、自分で簡単に更新できるHP」をコツコツ作っています💻✨\n（動画制作も勉強中…！ゆくゆくは動画制作なども展開していく予定です🎬）\nご相談や「こういうの作れる？」といった質問はDMまたはメールまでお気軽にどうぞ📮",
+    "priceGuide": "free_monitor",
+    "updatedAt": "2026-09-07T12:48:48.000Z"
+  },
+  {
+    "userId": "usr_a199b977",
+    "role": "streamer",
+    "displayName": "【サンプル】水守ルカ",
+    "isContactWelcome": true,
+    "category": "VTuber,individual,Newcomer",
+    "tags": "retro,cute,pop,female,vocal,stream_collab",
+    "freeTags": "",
+    "avatarUrl": "https://raw.githubusercontent.com/v-connect-lab/castelier/main/assets/logo.png",
+    "works": [
+      {
+        "type": "image",
+        "image": "",
+        "url": "https://raw.githubusercontent.com/v-connect-lab/castelier/main/assets/spinner.png"
+      }
+    ],
+    "portfolioUrl": "https://v-connect-lab.github.io/castelier/",
+    "xUrl": "https://x.com/home",
+    "platforms": [
+      {
+        "label": "YouTube",
+        "url": "https://www.youtube.com/"
+      }
+    ],
+    "contactInfo": "",
+    "description": "週末夜を中心に歌枠やゲーム配信をお届けしている個人勢VTuberの水守ルカです！\n\n【活動方針・好きな世界観】\nポップで明るいサイバー・ビビッドなテイストが大好きです。元気になれる歌や企画をリスナーさんに届ける活動をしています。\n\n【探しているクリエイター様】\n・周年記念の歌ってみた用の一枚絵\n・配信画面やサムネイルで使用するミニキャラ（SDイラスト）\n・作風や世界観が合いそうな方と長くお付き合いしたいと考えています！\n\n無償・有償問わず、作風に惹かれたクリエイター様をお気に入り登録させていただいています。お気軽に仲良くしてください！",
+    "priceGuide": "",
+    "updatedAt": "2026-09-06T13:10:11.000Z"
+  },
+  {
+    "userId": "usr_1088b3b4",
+    "role": "creator",
+    "displayName": "【サンプル】宵月あおい",
+    "isContactWelcome": true,
+    "category": "illust,Live2D",
+    "tags": "dark,elegant,female",
+    "freeTags": "",
+    "avatarUrl": "https://raw.githubusercontent.com/v-connect-lab/castelier/main/assets/logo.png",
+    "works": [
+      {
+        "type": "image",
+        "image": "",
+        "url": "https://raw.githubusercontent.com/v-connect-lab/castelier/main/assets/spinner.png"
+      }
+    ],
+    "portfolioUrl": "https://v-connect-lab.github.io/castelier/",
+    "xUrl": "https://x.com/home",
+    "platforms": [
+      {
+        "label": "YouTube",
+        "url": "https://www.youtube.com/"
+      }
+    ],
+    "contactInfo": "",
+    "description": "ゴシック・ダークファンタジーな世界観のキャラクターイラストや、Live2D用パーツ分けイラストを中心に制作しています。\n\n【得意なテイスト】\n・アンティーク、エレガント、少し影のある中世風デザイン\n・女性キャラクター、繊細な装飾や衣装デザイン\n\n【対応可能】\n新衣装立ち絵、一枚絵（歌ってみた・キービジュアル）、Live2Dパーツ分け\n\n初めて依頼される配信者の方も、イメージやモチーフの段階から丁寧にお手伝いします。納期や料金の目安、ご相談はXのDMまたは連絡先メールからお気軽にご連絡ください！",
+    "priceGuide": "flexible",
+    "updatedAt": "2026-09-06T13:10:12.000Z"
+  },
+  {
+    "userId": "usr_5a58204b",
+    "role": "creator",
+    "displayName": "タマ",
+    "isContactWelcome": true,
+    "category": "illust",
+    "tags": "cute",
+    "freeTags": "",
+    "avatarUrl": "https://drive.google.com/thumbnail?id=19WfhBv34oqkDysKAoydyNQFPykkjbIEb&sz=w800",
+    "works": [
+      {
+        "type": "image",
+        "image": "",
+        "url": "https://drive.google.com/thumbnail?id=19WfhBv34oqkDysKAoydyNQFPykkjbIEb&sz=w800"
+      }
+    ],
+    "portfolioUrl": "",
+    "xUrl": "",
+    "platforms": [],
+    "contactInfo": "",
+    "description": "よろしくお願いします。",
+    "priceGuide": "view_only",
+    "updatedAt": "2026-09-07T13:38:32.000Z"
+  }
+]
