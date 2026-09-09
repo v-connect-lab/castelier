@@ -28,7 +28,6 @@
       --shadow-hover: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
       --star-color: #f59e0b;
 
-      /* 蒼白い光沢グラデーションの定義 */
       --card-gradient: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(240, 246, 255, 0.92) 50%, rgba(224, 238, 255, 0.90) 100%);
       --card-border: 1px solid rgba(191, 219, 254, 0.8);
       --card-shadow: 0 10px 25px -5px rgba(30, 58, 138, 0.08), 0 4px 10px -2px rgba(30, 58, 138, 0.04);
@@ -96,7 +95,6 @@
       box-shadow: 0 4px 10px rgba(79, 70, 229, 0.4);
     }
 
-    /* ハンバーガーアイコンボタン */
     .btn-hamburger {
       background: transparent;
       border: 1px solid rgba(191, 219, 254, 0.8);
@@ -121,7 +119,6 @@
       border-radius: 2px;
     }
 
-    /* ハンバーガーサイドメニュー */
     .menu-drawer-overlay {
       position: fixed;
       inset: 0;
@@ -249,7 +246,6 @@
       text-decoration: underline;
     }
 
-    /* リストドロワー */
     .list-drawer {
       position: fixed;
       top: 0;
@@ -353,14 +349,12 @@
       background: #fee2e2;
     }
 
-    /* メインコンテナ */
     .container {
       max-width: 1200px;
       margin: 0 auto;
       padding: 24px 16px 60px;
     }
 
-    /* 統合コントロールパネル */
     .filter-panel {
       background: var(--card-gradient) !important;
       backdrop-filter: blur(12px);
@@ -444,7 +438,6 @@
       border-radius: 10px;
     }
 
-    /* 開閉する検索・絞り込みエリア */
     .filter-accordion-body {
       display: flex;
       flex-direction: column;
@@ -582,7 +575,6 @@
       gap: 20px;
     }
 
-    /* ユーザーカード */
     .user-card {
       border-radius: var(--radius);
       overflow: hidden;
@@ -992,7 +984,6 @@
       box-sizing: border-box;
     }
     
-    /* 代表作品の画像表示スタイル（クリック可能であることを明示） */
     .media-box img.modal-work-img {
       width: 100%;
       height: 100%;
@@ -1145,7 +1136,6 @@
       min-width: 0;
     }
 
-    /* オリジナル画像ローディングスピナー */
     .custom-spinner-wrapper {
       grid-column: 1 / -1;
       display: flex;
@@ -1207,7 +1197,6 @@
       letter-spacing: 0.05em;
     }
 
-    /* お知らせインフォメーションバー */
     .news-banner {
       background: var(--card-gradient);
       backdrop-filter: blur(12px);
@@ -1290,7 +1279,6 @@
       }
     }
 
-    /* サンプルユーザー用バッジ */
     .sample-badge {
       background: linear-gradient(135deg, #64748b 0%, #475569 100%);
       color: #ffffff;
@@ -1318,7 +1306,6 @@
       white-space: nowrap;
     }
 
-    /* ページネーション用UI */
     .pagination-container {
       display: flex;
       justify-content: center;
@@ -1356,7 +1343,6 @@
       font-feature-settings: "tnum";
     }
 
-    /* 代表作品 画像全体表示モーダル（ライトボックス） */
     .work-image-lightbox-overlay {
       position: fixed;
       inset: 0;
@@ -1367,7 +1353,7 @@
       align-items: center;
       justify-content: center;
       padding: 16px;
-      z-index: 150; /* 詳細モーダル(120)のさらに最前面 */
+      z-index: 150;
     }
     .work-image-lightbox-overlay.open {
       display: flex;
@@ -1421,7 +1407,6 @@
     <div id="headerAuthNav"></div>
   </header>
 
-  <!-- サイドメニュー ドロワー -->
   <div class="menu-drawer-overlay" id="menuDrawerOverlay" onclick="closeAllDrawers()"></div>
   <div class="menu-drawer" id="menuDrawer">
     <div class="drawer-user-info">
@@ -1476,7 +1461,6 @@
     </div>
   </div>
 
-  <!-- リスト表示用ドロワー -->
   <div class="list-drawer" id="listDrawer">
     <div class="list-drawer-header">
       <div style="display: flex; align-items: center; gap: 8px;">
@@ -1488,15 +1472,12 @@
   </div>
 
   <div class="container">
-    <!-- お知らせバー（データがある場合のみJSで表示） -->
     <div class="news-banner hidden" id="newsBanner">
       <div class="news-icon">📢</div>
       <div class="news-list" id="newsList"></div>
     </div>
 
-    <!-- 統合コントロールパネル -->
     <div class="filter-panel">
-      <!-- 1. タブ ＆ 絞り込みトグルボタン -->
       <div class="filter-panel-top">
         <div class="role-tabs">
           <button class="role-btn active" data-role="all" onclick="setRoleFilter('all')">すべて</button>
@@ -1511,7 +1492,6 @@
         </button>
       </div>
 
-      <!-- 2. 検索・タグ選択エリア -->
       <div class="filter-accordion-body collapsed" id="filterAccordionBody">
         <div class="search-input-wrap">
           <input type="text" id="keywordSearch" class="search-input" placeholder="活動名・カテゴリ・タグで検索..." oninput="onFilterChanged()">
@@ -1534,7 +1514,6 @@
         </div>
       </div>
 
-      <!-- 3. 件数表示 ＆ 表示切り替えスイッチ -->
       <div class="view-mode-bar">
         <div class="results-count" id="resultsCount">読み込み中...</div>
         <div class="view-toggle-group">
@@ -1548,7 +1527,6 @@
       </div>
     </div>
 
-    <!-- ユーザーグリッド一覧 -->
     <div class="user-grid" id="userGrid">
       <div class="custom-spinner-wrapper">
         <div class="custom-spinner"></div>
@@ -1556,11 +1534,9 @@
       </div>
     </div>
 
-    <!-- ページネーションコントロール -->
     <div class="pagination-container hidden" id="paginationControls"></div>
   </div>
 
-  <!-- 詳細モーダル -->
   <div class="modal-overlay" id="userModal" onclick="closeModal(event)">
     <div class="modal-content" onclick="event.stopPropagation()">
       <button class="modal-close" onclick="closeModal()">×</button>
@@ -1569,7 +1545,6 @@
     </div>
   </div>
 
-  <!-- 代表作品 画像全体表示モーダル（ライトボックス） -->
   <div class="work-image-lightbox-overlay" id="workImageLightbox" onclick="closeWorkImageModal()">
     <div class="work-image-lightbox-content" onclick="event.stopPropagation()">
       <button type="button" class="work-image-lightbox-close" onclick="closeWorkImageModal()">×</button>
@@ -1579,7 +1554,8 @@
 
   <script>
     const SAMPLE_USER_IDS = new Set(['usr_a199b977', 'usr_1088b3b4']);
-    const GAS_API_URL = 'https://script.google.com/macros/s/AKfycbyk1gWVq5JmKoz73D6zGB_k0WmpWgs4BGsH00J7WyewnW-iWAFzM6ORGOC4aR_ePRry4Q/exec';
+    // Cloudflare Workers API エンドポイント
+    const API_URL = 'https://castelier-api.urukanero-works.workers.dev';
 
     const PAGE_SIZE = 50;
     let currentPage = 1;
@@ -1629,11 +1605,11 @@
 
       const list = [];
       for (let i = 1; i <= 4; i++) {
-        const url = u[`works_url-${i}`] || u[`workUrls-${i}`];
+        const url = u[`works_url-${i}`] || u[`workUrls-${i}`] || u[`works_url_${i}`];
         if (url) {
           list.push({
-            type: u[`works_type-${i}`] || 'image',
-            image: u[`works_image-${i}`] || '',
+            type: u[`works_type-${i}`] || u[`works_type_${i}`] || 'image',
+            image: u[`works_image-${i}`] || u[`works_image_${i}`] || '',
             url: url
           });
         }
@@ -1652,10 +1628,10 @@
 
       const list = [];
       for (let i = 1; i <= 3; i++) {
-        const url = u[`platforms_url-${i}`] || u[`platformUrls-${i}`];
+        const url = u[`platforms_url-${i}`] || u[`platformUrls-${i}`] || u[`platforms_url_${i}`];
         if (url) {
           list.push({
-            label: u[`platforms_name-${i}`] || `活動先 ${i}`,
+            label: u[`platforms_name-${i}`] || u[`platforms_name_${i}`] || `活動先 ${i}`,
             url: url
           });
         }
@@ -1707,7 +1683,6 @@
       return isNaN(t) ? 0 : t;
     }
 
-    /* ユーザーソートアルゴリズム */
     function sortCastelierUsers(users) {
       const samples = [];
       const realUsers = [];
@@ -1720,19 +1695,15 @@
         }
       });
 
-      // 登録日時降順
       const sortedByCreatedDesc = [...realUsers].sort((a, b) => {
         return (parseDateSafe(b.createdAt || b.registeredAt) - parseDateSafe(a.createdAt || a.registeredAt));
       });
 
-      // 新規登録枠（最大10枠）
       const newUsers = sortedByCreatedDesc.slice(0, 10);
       const newUserIds = new Set(newUsers.map(u => u.userId));
 
-      // 新規不足分を更新枠に加算
       const remainingSlotsForActive = 15 + Math.max(0, 10 - newUsers.length);
 
-      // 最終更新日降順
       const eligibleForActive = realUsers.filter(u => !newUserIds.has(u.userId));
       const sortedByUpdatedDesc = [...eligibleForActive].sort((a, b) => {
         return (parseDateSafe(b.updatedAt || b.modifiedAt) - parseDateSafe(a.updatedAt || a.modifiedAt));
@@ -1741,7 +1712,6 @@
       const activeUsers = sortedByUpdatedDesc.slice(0, remainingSlotsForActive);
       const activeUserIds = new Set(activeUsers.map(u => u.userId));
 
-      // 残りの一般枠（登録順＝昇順）
       const normalUsers = eligibleForActive.filter(u => !activeUserIds.has(u.userId));
       normalUsers.sort((a, b) => {
         return (parseDateSafe(a.createdAt || a.registeredAt) - parseDateSafe(b.createdAt || b.registeredAt));
@@ -1964,11 +1934,7 @@
     }
 
     window.addEventListener('DOMContentLoaded', async () => {
-      const registeredAt = localStorage.getItem('castelier_registered_at');
       const now = Date.now();
-      const FIFTEEN_MINUTES = 15 * 60 * 1000;
-      const isRecentlyRegistered = registeredAt && (now - parseInt(registeredAt, 10) < FIFTEEN_MINUTES);
-
       const session = sessionStorage.getItem('castelier_session');
       currentUserId = session ? JSON.parse(session).userId : null;
 
@@ -1982,8 +1948,10 @@
       try {
         const fetchSchema = fetch('./schema/accounts.yaml').then(r => r.text());
 
-        const fetchJsonUsers = fetch(`./data/users.json?t=${now}`)
-          .then(r => r.ok ? r.json() : [])
+        // Workers API（D1）から最新ユーザー一覧をダイレクト取得
+        const fetchDbUsers = fetch(`${API_URL}?action=getUsers`)
+          .then(r => r.json())
+          .then(res => (res.success && Array.isArray(res.data)) ? res.data : [])
           .catch(() => []);
 
         const fetchContactConfig = fetch(`./config/contact.json?t=${now}`)
@@ -1994,25 +1962,12 @@
           .then(r => r.ok ? r.json() : [])
           .catch(() => []);
 
-        const fetchSelfUser = (async () => {
-          if (isRecentlyRegistered && currentUserId) {
-            try {
-              const res = await fetch(`${GAS_API_URL}?action=getUserById&userId=${encodeURIComponent(currentUserId)}`);
-              const data = await res.json();
-              return data.success ? data.user : null;
-            } catch(e) {
-              return null;
-            }
-          }
-          return null;
-        })();
-
         const fetchMyFavorites = (async () => {
           if (!currentUserId) return null;
           try {
-            const res = await fetch(GAS_API_URL, {
+            const res = await fetch(API_URL, {
               method: 'POST',
-              headers: { 'Content-Type': 'text/plain' },
+              headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({
                 action: 'getFavoriteRelations',
                 data: { userId: currentUserId }
@@ -2025,8 +1980,8 @@
           }
         })();
 
-        const [schemaYaml, baseUsers, selfUser, favResult, loadedContact, loadedNews] = await Promise.all([
-          fetchSchema, fetchJsonUsers, fetchSelfUser, fetchMyFavorites, fetchContactConfig, fetchNews
+        const [schemaYaml, baseUsers, favResult, loadedContact, loadedNews] = await Promise.all([
+          fetchSchema, fetchDbUsers, fetchMyFavorites, fetchContactConfig, fetchNews
         ]);
 
         contactConfig = loadedContact;
@@ -2047,13 +2002,7 @@
 
         renderFilterChips();
 
-        let mergedList = [...baseUsers];
-        if (selfUser) {
-          mergedList = mergedList.filter(u => u.userId !== selfUser.userId);
-          mergedList.unshift(selfUser);
-        }
-
-        allUsers = mergedList;
+        allUsers = baseUsers;
         allUsersMap.clear();
         allUsers.forEach(u => {
           if (u.userId) allUsersMap.set(u.userId, u);
@@ -2061,7 +2010,6 @@
         
         onFilterChanged();
 
-        // URLパラメータ（?id=xxx）をチェックして自動でモーダルを開く
         const urlParams = new URLSearchParams(window.location.search);
         const targetUserId = urlParams.get('id');
         if (targetUserId) {
@@ -2278,7 +2226,7 @@
         const isFav = myFavoritesSet.has(u.userId);
         const isSelf = currentUserId && (currentUserId === u.userId);
 
-        const isWelcome = u.role === 'streamer' && String(u.isContactWelcome) === 'true';
+        const isWelcome = u.role === 'streamer' && (String(u.isContactWelcome) === 'true' || u.isContactWelcome === 1);
         const roleClass = u.role === 'streamer' ? 'role-streamer' : 'role-creator';
 
         return `
@@ -2382,7 +2330,7 @@
       const freeTags = (u.freeTags ? String(u.freeTags).split(',') : []).map(t => t.trim()).filter(Boolean);
       const allModalTags = standardTags.concat(freeTags);
 
-      const isWelcome = u.role === 'streamer' && String(u.isContactWelcome) === 'true';
+      const isWelcome = u.role === 'streamer' && (String(u.isContactWelcome) === 'true' || u.isContactWelcome === 1);
 
       const links = [];
       if (u.xUrl) links.push(`<a href="${u.xUrl}" target="_blank" rel="noopener">X (Twitter)</a>`);
@@ -2516,7 +2464,6 @@
       document.getElementById('userModal').classList.remove('open');
     }
 
-    /* 代表作品 画像全体表示モーダルの開閉処理 */
     function openWorkImageModal(imgUrl) {
       const modal = document.getElementById('workImageLightbox');
       const img = document.getElementById('lightboxWorkImg');
@@ -2557,9 +2504,9 @@
       updateFavUI(targetUserId);
 
       try {
-        const res = await fetch(GAS_API_URL, {
+        const res = await fetch(API_URL, {
           method: 'POST',
-          headers: { 'Content-Type': 'text/plain' },
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             action: 'toggleFavorite',
             data: {
