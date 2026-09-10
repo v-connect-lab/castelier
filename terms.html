@@ -112,19 +112,20 @@
       <button class="close-btn" onclick="window.close()">このページを閉じる</button>
     </div>
   </div>
+
+    <!-- Service Worker の登録スクリプト -->
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js')
+          .then((reg) => {
+            console.log('ServiceWorker registration successful:', reg.scope);
+          })
+          .catch((err) => {
+            console.log('ServiceWorker registration failed:', err);
+          });
+      });
+    }
+  </script>
 </body>
-<!-- Service Worker の登録スクリプト -->
-<script>
-  if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-      navigator.serviceWorker.register('/sw.js')
-        .then((reg) => {
-          console.log('ServiceWorker registration successful:', reg.scope);
-        })
-        .catch((err) => {
-          console.log('ServiceWorker registration failed:', err);
-        });
-    });
-  }
-</script>
 </html>
