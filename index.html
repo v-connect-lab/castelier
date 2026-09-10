@@ -6,6 +6,9 @@
     <title>Castelier（キャストリエ）- クリエイターと配信者の安心のつながり場</title>
     <!-- ファビコンの設定 -->
     <link rel="icon" href="assets/logo.png">
+    <!-- manifest.json の読み込み -->
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#1a1a2e">
     <!-- Google Fonts: M PLUS Rounded 1p (丸ゴシック) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -508,6 +511,19 @@
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape') closeSampleLightbox();
         });
+
+        // Service Worker の登録スクリプト
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js')
+                    .then((reg) => {
+                        console.log('ServiceWorker registration successful:', reg.scope);
+                     })
+                     .catch((err) => {
+                          console.log('ServiceWorker registration failed:', err);
+                     });
+            });
+        }
     </script>
 
 </body>
