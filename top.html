@@ -2655,7 +2655,7 @@
       banner.classList.remove('hidden');
     }
 
-    <!-- Service Worker の登録スクリプト -->
+    // Service Worker の登録スクリプト
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
         navigator.serviceWorker.register('/sw.js')
