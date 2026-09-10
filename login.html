@@ -10,6 +10,10 @@
   <!-- ファビコン -->
   <link rel="icon" type="image/png" href="assets/logo.png">
 
+  <!-- manifest.json の読み込み -->
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#1a1a2e">
+
   <script src="https://cdnjs.cloudflare.com/ajax/libs/js-yaml/4.1.0/js-yaml.min.js"></script>
 
   <!-- Firebase App & Auth SDK (v10 Compat) -->
@@ -1040,6 +1044,19 @@
 
   function closeDriveHelpModal() {
     document.getElementById('driveHelpModal').classList.remove('open');
+  }
+
+  // Service Worker の登録スクリプト
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('/sw.js')
+        .then((reg) => {
+          console.log('ServiceWorker registration successful:', reg.scope);
+        })
+        .catch((err) => {
+          console.log('ServiceWorker registration failed:', err);
+        });
+    });
   }
 </script>
 
